@@ -1,0 +1,195 @@
+// @use "../node_modules/@angular/material/theming" as *;
+
+@use "@angular/material" as mat;
+@use "sass:map" as map;
+@use "sass:meta" as meta;
+@use "sass:color" as color;
+
+@include mat.core();
+
+// $my-light-palette: (
+//   100: #cb997e,
+//   200: #ddbea9,
+//   300: #ffe8d6,
+//   400: #b7b7a4,
+//   500: #a5a58d,
+//   600: #6b705c,
+//   contrast:
+//     (
+//       100: black,
+//       200: black,
+//       300: black,
+//       400: black,
+//       500: black,
+//       600: white,
+//     ),
+// );
+// $my-dark-palette: (
+//   100: #bf805f,
+//   200: #af7046,
+//   300: #662c00,
+//   400: #5b5b48,
+//   500: #39392d,
+//   600: #151612,
+//   contrast:
+//     (
+//       100: white,
+//       200: white,
+//       300: white,
+//       400: white,
+//       500: white,
+//       600: white,
+//     ),
+// );
+
+// background-color: var(--color-50);
+// color: var(--contrast-color-50);
+$my-light-palette: (
+  50: #f9db9f,
+  100: #f3c273,
+  200: #e49c31,
+  300: #dd8407,
+  400: #d38200,
+  500: #dadac5,
+  600: #a9a993,
+  700: #7a7a68,
+  800: #676751,
+  900: #474833,
+  contrast: (
+    50: black,
+    100: black,
+    200: black,
+    300: black,
+    400: black,
+    500: black,
+    600: black,
+    700: white,
+    800: white,
+    900: white,
+  ),
+);
+$my-dark-palette: (
+  50:
+    color.scale(
+      $color: #474833,
+      $lightness: -40%,
+    ),
+  100:
+    color.scale(
+      $color: #676751,
+      $lightness: -40%,
+    ),
+  200:
+    color.scale(
+      $color: #7b7b65,
+      $lightness: -40%,
+    ),
+  300:
+    color.scale(
+      $color: #a5a58d,
+      $lightness: -40%,
+    ),
+  400:
+    color.scale(
+      $color: #c4c4ab,
+      $lightness: -40%,
+    ),
+  500:
+    color.scale(
+      $color: #d34000,
+      $lightness: -40%,
+    ),
+  600:
+    color.scale(
+      $color: #dd5c07,
+      $lightness: -40%,
+    ),
+  700:
+    color.scale(
+      $color: #e47831,
+      $lightness: -40%,
+    ),
+  800:
+    color.scale(
+      $color: #ef9f67,
+      $lightness: -40%,
+    ),
+  900:
+    color.scale(
+      $color: #f9c59f,
+      $lightness: -40%,
+    ),
+  contrast: (
+    50: #ebebeb,
+    100: #ebebeb,
+    200: #ebebeb,
+    300: #ebebeb,
+    400: #000,
+    500: #ebebeb,
+    600: #ebebeb,
+    700: #ebebeb,
+    800: #fff,
+    900: #000,
+  ),
+);
+
+$light-theme: mat.define-light-theme(
+  (
+    color: (
+      // primary: mat.define-palette(mat.$amber-palette, 500),
+      // accent: mat.define-palette(mat.$brown-palette, 400, 600, 700),
+      // warn: mat.define-palette(mat.$deep-orange-palette, A700),
+      primary: mat.define-palette($my-light-palette, 50, 100, 200),
+      accent: mat.define-palette($my-light-palette, 300, 400),
+      warn: mat.define-palette($my-light-palette, 200),
+    ),
+    typography: mat.define-typography-config(),
+    density: 0,
+  )
+);
+
+$dark-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: mat.define-palette($my-dark-palette, 100, 200, 300),
+      accent: mat.define-palette($my-dark-palette, 300, 400),
+      warn: mat.define-palette($my-dark-palette, 200),
+    ),
+    density: 0,
+  )
+);
+
+/*
+Link to color documentation:
+https://mui.com/material-ui/customization/color/
+
+Angular Material documentation topic:
+https://material.angular.io/guide/theming
+
+In case of not single named color do something like this: "$mat-light-green".
+
+Depending on how many colors you create, add them all to the dedicated color theme.
+*/
+
+@mixin createCSSVars($theme) {
+  @if ($theme == "light") {
+    @include formatPaletteToCSSVar($my-light-palette);
+  }
+  @if ($theme == "dark") {
+    @include formatPaletteToCSSVar($my-dark-palette);
+  }
+}
+
+@mixin formatPaletteToCSSVar($palettes...) {
+  @each $palette in $palettes {
+    @each $name, $value in $palette {
+      @if (meta.type-of($value) == map) {
+        @each $contrastName, $contrastValue in $value {
+          --contrast-color-#{$contrastName}: #{$contrastValue};
+        }
+      } @else {
+        --color-#{$name}: #{$value};
+      }
+    }
+  }
+}

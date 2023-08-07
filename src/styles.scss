@@ -1,1 +1,77 @@
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+// @use "@angular/material" as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+// @include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+// $Memo-licious-primary: mat.define-palette(mat.$indigo-palette);
+// $Memo-licious-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+// $Memo-licious-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+// $Memo-licious-theme: mat.define-light-theme(
+//   (
+//     color: (
+//       primary: $Memo-licious-primary,
+//       accent: $Memo-licious-accent,
+//       warn: $Memo-licious-warn,
+//     ),
+//   )
+// );
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+// @include mat.all-component-themes($Memo-licious-theme);
+
 /* You can add global styles to this file, and also import other style files */
+
+@use "@angular/material" as mat;
+@use "./themes.scss" as theme;
+
+@include mat.core-theme(theme.$light-theme);
+@include mat.all-component-themes(theme.$light-theme);
+:root {
+  @include theme.createCSSVars("light");
+}
+
+// @media (prefers-color-scheme: dark) {
+//   @include mat.core-color(theme.$dark-theme);
+//   // @include mat.all-component-themes(theme.$dark-theme);
+//   @include mat.all-component-colors(theme.$dark-theme);
+//   :root {
+//     @include theme.createCSSVars("dark");
+//   }
+// }
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  // background-color: var(--color-50);
+  // color: var(--contrast-color-50);
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

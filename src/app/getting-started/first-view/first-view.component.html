@@ -1,0 +1,28 @@
+<main>
+  <img
+    src="../../../assets/getting-started/hello-background.webp"
+    alt="A group of daily products (banana, chocolate, nuts and coffee)"
+  />
+  <section class="greeting" #container>
+    <h1 class="greeting__header fade-out-animation-element">
+      Hello dear Shopper!
+    </h1>
+    <div class="greeting__par-container fade-out-animation-element">
+      <p class="greeting__par fade-out-animation-element">
+        Welcome to Memo-licious, the app that helps you keep track of your
+        shopping lists 🛒
+      </p>
+      <p class="greeting__par fade-out-animation-element">
+        Whether you're planning a big event, a weekly grocery run, or a
+        spontaneous splurge, Memo-licious has you covered. 🙌
+      </p>
+    </div>
+
+    <a
+      class="greeting__CTA fade-out-animation-element"
+      (click)="runTransition()"
+    >
+      Let's dive in!
+    </a>
+  </section>
+</main>
