@@ -1,0 +1,22 @@
+<main>
+  <img
+    class="background-image"
+    src="../../../assets/getting-started/Whiteboard-List-Shoper.webp"
+    alt="background photo of a note"
+  />
+  <section class="container">
+    <h1 class="h1">Decide who you are</h1>
+
+    <div class="container__register">
+      <h2>I'm new here 🥳</h2>
+      <a class="CTA" (click)="showRegisterForm()">Register</a>
+    </div>
+
+    <div class="container__login">
+      <h2>I'm returning 🤠</h2>
+      <a class="CTA--alternative" (click)="showLogInForm()">Log in</a>
+    </div>
+
+    <router-outlet></router-outlet>
+  </section>
+</main>
