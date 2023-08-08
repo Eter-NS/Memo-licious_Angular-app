@@ -8,7 +8,9 @@ main {
   overflow: hidden;
 
   display: grid;
-  place-items: center;
+  align-items: end;
+  grid-template-rows: 1fr auto;
+  justify-items: center;
 
   animation: changeColor 1000ms cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
 }
@@ -28,7 +30,8 @@ main {
 }
 
 .background-image,
-.container {
+.container,
+.shopping-svg {
   opacity: 0;
   animation: fadeIn 750ms 1s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
 }
@@ -39,47 +42,77 @@ main {
   object-fit: contain;
   background-repeat: no-repeat;
   object-position: center;
+}
+
+.background-image {
   width: 200px;
   height: auto;
-  clip-path: ellipse(95% 75% at 90% 25%);
+  // clip-path: ellipse(100% 75% at 100% 0%);
+  clip-path: circle(60% at 100% 49%);
   top: 0;
   right: 0;
 }
 
+.shopping-svg {
+  justify-self: start;
+  position: relative;
+  top: 20px;
+}
+
 .container {
-  z-index: 1;
-  margin: 0 auto;
-  padding: 0.5em 1em;
-  width: min(90%, 500px);
+  align-self: flex-end;
+  --margin: 0.75rem;
+
+  margin: 0 0.75rem var(--margin);
+  padding: var(--margin);
+  min-height: 45vh;
   border-radius: 20px;
 
   display: grid;
   place-items: center;
   text-align: center;
   grid-template-columns: repeat(9, 1fr);
-  row-gap: 1.5rem;
+  row-gap: 1.75rem;
 
   color: var(--contrast-color-600);
   background-color: var(--color-600);
 
-  &__register {
+  &__offline,
+  &__online {
+    align-self: end;
+    height: 100%;
+  }
+
+  &__par {
+    grid-column: 1 / -1;
+    margin: 0 0.5ch;
+  }
+
+  &__offline {
     grid-column: 1 / 5;
   }
 
-  &__login {
+  &__online {
     grid-column: 6 / -1;
   }
 
   & h2 {
-    margin-bottom: 1.75rem;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: var(--margin);
   }
 }
 
 %CTA {
+  display: grid;
+  place-content: center;
+
+  height: inherit;
+  padding: 0.5em 1.4em;
+  border-radius: 20px;
   background-color: var(--color-800);
   color: var(--contrast-color-800);
-  padding: 1em 1.5em;
-  border-radius: 12px;
+  line-break: auto;
 
   &:hover {
     cursor: pointer;
@@ -100,5 +133,7 @@ main {
 
 .h1 {
   grid-column: 1 / -1;
+  font-weight: 600;
+  margin-top: 0.75rem;
   font-size: 2rem;
 }

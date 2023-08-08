@@ -4,19 +4,43 @@
     src="../../../assets/getting-started/Whiteboard-List-Shoper.webp"
     alt="background photo of a note"
   />
+
+  <app-shopping-three
+    class="shopping-svg"
+    [svgHeight]="svgSize"
+    [svgWidth]="svgSize"
+    primaryColor="#dd8407"
+  ></app-shopping-three>
+
   <section class="container">
-    <h1 class="h1">Decide who you are</h1>
+    <h1 class="h1">Choose your path</h1>
+    <p class="container__par">
+      How do you want to use Shopping List Notes? You can either continue as a
+      guest or create an account to share passwords with your other devices.
+    </p>
 
-    <div class="container__register">
-      <h2>I'm new here 🥳</h2>
-      <a class="CTA" (click)="showRegisterForm()">Register</a>
+    <div class="container__offline">
+      <a
+        class="CTA"
+        appRippleColorChecker
+        (rippleColor)="this.rippleColor = $event"
+        matRipple
+        [matRippleColor]="rippleColor"
+        (click)="goGuestPath()"
+        >Continue as Guest</a
+      >
     </div>
 
-    <div class="container__login">
-      <h2>I'm returning 🤠</h2>
-      <a class="CTA--alternative" (click)="showLogInForm()">Log in</a>
+    <div class="container__online">
+      <a
+        class="CTA--alternative"
+        appRippleColorChecker
+        (rippleColor)="this.rippleColor = $event"
+        matRipple
+        [matRippleColor]="rippleColor"
+        (click)="goOnlinePath()"
+        >Continue Online</a
+      >
     </div>
-
-    <router-outlet></router-outlet>
   </section>
 </main>
