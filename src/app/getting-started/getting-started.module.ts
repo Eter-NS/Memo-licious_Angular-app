@@ -9,6 +9,8 @@ import { LoginOrGuestViewComponent } from './login-or-guest-view/login-or-guest-
 import { GuestFormComponent } from './guest-form/guest-form.component';
 import { RouterModule } from '@angular/router';
 import { MatRippleModule } from '@angular/material/core';
+import { ShoppingThreeComponent } from '../../reusable/SVGs/shopping-three/shopping-three.component';
+import { RippleColorCheckerDirective } from 'src/reusable/ripples/ripple-color-checker.directive';
 
 @NgModule({
   declarations: [
@@ -23,6 +25,8 @@ import { MatRippleModule } from '@angular/material/core';
     GettingStartedRoutingModule,
     RouterModule,
     MatRippleModule,
+    ShoppingThreeComponent,
+    RippleColorCheckerDirective,
   ],
 })
 export class GettingStartedModule {}
