@@ -4,7 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start:net": "ng serve --host=192.168.0.8 --hmr",
+    "start:net": "ng serve --host=192.168.0.8",
+    "start:net--hmr": "ng serve --host=192.168.0.8 --hmr",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
