@@ -2,7 +2,11 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-getting-started',
-  templateUrl: './getting-started.component.html',
-  styleUrls: ['./getting-started.component.scss'],
+  template: /* html */ `
+    <div class="wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  `,
+  styles: [/* css */ ``],
 })
 export class GettingStartedComponent {}
