@@ -35,9 +35,13 @@ main {
   }
 
   &__par-container {
+    --space-between-items: 1.4em;
     position: relative;
-    padding: 1em;
+    padding: var(--space-between-items);
     color: var(--contrast-color-100);
+
+    display: grid;
+    row-gap: var(--space-between-items);
 
     &::before {
       content: "";
@@ -53,22 +57,23 @@ main {
   }
 
   &__par {
+    text-align: start;
     font-weight: 500;
+
     &:nth-child(2) {
-      margin-top: 0.75rem;
+      text-align: end;
     }
   }
 
   &__CTA {
     --border-radius: 100px;
     position: relative;
-    width: 80%;
     margin: {
       top: 1rem;
       bottom: 1rem;
     }
     border: 0;
-    padding: 0.75em 1.1em;
+    padding: 1em 1.9em;
     font-size: 1.25rem;
     font-weight: 500;
     text-decoration: none;
