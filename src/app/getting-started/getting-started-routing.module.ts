@@ -18,22 +18,7 @@ const routes: Routes = [
         /* 2. */
         path: 'getting-started/choose-path',
         component: LoginOrGuestViewComponent,
-        children: [
-          {
-            /* 3a. */
-            path: 'register',
-            component: LoginOrGuestViewComponent,
-          },
-          {
-            /* 3b. */
-            path: 'login',
-            component: LoginOrGuestViewComponent,
-          },
-        ],
       },
-
-      { path: '', redirectTo: 'getting-started/hello', pathMatch: 'full' },
-      { path: '**', redirectTo: 'getting-started/hello', pathMatch: 'full' },
     ],
   },
 ];
