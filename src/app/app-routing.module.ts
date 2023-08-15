@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeViewComponent } from './home-view/home-view.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { GettingStartedComponent } from './getting-started/getting-started.component';
 
@@ -14,6 +13,22 @@ const routes: Routes = [
     path: 'getting-started',
     component: GettingStartedComponent,
   },
+
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./register-component/register-component.component').then(
+        (m) => m.RegisterComponentComponent
+      ),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./login-component/login-component.component').then(
+        (m) => m.LoginComponentComponent
+      ),
+  },
+
   { path: '', redirectTo: 'getting-started', pathMatch: 'full' },
   { path: '**', component: NotFoundComponent },
 ];
