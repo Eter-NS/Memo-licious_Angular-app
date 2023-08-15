@@ -1,28 +1,28 @@
-import {
-  Directive,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Output,
-} from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, inject } from '@angular/core';
+import { MatRipple } from '@angular/material/core';
 
 @Directive({
-  selector: '[appRippleColorChecker]',
+  selector: '[appCustomMatRipple]',
   standalone: true,
+  providers: [MatRipple],
 })
-export class RippleColorCheckerDirective {
+export class CustomMatRippleDirective
+  extends MatRipple
+  implements AfterViewInit
+{
   // Assign the emitted value to the state var. and then assign to matRippleColor
-  @Output() rippleColor = new EventEmitter<string>();
+  // @Input() rippleColor: string = '';
 
-  constructor(private el: ElementRef) {}
+  private el = inject(ElementRef);
 
-  @HostListener('touchstart')
-  @HostListener('touchmove')
-  @HostListener('mouseenter')
+  ngAfterViewInit(): void {
+    this.setColorBrightness();
+  }
+
   setColorBrightness(): void {
-    const darkShadow = '';
+    const darkShadow = 'hsl(0, 0%, 0%, 0.15)';
     const lightShadow = 'hsl(0, 0%, 100%, 0.15)';
-    const brightnessMiddle = 170;
+    const brightnessMiddlePoint = 170;
     const colorString = window
       .getComputedStyle(this.el.nativeElement)
       .getPropertyValue('background-color');
@@ -30,9 +30,9 @@ export class RippleColorCheckerDirective {
 
     colorString.match(/\d+/g)!.forEach((colorChannel) => {
       if (!isLowerThanMiddle)
-        isLowerThanMiddle = brightnessMiddle >= Number(colorChannel);
+        isLowerThanMiddle = brightnessMiddlePoint >= Number(colorChannel);
     });
 
-    this.rippleColor.emit(isLowerThanMiddle ? lightShadow : darkShadow);
+    this.color = isLowerThanMiddle ? lightShadow : darkShadow;
   }
 }
