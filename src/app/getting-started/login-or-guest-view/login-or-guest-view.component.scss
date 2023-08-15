@@ -1,39 +1,17 @@
+@use "../../../scss/utils.scss" as *;
+
 main {
   background-color: var(--color-50);
   --desired-color: var(--color-500);
 
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
+  @extend %mainframe;
 
   display: grid;
   align-items: end;
   grid-template-rows: 1fr auto;
   justify-items: center;
 
-  animation: changeColor 1000ms cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
-}
-@keyframes changeColor {
-  to {
-    background-color: var(--desired-color);
-  }
-}
-@keyframes fadeIn {
-  from {
-    transform: translateY(10%);
-  }
-  to {
-    transform: translateY(0%);
-    opacity: 1;
-  }
-}
-
-.background-image,
-.container,
-.shopping-svg {
-  opacity: 0;
-  animation: fadeIn 750ms 1s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
+  animation: changeColor 800ms cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
 }
 
 .background-image {
@@ -61,10 +39,12 @@ main {
 
 .container {
   align-self: flex-end;
-  --margin: 0.75rem;
+  position: relative;
+  bottom: 7.5%;
+  --padding: 0.75rem;
 
-  margin: 0 0.75rem var(--margin);
-  padding: var(--margin);
+  margin: 0 0.75rem 0;
+  padding: var(--padding);
   min-height: 45vh;
   border-radius: 20px;
 
@@ -76,6 +56,7 @@ main {
 
   color: var(--contrast-color-600);
   background-color: var(--color-600);
+  box-shadow: inset 0 45px 50px -25px var(--color-500);
 
   &__offline,
   &__online {
@@ -99,7 +80,7 @@ main {
   & h2 {
     font-size: 1.25rem;
     font-weight: 500;
-    margin-bottom: var(--margin);
+    margin-bottom: var(--padding);
   }
 }
 

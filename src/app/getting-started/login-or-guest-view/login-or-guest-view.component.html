@@ -1,18 +1,18 @@
-<main>
+<main #container>
   <img
-    class="background-image"
+    class="background-image | fadeIn-vol-2-animation"
     src="../../../assets/getting-started/Whiteboard-List-Shoper.webp"
     alt="background photo of a note"
   />
 
   <app-shopping-three
-    class="shopping-svg"
+    class="shopping-svg | fadeIn-vol-2-animation"
     [svgHeight]="svgSize"
     [svgWidth]="svgSize"
-    primaryColor="#dd8407"
+    primaryColor="#e49c31"
   ></app-shopping-three>
 
-  <section class="container">
+  <section class="container | fadeIn-vol-2-animation">
     <h1 class="h1">Choose your path</h1>
     <p class="container__par">
       How do you want to use Shopping List Notes? You can either continue as a
@@ -20,13 +20,7 @@
     </p>
 
     <div class="container__offline">
-      <a
-        class="CTA"
-        appRippleColorChecker
-        (rippleColor)="this.rippleColor = $event"
-        matRipple
-        [matRippleColor]="rippleColor"
-        (click)="goGuestPath()"
+      <a class="CTA" appCustomMatRipple (click)="runTransition('register')"
         >Continue as Guest</a
       >
     </div>
@@ -34,11 +28,8 @@
     <div class="container__online">
       <a
         class="CTA--alternative"
-        appRippleColorChecker
-        (rippleColor)="this.rippleColor = $event"
-        matRipple
-        [matRippleColor]="rippleColor"
-        (click)="goOnlinePath()"
+        appCustomMatRipple
+        (click)="runTransition('login')"
         >Continue Online</a
       >
     </div>
