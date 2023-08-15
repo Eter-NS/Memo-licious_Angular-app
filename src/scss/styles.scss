@@ -36,6 +36,8 @@
 
 /* You can add global styles to this file, and also import other style files */
 
+// @use "./utils.scss" as utils;
+@use "../app/animations/animations.scss" as anim;
 @use "@angular/material" as mat;
 @use "./themes.scss" as theme;
 
@@ -43,6 +45,7 @@
 @include mat.all-component-themes(theme.$light-theme);
 :root {
   @include theme.createCSSVars("light");
+  --validation-error: rgb(150, 25, 25);
 }
 
 // @media (prefers-color-scheme: dark) {
