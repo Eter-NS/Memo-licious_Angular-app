@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SvgElementsDirective } from '../svg-elements.directive';
-import { SvgElement } from '../svg-element';
 
 @Component({
   selector: 'app-shopping-three',
@@ -9,11 +8,11 @@ import { SvgElement } from '../svg-element';
   imports: [CommonModule],
   templateUrl: './shopping-three.component.html',
   styles: [],
-  // hostDirectives: [
-  //   {
-  //     directive: SvgElementsDirective,
-  //     inputs: ['svgWidth', 'svgHeight', 'svgColor'],
-  //   },
-  // ],
+  hostDirectives: [
+    {
+      directive: SvgElementsDirective,
+      inputs: ['svgWidth', 'svgHeight', 'primaryColor'],
+    },
+  ],
 })
-export class ShoppingThreeComponent extends SvgElement {}
+export class ShoppingThreeComponent {}
