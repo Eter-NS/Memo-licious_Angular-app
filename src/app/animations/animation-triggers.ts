@@ -1,13 +1,20 @@
 type runWithDelayOptions = {
   timeoutTime?: number;
-  delay?: number;
+  delayT?: number;
   reverse?: boolean;
 };
 
-import {
-  iterateOverElementsAndDoSomething,
-  startAnimation,
-} from './animation-tools';
+import { forEachAndCb, startAnimation, stopAnimation } from './animation-tools';
+
+/**
+ * The animation must have finite amount of iterations
+ */
+export function runAnimationOnce(object: HTMLElement, animationClass: string) {
+  object.classList.add(animationClass);
+  object.addEventListener('animationend', () => {
+    object.classList.remove(animationClass);
+  });
+}
 
 export function runAnimations(
   object: NodeListOf<HTMLElement> | HTMLElement,
@@ -16,13 +23,10 @@ export function runAnimations(
 ) {
   if ('style' in object) {
     global
-      ? iterateOverElementsAndDoSomething(
-          object.querySelectorAll(animationClass),
-          startAnimation
-        )
+      ? forEachAndCb(object.querySelectorAll(animationClass), startAnimation)
       : startAnimation(object);
   } else {
-    iterateOverElementsAndDoSomething(object, startAnimation);
+    forEachAndCb(object, startAnimation);
   }
 }
 
@@ -30,24 +34,24 @@ export const runWithDelay = (
   elementsArray:
     | NodeListOf<HTMLElement | Element>
     | HTMLCollection
-    | HTMLElement[],
-  options?: runWithDelayOptions
+    | Array<HTMLElement>,
+  { delayT, reverse, timeoutTime }: runWithDelayOptions
 ) =>
   new Promise<void>((resolve, reject) => {
-    const run = runInSequence();
-    const delay = options?.delay ? options.delay : 100;
-    const reverse = options?.reverse;
-    const lastElement = reverse
-      ? elementsArray[0]
-      : elementsArray[elementsArray.length - 1];
+    const delay = delayT ?? 100,
+      calculatedTimeout = delay * elementsArray.length,
+      // reverse = reverse,
+      lastElement = reverse
+        ? elementsArray[0]
+        : elementsArray[elementsArray.length - 1];
+
+    if (timeoutTime)
+      if (calculatedTimeout > timeoutTime)
+        throw new Error(
+          `Timeout time is too short, actual value: ${timeoutTime}, minimum time calculated for the elementsArray: ${calculatedTimeout}`
+        );
 
     lastElement.addEventListener('animationend', afterLastAnimation);
-
-    const runningEachAnimation = setInterval(() => {
-      if (run.next().done) {
-        clearInterval(runningEachAnimation);
-      }
-    }, delay);
 
     function* runInSequence() {
       for (
@@ -57,28 +61,29 @@ export const runWithDelay = (
       ) {
         const el = elementsArray[i] as HTMLElement;
         if (!el) reject(new Error('Element not found'));
-
+        el.addEventListener(
+          'animationend',
+          el === lastElement ? afterLastAnimation : afterAnimation
+        );
         yield startAnimation(el);
       }
     }
-
-    function removePlayState() {
-      for (let i = 0; i < elementsArray.length; i++) {
-        const el = elementsArray[i] as HTMLElement;
-        if (!el) reject(new Error('Element not found'));
-        el.classList.remove('play');
+    const run = runInSequence();
+    const runningEachAnimation = setInterval(() => {
+      if (run.next().done) {
+        clearInterval(runningEachAnimation);
       }
+    }, delay);
+
+    function afterAnimation(e: Event) {
+      stopAnimation(e.target as HTMLElement);
     }
 
     function afterLastAnimation(e: Event) {
-      removePlayState();
-
-      setTimeout(
-        () => {
-          resolve();
-        },
-        options?.timeoutTime ? options.timeoutTime : 500
-      );
+      afterAnimation(e);
+      setTimeout(() => {
+        resolve();
+      }, timeoutTime ?? calculatedTimeout);
       lastElement.removeEventListener('animationend', afterLastAnimation);
     }
   });

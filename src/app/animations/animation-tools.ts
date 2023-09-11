@@ -1,20 +1,22 @@
-export function iterateOverElementsAndDoSomething(
-  elementArray: NodeListOf<HTMLElement> | HTMLCollection | Array<HTMLElement>,
-  cb: Function
-) {
+export type ElementsArray =
+  | NodeListOf<HTMLElement | Element>
+  | HTMLCollection
+  | Array<HTMLElement>;
+
+export function forEachAndCb(elementArray: ElementsArray, cb: Function) {
   for (let i = 0; i < elementArray.length; i++) cb(elementArray[i]);
 }
 
 export function addAnimations(
   object: HTMLElement | NodeListOf<HTMLElement> | Array<HTMLElement>,
   animations: string | Array<string>,
-  global?: boolean
+  parent?: boolean
 ) {
   if ('classList' in object)
-    global
-      ? iterateOverElementsAndDoSomething(object.children, applyAnimation)
+    parent
+      ? forEachAndCb(object.children, applyAnimation)
       : applyAnimation(object);
-  else iterateOverElementsAndDoSomething(object, applyAnimation);
+  else forEachAndCb(object, applyAnimation);
 
   function applyAnimation(element: HTMLElement) {
     element.classList.add(
@@ -26,13 +28,13 @@ export function addAnimations(
 export function removeAnimations(
   object: HTMLElement | NodeListOf<HTMLElement> | Array<HTMLElement>,
   animations: string | Array<string>,
-  global?: boolean
+  parent?: boolean
 ) {
   if ('classList' in object)
-    global
-      ? iterateOverElementsAndDoSomething(object.children, removeAnimation)
+    parent
+      ? forEachAndCb(object.children, removeAnimation)
       : removeAnimation(object);
-  else iterateOverElementsAndDoSomething(object, removeAnimation);
+  else forEachAndCb(object, removeAnimation);
 
   function removeAnimation(element: HTMLElement) {
     typeof animations === 'string'
@@ -41,6 +43,16 @@ export function removeAnimations(
   }
 }
 
-export function startAnimation(element: HTMLElement) {
+export function startAnimation(element: HTMLElement | EventTarget) {
+  if (!element) throw new Error('The element is not defined');
+  if (!('classList' in element))
+    throw new Error(`The ${element} does not have a classList property`);
   element.classList.add('play');
+}
+
+export function stopAnimation(element: HTMLElement | EventTarget) {
+  if (!element) throw new Error('The element is not defined');
+  if (!('classList' in element))
+    throw new Error('The element does not have a classList property');
+  element.classList.remove('play');
 }
