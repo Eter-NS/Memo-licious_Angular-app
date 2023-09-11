@@ -14,15 +14,14 @@
 //   400: #b7b7a4,
 //   500: #a5a58d,
 //   600: #6b705c,
-//   contrast:
-//     (
-//       100: black,
-//       200: black,
-//       300: black,
-//       400: black,
-//       500: black,
-//       600: white,
-//     ),
+//   contrast: (
+//     100: black,
+//     200: black,
+//     300: black,
+//     400: black,
+//     500: black,
+//     600: white,
+//   ),
 // );
 // $my-dark-palette: (
 //   100: #bf805f,
@@ -31,104 +30,112 @@
 //   400: #5b5b48,
 //   500: #39392d,
 //   600: #151612,
-//   contrast:
-//     (
-//       100: white,
-//       200: white,
-//       300: white,
-//       400: white,
-//       500: white,
-//       600: white,
-//     ),
+//   contrast: (
+//     100: white,
+//     200: white,
+//     300: white,
+//     400: white,
+//     500: white,
+//     600: white,
+//   ),
 // );
 
 // background-color: var(--color-50);
 // color: var(--contrast-color-50);
-$my-light-palette: (
-  50: hsl(40, 100%, 80%),
-  100: hsl(40, 79%, 70%),
-  200: hsl(40, 74%, 56%),
-  300: hsl(40, 72%, 55%),
-  400: hsl(30, 75%, 58%),
-  500: hsl(60, 22%, 81%),
-  600: hsl(60, 10%, 57%),
-  700: hsl(60, 8%, 40%),
-  800: hsl(60, 12%, 36%),
-  900: hsl(60, 17%, 24%),
+$my-light-palette-main: (
+  50: hsl(42, 75%, 94%),
+  100: hsl(38, 81%, 85%),
+  200: hsl(39, 81%, 76%),
+  300: hsl(38, 81%, 67%),
+  400: hsl(37, 82%, 61%),
+  500: hsl(34, 82%, 58%),
+  600: hsl(32, 79%, 56%),
+  700: hsl(29, 74%, 54%),
+  800: hsl(26, 71%, 52%),
+  900: hsl(22, 69%, 48%),
   contrast: (
-    50: hsl(0, 0%, 5%),
-    100: hsl(0, 0%, 5%),
-    200: hsl(0, 0%, 5%),
-    300: hsl(0, 0%, 5%),
-    400: hsl(0, 0%, 5%),
-    500: hsl(0, 0%, 5%),
-    600: hsl(0, 0%, 5%),
-    700: hsl(0, 0%, 95%),
-    800: hsl(0, 0%, 95%),
-    900: hsl(0, 0%, 95%),
+    50: #000,
+    100: #000,
+    200: #000,
+    300: #000,
+    400: #000,
+    500: #000,
+    600: #000,
+    700: #000,
+    800: #000,
+    900: #fff,
   ),
 );
-$my-dark-palette: (
-  50:
-    color.scale(
-      $color: #474833,
-      $lightness: -40%,
-    ),
-  100:
-    color.scale(
-      $color: #676751,
-      $lightness: -40%,
-    ),
-  200:
-    color.scale(
-      $color: #7b7b65,
-      $lightness: -40%,
-    ),
-  300:
-    color.scale(
-      $color: #a5a58d,
-      $lightness: -40%,
-    ),
-  400:
-    color.scale(
-      $color: #c4c4ab,
-      $lightness: -40%,
-    ),
-  500:
-    color.scale(
-      $color: #d34000,
-      $lightness: -40%,
-    ),
-  600:
-    color.scale(
-      $color: #dd5c07,
-      $lightness: -40%,
-    ),
-  700:
-    color.scale(
-      $color: #e47831,
-      $lightness: -40%,
-    ),
-  800:
-    color.scale(
-      $color: #ef9f67,
-      $lightness: -40%,
-    ),
-  900:
-    color.scale(
-      $color: #f9c59f,
-      $lightness: -40%,
-    ),
+$my-dark-palette-main: (
+  50: hsl(22, 69%, 48%),
+  100: hsl(26, 71%, 52%),
+  200: hsl(29, 74%, 54%),
+  300: hsl(32, 79%, 56%),
+  400: hsl(34, 82%, 58%),
+  500: hsl(37, 82%, 61%),
+  600: hsl(38, 81%, 67%),
+  700: hsl(39, 81%, 76%),
+  800: hsl(38, 81%, 85%),
+  900: hsl(42, 75%, 94%),
   contrast: (
-    50: #ebebeb,
-    100: #ebebeb,
-    200: #ebebeb,
-    300: #ebebeb,
+    50: #fff,
+    100: #000,
+    200: #000,
+    300: #000,
     400: #000,
-    500: #ebebeb,
-    600: #ebebeb,
-    700: #ebebeb,
-    800: #fff,
+    500: #000,
+    600: #000,
+    700: #000,
+    800: #000,
+    900: #000,
+  ),
+);
+
+$my-light-palette-accent: (
+  50: hsl(86, 58%, 95%),
+  100: hsl(86, 57%, 88%),
+  200: hsl(86, 57%, 81%),
+  300: hsl(85, 55%, 74%),
+  400: hsl(85, 53%, 69%),
+  500: hsl(84, 53%, 64%),
+  600: hsl(82, 42%, 59%),
+  700: hsl(79, 31%, 53%),
+  800: hsl(75, 25%, 47%),
+  900: hsl(67, 17%, 37%),
+  contrast: (
+    50: #000,
+    100: #000,
+    200: #000,
+    300: #000,
+    400: #000,
+    500: #000,
+    600: #000,
+    700: #000,
+    800: #000,
+    900: #fff,
+  ),
+);
+$my-dark-palette-accent: (
+  50: hsl(67, 17%, 37%),
+  100: hsl(75, 25%, 47%),
+  200: hsl(79, 31%, 53%),
+  300: hsl(82, 42%, 59%),
+  400: hsl(84, 53%, 64%),
+  500: hsl(85, 53%, 69%),
+  600: hsl(85, 55%, 74%),
+  700: hsl(86, 57%, 81%),
+  800: hsl(86, 57%, 88%),
+  900: hsl(86, 58%, 95%),
+  contrast: (
+    50: #fff,
+    100: #000,
+    200: #000,
+    300: #000,
+    400: #000,
+    500: #000,
+    600: #000,
+    700: #000,
+    800: #000,
     900: #000,
   ),
 );
@@ -136,12 +143,9 @@ $my-dark-palette: (
 $light-theme: mat.define-light-theme(
   (
     color: (
-      // primary: mat.define-palette(mat.$amber-palette, 500),
-      // accent: mat.define-palette(mat.$brown-palette, 400, 600, 700),
-      // warn: mat.define-palette(mat.$deep-orange-palette, A700),
-      primary: mat.define-palette($my-light-palette, 50, 100, 200),
-      accent: mat.define-palette($my-light-palette, 300, 400),
-      warn: mat.define-palette($my-light-palette, 200),
+      primary: mat.define-palette($my-light-palette-main, 50, 100, 200),
+      accent: mat.define-palette($my-light-palette-accent, 300, 400),
+      warn: mat.define-palette($my-light-palette-main, 200),
     ),
     typography: mat.define-typography-config(),
     density: 0,
@@ -151,9 +155,9 @@ $light-theme: mat.define-light-theme(
 $dark-theme: mat.define-dark-theme(
   (
     color: (
-      primary: mat.define-palette($my-dark-palette, 100, 200, 300),
-      accent: mat.define-palette($my-dark-palette, 300, 400),
-      warn: mat.define-palette($my-dark-palette, 200),
+      primary: mat.define-palette($my-dark-palette-main, 100, 200, 300),
+      accent: mat.define-palette($my-dark-palette-accent, 300, 400),
+      warn: mat.define-palette($my-dark-palette-main, 200),
     ),
     density: 0,
   )
@@ -173,22 +177,24 @@ Depending on how many colors you create, add them all to the dedicated color the
 
 @mixin createCSSVars($theme) {
   @if ($theme == "light") {
-    @include formatPaletteToCSSVar($my-light-palette);
+    @include formatPaletteToCSSVar("main", $my-light-palette-main);
+    @include formatPaletteToCSSVar("accent", $my-light-palette-accent);
   }
   @if ($theme == "dark") {
-    @include formatPaletteToCSSVar($my-dark-palette);
+    @include formatPaletteToCSSVar("main", $my-dark-palette-main);
+    @include formatPaletteToCSSVar("accent", $my-dark-palette-accent);
   }
 }
 
-@mixin formatPaletteToCSSVar($palettes...) {
+@mixin formatPaletteToCSSVar($main-accent, $palettes...) {
   @each $palette in $palettes {
     @each $name, $value in $palette {
       @if (meta.type-of($value) == map) {
         @each $contrastName, $contrastValue in $value {
-          --contrast-color-#{$contrastName}: #{$contrastValue};
+          --contrast-color-#{$main-accent}-#{$contrastName}: #{$contrastValue};
         }
       } @else {
-        --color-#{$name}: #{$value};
+        --color-#{$main-accent}-#{$name}: #{$value};
       }
     }
   }

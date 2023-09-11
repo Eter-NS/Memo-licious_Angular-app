@@ -44,7 +44,7 @@
 }
 
 .signin-with-google {
-  @include box-shadow-inset-500(--color-accent-50);
+  @include box-shadow-inset(--color-accent-50);
   @extend %flex-center, %gap-sm;
   padding: 1.5vmax;
   border: none;

@@ -46,7 +46,7 @@ input {
 }
 
 input {
-  @include box-shadow-inset-500("--color-accent-500");
+  @include box-shadow-inset("--color-accent-500");
   line-height: 1.5;
   padding: 0.75vmax 0.5em;
 
@@ -58,7 +58,7 @@ input {
 
 .submit-button {
   cursor: pointer;
-  @include box-shadow-inset-500("--color-main-500");
+  @include box-shadow-inset("--color-main-500");
   background-color: var(--color-main-300);
   color: var(--contrast-color-main-300);
   display: inline;
