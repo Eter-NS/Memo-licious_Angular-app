@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 import { GettingStartedRoutingModule } from './getting-started-routing.module';
 import { GettingStartedComponent } from './getting-started.component';
@@ -21,7 +20,6 @@ import { CustomMatRippleDirective } from 'src/reusable/ripples/ripple-color-chec
     GuestFormComponent,
   ],
   imports: [
-    CommonModule,
     GettingStartedRoutingModule,
     RouterModule,
     MatRippleModule,

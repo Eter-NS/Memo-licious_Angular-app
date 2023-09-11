@@ -19,6 +19,11 @@ const routes: Routes = [
         path: 'getting-started/choose-path',
         component: LoginOrGuestViewComponent,
       },
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'getting-started/hello',
+      },
     ],
   },
 ];
