@@ -1,0 +1,59 @@
+@use "../../../scss/utils.scss" as *;
+
+.container,
+.component-content {
+  display: grid;
+}
+
+.container {
+  @extend %mainframe;
+  --min-value-break: 0.5rem;
+  --max-value-break: 2.5vh;
+  --break-between-elements: max(var(--min-value-break), var(--max-value-break));
+  --break-between-elements-2: max(
+    var(--min-value-break) / 2,
+    var(--max-value-break) / 2
+  );
+  grid-template-rows: 1fr auto;
+  row-gap: var(--break-between-elements);
+  padding-top: var(--break-between-elements);
+  padding-bottom: var(--break-between-elements);
+  background-color: var(--color-accent-50);
+}
+
+.login-register {
+  &-content {
+    display: grid;
+    align-content: center;
+  }
+
+  &-switch {
+    font-size: var(--p);
+    font-weight: 500;
+    cursor: pointer;
+    & b {
+      color: var(--contrast-color-accent-500);
+    }
+  }
+}
+
+.component-content {
+  row-gap: var(--break-between-elements);
+  align-content: center;
+  justify-items: center;
+}
+
+.signin-with-google {
+  @include box-shadow-inset-500(--color-accent-50);
+  @extend %flex-center, %gap-sm;
+  padding: 1.5vmax;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  background-color: white;
+  color: black;
+
+  & > span {
+    @extend %font-size-sm;
+  }
+}

@@ -1,0 +1,38 @@
+<main class="container" #container>
+  <div class="login-register-content">
+    <ng-container *ngIf="register; else loginBlock">
+      <app-register-component
+        [emailAlreadyInUse]="alreadyInUseError"
+        (data)="handleSubmit($event)"
+      />
+    </ng-container>
+    <ng-template #loginBlock>
+      <app-login-component
+        [wrongEmailOrPassword]="wrongEmailOrPassword"
+        [emailDoesNotExist]="emailDoesNotExist"
+        (data)="handleSubmit($event)"
+      />
+    </ng-template>
+  </div>
+  <div class="component-content">
+    <a (click)="register = !register" class="login-register-switch">
+      <ng-container *ngIf="register; else loginText"
+        >Wanna Log in?</ng-container
+      >
+      <ng-template #loginText>Wanna Register?</ng-template>
+    </a>
+    <button
+      type="button"
+      class="signin-with-google"
+      appCustomMatRipple
+      (click)="authService.continueWithGoogle()"
+    >
+      <app-google-logo
+        class="google-logo"
+        [svgWidth]="svgWidth"
+        [svgHeight]="svgHeight"
+      ></app-google-logo>
+      <span #googleButton>Continue with Google</span>
+    </button>
+  </div>
+</main>
