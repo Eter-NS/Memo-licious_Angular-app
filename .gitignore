@@ -46,4 +46,4 @@ Thumbs.db
 *-debug.log
 .runtimeconfig.json
 export-firebase
-src/environments/environment.prod.ts
+src/environments/
