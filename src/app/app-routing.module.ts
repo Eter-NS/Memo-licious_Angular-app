@@ -1,13 +1,23 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { NotFoundComponent } from './not-found/not-found.component';
 import { GettingStartedComponent } from './getting-started/getting-started.component';
+import { NotFoundComponent } from './not-found/not-found.component';
+
+import {
+  redirectUnauthorizedTo,
+  redirectLoggedInTo,
+  canActivate,
+} from '@angular/fire/auth-guard';
+
+const redirectUnauthorizedToGettingStarted = () => redirectUnauthorizedTo(['']);
+const redirectLoggedInToApp = () => redirectLoggedInTo(['app']);
 
 const routes: Routes = [
   {
     path: 'app',
-    loadChildren: () =>
-      import('./app-view/app-view.module').then((m) => m.AppViewModule),
+    ...canActivate(redirectLoggedInToApp),
+    loadComponent: () =>
+      import('./app-view/app-view.component').then((m) => m.AppViewComponent),
   },
   {
     path: 'getting-started',
@@ -15,21 +25,39 @@ const routes: Routes = [
   },
 
   {
-    path: 'register',
+    path: 'guest',
     loadComponent: () =>
-      import('./register-component/register-component.component').then(
-        (m) => m.RegisterComponentComponent
+      import('./auth-components/guest/guest.component').then(
+        (m) => m.GuestComponent
       ),
   },
   {
-    path: 'login',
+    path: 'online/:redirect?',
     loadComponent: () =>
-      import('./login-component/login-component.component').then(
-        (m) => m.LoginComponentComponent
+      import('./auth-components/online/online.component').then(
+        (m) => m.OnlineComponent
+      ),
+  },
+  {
+    path: 'online',
+    loadComponent: () =>
+      import('./auth-components/online/online.component').then(
+        (m) => m.OnlineComponent
+      ),
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./auth-components/verify/verify.component').then(
+        (m) => m.VerifyComponent
       ),
   },
 
-  { path: '', redirectTo: 'getting-started', pathMatch: 'full' },
+  {
+    path: '',
+    component: GettingStartedComponent,
+    ...canActivate(redirectUnauthorizedToGettingStarted),
+  },
   { path: '**', component: NotFoundComponent },
 ];
 
