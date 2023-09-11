@@ -1,0 +1,75 @@
+@use "../../../scss/utils.scss" as *;
+
+section {
+  display: grid;
+  justify-content: stretch;
+  align-items: end;
+  width: min(70%, 500px);
+  margin: 0 auto;
+  row-gap: 1.5vmax;
+}
+
+h1 {
+  text-align: center;
+  font-size: clamp(var(--h2), 3.5vmax, var(--h1));
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-accent-900);
+}
+
+form {
+  display: grid;
+  min-height: 35vh;
+  justify-content: stretch;
+  row-gap: max(0.3rem, 1.5vh);
+}
+
+.form-element {
+  display: grid;
+  min-height: 5rem;
+  align-content: space-evenly;
+}
+
+input,
+.submit-button {
+  background-color: var(--color-accent-300);
+  color: var(--contrast-color-accent-300);
+  border-radius: 10px;
+  border: none;
+}
+
+label,
+input {
+  @extend %font-size-sm;
+}
+
+input {
+  @include box-shadow-inset-500("--color-accent-500");
+  line-height: 1.5;
+  padding: 0.75vmax 0.5em;
+
+  &:focus,
+  &:focus-visible {
+    border: 2px solid var(--color-accent-900);
+  }
+}
+
+.submit-button {
+  cursor: pointer;
+  @include box-shadow-inset-500("--color-main-500");
+  background-color: var(--color-main-300);
+  color: var(--contrast-color-main-300);
+  display: inline;
+  justify-self: end;
+  font-size: clamp(var(--p), 2vmax, var(--h3));
+  padding: 2.5vmax 3vmax;
+}
+
+.input-error {
+  text-align: center;
+  color: var(--validation-error);
+  font-size: var(--form-input);
+  min-height: 0.9rem;
+}
