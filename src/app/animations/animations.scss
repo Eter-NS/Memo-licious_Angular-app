@@ -49,6 +49,7 @@
 
 .fadeIn-from-left-animation {
   animation: fadeIn-from-left 400ms cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeIn-from-left {
@@ -65,6 +66,7 @@
 .fadeOut-to-left-animation {
   animation: fadeIn-to-left 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
     forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeOut-to-left {
@@ -80,6 +82,7 @@
 
 .fadeIn-from-top-animation {
   animation: fadeIn-from-top 400ms cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeIn-from-top {
@@ -95,6 +98,7 @@
 
 .fadeOut-to-top-animation {
   animation: fadeIn-to-top 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeOut-to-top {
@@ -111,6 +115,7 @@
 .fadeIn-from-right-animation {
   animation: fadeIn-from-right 400ms cubic-bezier(0.215, 0.61, 0.355, 1)
     forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeIn-from-right {
@@ -127,6 +132,7 @@
 .fadeOut-to-right-animation {
   animation: fadeIn-to-right 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
     forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeOut-to-right {
@@ -143,6 +149,7 @@
 .fadeIn-from-bottom-animation {
   animation: fadeIn-from-bottom 400ms cubic-bezier(0.215, 0.61, 0.355, 1)
     forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeIn-from-bottom {
@@ -159,6 +166,7 @@
 .fadeOut-to-bottom-animation {
   animation: fadeIn-to-bottom 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
     forwards;
+  animation-play-state: paused;
 }
 
 @keyframes fadeOut-to-bottom {
