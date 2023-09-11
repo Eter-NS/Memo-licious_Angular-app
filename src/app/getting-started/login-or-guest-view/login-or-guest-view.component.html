@@ -9,18 +9,18 @@
     class="shopping-svg | fadeIn-vol-2-animation"
     [svgHeight]="svgSize"
     [svgWidth]="svgSize"
-    primaryColor="#e49c31"
+    primaryColor="#edaf4a"
   ></app-shopping-three>
 
   <section class="container | fadeIn-vol-2-animation">
     <h1 class="h1">Choose your path</h1>
     <p class="container__par">
       How do you want to use Shopping List Notes? You can either continue as a
-      guest or create an account to share passwords with your other devices.
+      guest or create an account to share notes with your other devices.
     </p>
 
     <div class="container__offline">
-      <a class="CTA" appCustomMatRipple (click)="runTransition('register')"
+      <a class="CTA" appCustomMatRipple (click)="runTransition('guest')"
         >Continue as Guest</a
       >
     </div>
@@ -29,7 +29,7 @@
       <a
         class="CTA--alternative"
         appCustomMatRipple
-        (click)="runTransition('login')"
+        (click)="runTransition('online')"
         >Continue Online</a
       >
     </div>
