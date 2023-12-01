@@ -1,0 +1,12 @@
+.social-media {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+
+  &__link {
+    list-style: none;
+    & svg {
+      fill: var(--contrast-color-accent-50);
+    }
+  }
+}
