@@ -1,0 +1,17 @@
+<!-- bottom of the screen - m3 navbar with three sections, notes, trash, and settings -->
+
+<!-- Above the screen - notes groups list view - grid layout with the first three Chips, after clicking on it, user'll be sent to the specific group where he can modify data -->
+
+<!-- Above the screen - trash can view - Something like category tree, after the group name it will show elements preparing for being deceased, with an option to retrieve it back, or remove immediately. -->
+
+<!-- Above the screen - settings view - Settings panel with a switch for light / dark / auto mode, logout from the app,
+manage the account,
+remove the account,
+credits about me,
+and link to the repo. -->
+<a
+  (click)="authAccountService.signOutUser()"
+  (keyup.enter)="authAccountService.signOutUser()"
+  tabindex="0"
+  >Log out</a
+>
