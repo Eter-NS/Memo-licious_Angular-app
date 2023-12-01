@@ -1,0 +1,31 @@
+<header class="header">
+  <img src="#" alt="Logo" />
+
+  <button
+    type="button"
+    mat-icon-button
+    color="primary"
+    aria-label="hamburger menu"
+    class="hamburger-menu"
+    (click)="sideNav.toggle()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+</header>
+
+<mat-sidenav-container>
+  <mat-sidenav #sideNav mode="over" position="end" fixedTopGap="56">
+    <mat-nav-list>
+      <mat-list-item>
+        <a mat-list-item routerLink="/app">Notes</a>
+      </mat-list-item>
+      <mat-list-item>
+        <a mat-list-item routerLink="/app/settings">Settings</a>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- <mat-sidenav-content class="example-sidenav-container"> -->
+  <!-- Actual content here -->
+  <!-- </mat-sidenav-content> -->
+</mat-sidenav-container>
