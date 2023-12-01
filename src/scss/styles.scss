@@ -1,27 +1,38 @@
-@use "../app/animations/animations.scss" as anim;
+@use "sass:map";
 @use "@angular/material" as mat;
+@use "/src/app/reusable/animations/animations.scss" as anim;
 @use "./themes.scss" as theme;
+@use "./utils.scss" as util;
+@use "./typography.scss";
+@use "./viewport.scss";
 
 @include mat.core-theme(theme.$light-theme);
 @include mat.all-component-themes(theme.$light-theme);
 :root {
   @include theme.createCSSVars("light");
-  --validation-error: rgb(150, 25, 25);
 
-  // font sizes
-  --h1: 2rem;
-  --h2: 1.75rem;
-  --h3: 1.3rem;
-  --p: 1rem;
-  --form-input: 0.95rem;
+  /* Warn colors */
+  --color-warn-primary: var(--color-warn-300);
+  --contrast-color-warn: #000000de;
+  --color-warn-accent: var(--color-warn-100);
+  --color-warn-input: var(--color-warn-900);
 }
 
 @media (prefers-color-scheme: dark) {
   @include mat.core-color(theme.$dark-theme);
-  // @include mat.all-component-themes(theme.$dark-theme);
   @include mat.all-component-colors(theme.$dark-theme);
   :root {
     @include theme.createCSSVars("dark");
+
+    /* Warn colors */
+    --color-warn-primary: var(--color-warn-700);
+    --contrast-color-warn: #ffffffde;
+    --color-warn-accent: var(--color-warn-900);
+    --color-warn-input: var(--color-warn-200);
+  }
+
+  img {
+    filter: brightness(90%) grayscale(15%);
   }
 }
 
@@ -35,12 +46,18 @@
 
 img {
   max-width: 100%;
+  height: auto;
 }
 
 html,
 body {
   height: 100%;
+  background-color: var(--color-accent-50);
+  color: var(--contrast-color-accent-50);
 }
-body {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+
+main {
+  @extend %mainframe;
+  background-color: var(--color-accent-50);
+  color: var(--contrast-color-accent-50);
 }

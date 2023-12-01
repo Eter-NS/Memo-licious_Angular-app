@@ -1,7 +1,19 @@
+@use "sass:map";
+
 %mainframe {
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+%deselected {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+%deselected-mainframe {
+  @extend %mainframe, %deselected;
 }
 
 %fillBeforeAfter {
@@ -13,19 +25,11 @@
   height: 100%;
 }
 
-%font-size-sm {
-  font-size: var(--form-input);
-}
-
-@mixin box-shadow-inset($color) {
-  box-shadow: inset 0 0 15px var(#{$color});
-  transition: box-shadow 250ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
-
-  &:hover,
-  &:focus,
-  &:focus-visible {
-    box-shadow: none;
-  }
+%absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 %flex-center {
@@ -34,22 +38,46 @@
   justify-content: center;
 }
 
-%gap-sm {
-  gap: 0.75rem;
+@mixin inset-box-shadow($color) {
+  box-shadow: inset 0 0 12px #{$color};
+
+  @media screen and (prefers-color-scheme: dark) {
+    // box-shadow: none;
+  }
 }
 
-%border-radius-sm {
-  border-radius: 6px;
+@mixin inset-box-shadow-with-transition($color) {
+  @include inset-box-shadow($color);
+  transition: box-shadow 250ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
+
+  &:hover,
+  &:active {
+    box-shadow: none;
+  }
 }
-%border-radius-md {
-  border-radius: 15px;
+
+@function free-space($size: "sm") {
+  $sizes: (
+    xs: 0.65rem,
+    sm: 1rem,
+    md: 1.5rem,
+    lg: 1.75rem,
+    xl: 2rem,
+  );
+  @return map.get($sizes, $size);
 }
-%border-radius-lg {
-  border-radius: 25px;
+
+@function border-radius-implicit($size: "md") {
+  $border-sizes: (
+    xs: 6px,
+    sm: 10px,
+    md: 15px,
+    lg: 25px,
+    pill: 9999px,
+  );
+  @return map.get($border-sizes, $size);
 }
-%border-radius-pill {
-  border-radius: 9999px;
-}
-%border-radius-circle {
-  border-radius: 50%;
+
+@mixin border-radius($size: "md") {
+  border-radius: border-radius-implicit($size);
 }

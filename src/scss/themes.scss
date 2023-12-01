@@ -1,48 +1,14 @@
-// @use "../node_modules/@angular/material/theming" as *;
+/* @use "../node_modules/@angular/material/theming" as *;*/
 
 @use "@angular/material" as mat;
 @use "sass:map" as map;
 @use "sass:meta" as meta;
-@use "sass:color" as color;
 
 @include mat.core();
 
-// $my-light-palette: (
-//   100: #cb997e,
-//   200: #ddbea9,
-//   300: #ffe8d6,
-//   400: #b7b7a4,
-//   500: #a5a58d,
-//   600: #6b705c,
-//   contrast: (
-//     100: black,
-//     200: black,
-//     300: black,
-//     400: black,
-//     500: black,
-//     600: white,
-//   ),
-// );
-// $my-dark-palette: (
-//   100: #bf805f,
-//   200: #af7046,
-//   300: #662c00,
-//   400: #5b5b48,
-//   500: #39392d,
-//   600: #151612,
-//   contrast: (
-//     100: white,
-//     200: white,
-//     300: white,
-//     400: white,
-//     500: white,
-//     600: white,
-//   ),
-// );
-
-// background-color: var(--color-50);
-// color: var(--contrast-color-50);
-$my-light-palette-main: (
+/* background-color: var(--color-primary-300); */
+/* color: var(--contrast-color-accent-300); */
+$my-light-palette-primary: (
   50: hsl(42, 75%, 94%),
   100: hsl(38, 81%, 85%),
   200: hsl(39, 81%, 76%),
@@ -54,40 +20,40 @@ $my-light-palette-main: (
   800: hsl(26, 71%, 52%),
   900: hsl(22, 69%, 48%),
   contrast: (
-    50: #000,
-    100: #000,
-    200: #000,
-    300: #000,
-    400: #000,
-    500: #000,
-    600: #000,
-    700: #000,
-    800: #000,
+    50: #131313ec,
+    100: #131313ec,
+    200: #131313ec,
+    300: #131313ec,
+    400: #131313ec,
+    500: #131313ec,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
     900: #fff,
   ),
 );
-$my-dark-palette-main: (
-  50: hsl(22, 69%, 48%),
-  100: hsl(26, 71%, 52%),
-  200: hsl(29, 74%, 54%),
-  300: hsl(32, 79%, 56%),
-  400: hsl(34, 82%, 58%),
-  500: hsl(37, 82%, 61%),
-  600: hsl(38, 81%, 67%),
-  700: hsl(39, 81%, 76%),
-  800: hsl(38, 81%, 85%),
-  900: hsl(42, 75%, 94%),
+$my-dark-palette-primary: (
+  50: hsl(22, 43%, 40%),
+  100: hsl(26, 46%, 52%),
+  200: hsl(29, 49%, 54%),
+  300: hsl(32, 54%, 56%),
+  400: hsl(34, 57%, 58%),
+  500: hsl(37, 57%, 61%),
+  600: hsl(38, 56%, 67%),
+  700: hsl(39, 56%, 76%),
+  800: hsl(38, 56%, 85%),
+  900: hsl(42, 50%, 94%),
   contrast: (
     50: #fff,
-    100: #000,
-    200: #000,
-    300: #000,
-    400: #000,
-    500: #000,
-    600: #000,
-    700: #000,
-    800: #000,
-    900: #000,
+    100: #131313ec,
+    200: #131313ec,
+    300: #131313ec,
+    400: #131313ec,
+    500: #131313ec,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
+    900: #131313ec,
   ),
 );
 
@@ -103,49 +69,51 @@ $my-light-palette-accent: (
   800: hsl(75, 25%, 47%),
   900: hsl(67, 17%, 37%),
   contrast: (
-    50: #000,
-    100: #000,
-    200: #000,
-    300: #000,
-    400: #000,
-    500: #000,
-    600: #000,
-    700: #000,
-    800: #000,
+    50: #131313ec,
+    100: #131313ec,
+    200: #131313ec,
+    300: #131313ec,
+    400: #131313ec,
+    500: #131313ec,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
     900: #fff,
   ),
 );
 $my-dark-palette-accent: (
-  50: hsl(67, 17%, 37%),
-  100: hsl(75, 25%, 47%),
-  200: hsl(79, 31%, 53%),
-  300: hsl(82, 42%, 59%),
-  400: hsl(84, 53%, 64%),
-  500: hsl(85, 53%, 69%),
-  600: hsl(85, 55%, 74%),
-  700: hsl(86, 57%, 81%),
-  800: hsl(86, 57%, 88%),
-  900: hsl(86, 58%, 95%),
+  50: hsl(68, 35%, 13%),
+  100: hsl(68, 35%, 18%),
+  200: hsl(68, 35%, 23%),
+  300: hsl(68, 35%, 28%),
+  400: hsl(68, 35%, 33%),
+  500: hsl(68, 35%, 38%),
+  600: hsl(68, 35%, 43%),
+  700: hsl(68, 35%, 48%),
+  800: hsl(68, 35%, 53%),
+  900: hsl(68, 35%, 58%),
   contrast: (
     50: #fff,
-    100: #000,
-    200: #000,
-    300: #000,
-    400: #000,
-    500: #000,
-    600: #000,
-    700: #000,
-    800: #000,
-    900: #000,
+    100: #fff,
+    200: #fff,
+    300: #fff,
+    400: #fff,
+    500: #fff,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
+    900: #131313ec,
   ),
 );
+
+$my-palette-warn: mat.$deep-orange-palette;
 
 $light-theme: mat.define-light-theme(
   (
     color: (
-      primary: mat.define-palette($my-light-palette-main, 50, 100, 200),
-      accent: mat.define-palette($my-light-palette-accent, 300, 400),
-      warn: mat.define-palette($my-light-palette-main, 200),
+      primary: mat.define-palette($my-light-palette-primary, 200, 300, 400),
+      accent: mat.define-palette($my-light-palette-accent, 500, 100, 200),
+      warn: mat.define-palette($my-palette-warn, 900),
     ),
     typography: mat.define-typography-config(),
     density: 0,
@@ -155,9 +123,9 @@ $light-theme: mat.define-light-theme(
 $dark-theme: mat.define-dark-theme(
   (
     color: (
-      primary: mat.define-palette($my-dark-palette-main, 100, 200, 300),
-      accent: mat.define-palette($my-dark-palette-accent, 300, 400),
-      warn: mat.define-palette($my-dark-palette-main, 200),
+      primary: mat.define-palette($my-dark-palette-primary, 200, 300, 400),
+      accent: mat.define-palette($my-dark-palette-accent, 300, 100, 200),
+      warn: mat.define-palette($my-palette-warn, 100),
     ),
     density: 0,
   )
@@ -177,12 +145,14 @@ Depending on how many colors you create, add them all to the dedicated color the
 
 @mixin createCSSVars($theme) {
   @if ($theme == "light") {
-    @include formatPaletteToCSSVar("main", $my-light-palette-main);
+    @include formatPaletteToCSSVar("primary", $my-light-palette-primary);
     @include formatPaletteToCSSVar("accent", $my-light-palette-accent);
+    @include formatPaletteToCSSVar("warn", $my-palette-warn);
   }
   @if ($theme == "dark") {
-    @include formatPaletteToCSSVar("main", $my-dark-palette-main);
+    @include formatPaletteToCSSVar("primary", $my-dark-palette-primary);
     @include formatPaletteToCSSVar("accent", $my-dark-palette-accent);
+    @include formatPaletteToCSSVar("warn", $my-palette-warn);
   }
 }
 
