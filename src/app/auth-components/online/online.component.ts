@@ -96,7 +96,6 @@ export class OnlineComponent implements OnInit, AfterViewInit {
   }
 
   private _authErrorGuard(response: AuthReturnCredits) {
-    console.log(response.errors);
     response.errors
       ? this._handleAuthErrors(response.errors)
       : this.viewTransitionService.goForward(
