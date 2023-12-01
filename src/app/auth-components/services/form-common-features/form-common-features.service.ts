@@ -1,10 +1,10 @@
-import { EventEmitter } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import {
   addAnimations,
   removeAnimations,
-} from 'src/app/animations/animation-tools';
-import { runWithDelay } from 'src/app/animations/animation-triggers';
+} from 'src/app/reusable/animations/animation-tools';
+import { runWithDelay } from 'src/app/reusable/animations/animation-triggers';
 
 export type AuthUserData = {
   name?: string;
@@ -12,8 +12,11 @@ export type AuthUserData = {
   password: string;
 };
 
-export class LoginRegisterCommonFeatures {
-  static onInitAnimations() {
+@Injectable({
+  providedIn: 'root',
+})
+export class FormCommonFeaturesService {
+  onInitAnimations() {
     const h1Element = document.querySelector('h1');
     const formInputs: Array<HTMLElement> = [];
     document
@@ -37,34 +40,21 @@ export class LoginRegisterCommonFeatures {
     });
   }
 
-  static applyGetError(formElement: FormGroup) {
-    return function getError(element: string, validation: string) {
-      return formElement.get(element)?.hasError(validation);
-    };
-  }
+  getError = (
+    formElement: FormGroup,
+    element: string | string[],
+    validation: string
+  ) => formElement.get(element)?.hasError(validation);
 
-  static googleButtonLogic(googleButton: HTMLSpanElement) {
-    const fontSize =
-      Number(window.getComputedStyle(googleButton).fontSize.split('px')[0]) + 0;
-    const height = `${fontSize}px`;
-    const width = `${fontSize}px`;
-    return {
-      height,
-      width,
-    };
-  }
-
-  static applyOnSubmit<T extends FormGroup>(
+  onSubmit = <T extends FormGroup>(
     formElement: T,
     emitter: EventEmitter<AuthUserData>
-  ) {
-    return async function onSubmit() {
-      if (formElement.invalid) {
-        formElement.setErrors({ checkInputs: true });
-        return;
-      }
-      formElement.setErrors(null);
-      emitter.emit({ ...formElement.value });
-    };
-  }
+  ) => {
+    if (formElement.invalid) {
+      formElement.setErrors({ checkInputs: true });
+      return;
+    }
+    formElement.setErrors(null);
+    emitter.emit({ ...formElement.value });
+  };
 }

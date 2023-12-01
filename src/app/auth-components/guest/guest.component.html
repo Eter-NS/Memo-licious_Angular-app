@@ -1,0 +1,203 @@
+<main #mainTagRef>
+  <section class="container">
+    <div class="go-back-button-wrapper">
+      <app-previous-page-button
+        class="go-back-button"
+        (clicked)="
+          viewTransitionService.goBack(
+            viewContainer,
+            '/getting-started/choose-path'
+          )
+        "
+      />
+    </div>
+    <div #viewContainer class="content">
+      <div class="form-wrapper" aria-label="The local account form">
+        <h1 class="form__header">Create a local account</h1>
+        <form (ngSubmit)="onSubmit()" [formGroup]="localUserForm" class="form">
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">Name</p>
+              <input type="text" formControlName="name" />
+            </label>
+            <p
+              class="input-error"
+              *ngIf="
+                getError('name', 'required') &&
+                localUserForm.get('name')?.touched
+              "
+            >
+              This field is required!
+            </p>
+            <p
+              class="input-error"
+              *ngIf="getError('name', 'includesSpecialChars')"
+            >
+              Your name can't include special characters
+            </p>
+            <p class="input-error" *ngIf="getError('name', 'includesNumbers')">
+              Your name can't include numbers
+            </p>
+            <p class="input-error" *ngIf="getError('name', 'minlength')">
+              Your name is too short
+            </p>
+            <p class="input-error" *ngIf="getError('name', 'maxlength')">
+              Your name is too long
+            </p>
+          </fieldset>
+          <fieldset class="form-element">
+            <h2 class="auth-header">Type of authentication</h2>
+            <mat-radio-group
+              class="radio-options"
+              aria-label="Select the authentication method"
+            >
+              <mat-radio-button
+                [checked]="!isPasswordSelected"
+                (input)="isPasswordSelected = true; toggleAuthMethod()"
+                color="primary"
+              >
+                Password
+              </mat-radio-button>
+              <mat-radio-button
+                [checked]="!isPasswordSelected"
+                (input)="isPasswordSelected = false; toggleAuthMethod()"
+                color="primary"
+              >
+                PIN
+              </mat-radio-button>
+            </mat-radio-group>
+          </fieldset>
+          <ng-container
+            *ngIf="isPasswordSelected; else pinTemplate"
+            formGroupName="passwordGroup"
+          >
+            <fieldset class="form-element">
+              <label>
+                <p class="form-label">Create your Password</p>
+                <input type="password" formControlName="password" />
+              </label>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(['passwordGroup', 'password'], 'required') &&
+                  localUserForm.get(['passwordGroup', 'password'])?.touched
+                "
+              >
+                This field is required!
+              </p>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(['passwordGroup', 'password'], 'passwordError') &&
+                  localUserForm.get(['passwordGroup', 'password'])?.dirty
+                "
+              >
+                The password must have 8 characters, numbers, and special
+                characters
+              </p>
+            </fieldset>
+            <fieldset class="form-element">
+              <label>
+                <p class="form-label">Confirm your Password</p>
+                <input type="password" formControlName="confirmPassword" />
+              </label>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(['passwordGroup', 'confirmPassword'], 'required') &&
+                  localUserForm.get(['passwordGroup', 'confirmPassword'])
+                    ?.touched
+                "
+              >
+                This field is required!
+              </p>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(
+                    ['passwordGroup', 'confirmPassword'],
+                    'passwordMatch'
+                  ) &&
+                  localUserForm.get(['passwordGroup', 'confirmPassword'])?.dirty
+                "
+              >
+                The passwords are not the same
+              </p>
+            </fieldset>
+          </ng-container>
+          <ng-template #pinTemplate formGroupName="pinGroup">
+            <fieldset class="form-element">
+              <label>
+                <p class="form-label">Create your PIN</p>
+                <input
+                  type="password"
+                  inputmode="numeric"
+                  formControlName="pin"
+                />
+              </label>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(['pinGroup', 'pin'], 'required') &&
+                  localUserForm.get(['pinGroup', 'pin'])?.touched
+                "
+              >
+                This field is required!
+              </p>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(['pinGroup', 'pin'], 'pinError') &&
+                  localUserForm.get(['pinGroup', 'pin'])?.dirty
+                "
+              >
+                Invalid PIN. Use from 4 to 8 digits.
+              </p>
+            </fieldset>
+            <fieldset class="form-element">
+              <label>
+                <p class="form-label">Confirm your PIN</p>
+                <input
+                  type="password"
+                  inputmode="numeric"
+                  formControlName="confirmPin"
+                />
+              </label>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(['pinGroup', 'confirmPin'], 'required') &&
+                  localUserForm.get(['pinGroup', 'confirmPin'])?.touched
+                "
+              >
+                This field is required!
+              </p>
+              <p
+                class="input-error"
+                *ngIf="
+                  getError(['pinGroup', 'confirmPin'], 'unmatchedPins') &&
+                  localUserForm.get(['pinGroup', 'confirmPin'])?.dirty
+                "
+              >
+                Your PINs are not the same
+              </p>
+            </fieldset>
+          </ng-template>
+
+          <fieldset class="form-element">
+            <mat-checkbox formControlName="rememberMe"
+              >Remember Me</mat-checkbox
+            >
+          </fieldset>
+
+          <button type="submit" class="submit-button" appCustomMatRipple>
+            Join Now
+          </button>
+          <p class="input-error" *ngIf="localUserForm.hasError('invalidForm')">
+            Check the inputs above
+          </p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>

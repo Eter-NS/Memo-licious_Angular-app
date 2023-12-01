@@ -1,0 +1,63 @@
+@use "/src/scss/utils.scss" as *;
+
+main,
+.container {
+  display: grid;
+}
+
+main {
+  place-content: center;
+  --original-color: var(--color-accent-100);
+  --desired-color: var(--color-accent-50);
+}
+
+.container {
+  --free-space-around-view: #{free-space("sm")};
+  margin: {
+    left: var(--free-space-around-view);
+    right: var(--free-space-around-view);
+  }
+}
+
+.go-back-button {
+  &-wrapper {
+    padding: {
+      top: free-space("xs");
+      bottom: free-space("xs");
+    }
+  }
+}
+
+.content {
+  margin-bottom: var(--free-space-around-view);
+}
+
+.form {
+  margin: {
+    right: auto;
+    left: auto;
+  }
+
+  &-wrapper {
+    animation: var(--fade-in-on-load);
+  }
+}
+
+.form__header {
+  margin-bottom: 1.5rem;
+}
+
+.auth-header {
+  text-align: center;
+  font-size: clamp(var(--h3), 3.1vmax, var(--h2));
+}
+
+.radio-options {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-evenly;
+
+  & > *:first-child {
+    margin-right: 1rem;
+  }
+}
