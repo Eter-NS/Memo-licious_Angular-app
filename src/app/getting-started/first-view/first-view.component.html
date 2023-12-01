@@ -1,13 +1,21 @@
 <main>
   <img
-    src="../../../assets/getting-started/intro1.webp"
+    ngSrc="../../../assets/getting-started/intro1.webp"
+    width="1200"
+    height="1200"
     alt="A group of daily products (banana, chocolate, nuts and coffee)"
+    priority
+    class="bg-image"
   />
-  <section class="greeting" #container>
+  <section
+    class="greeting"
+    #container
+    aria-label="Greetings to you, dear Shopper."
+  >
     <h1 class="greeting__header fade-out-animation">Hello dear Shopper!</h1>
     <div class="greeting__par-container fade-out-animation">
       <p class="greeting__par fade-out-animation">
-        Welcome to Memo-licious, the app that helps you keep track of your
+        Welcome to Memo-licious, the place where you can keep track of your
         shopping lists 🛒
       </p>
       <p class="greeting__par fade-out-animation">
@@ -19,6 +27,8 @@
     <a
       class="greeting__CTA fade-out-animation"
       (click)="runTransition()"
+      (keyup.enter)="runTransition()"
+      tabindex="0"
       appCustomMatRipple
     >
       Let's dive in!
