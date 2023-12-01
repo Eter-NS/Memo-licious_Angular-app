@@ -1,9 +1,11 @@
 {
   "rules": {
-    "users" :{
-      "$uid" : {
-        ".read" : "$uid === auth.uid", // if the uID equals the ID from the request, allow to read and write to the path.
-        ".write" : "$uid === auth.uid"
+    "users": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
       }
     }
   }
