@@ -1,0 +1,57 @@
+<main>
+  <section class="container">
+    <div class="go-back-button-wrapper">
+      <app-previous-page-button
+        class="go-back-button"
+        (clicked)="viewTransitionService.goBack(content, '/online')"
+      />
+    </div>
+    <div #content class="content">
+      <h1 class="content__header">Email Verification</h1>
+      <div
+        [ngSwitch]="sendingState$ | async"
+        aria-label="Summary of whether the email was sent or an error occurred during this action."
+      >
+        <div *ngSwitchCase="'sending'">
+          <mat-spinner class="progress-spinner"></mat-spinner>
+        </div>
+        <div class="result" *ngSwitchCase="'success'">
+          <app-completion-one
+            svgPrimaryColor="var(--color-primary-500)"
+            [svgMinMaxWidth]="[200, 300]"
+          />
+          <h2 class="result__header">Hurray! 🥳</h2>
+          <p>
+            You've got mail, but not the spammy kind. We've sent a link to
+            {{ userEmail }} to verify your mind.
+          </p>
+          <p>
+            Click on it and you'll be all set to enjoy our service without any
+            fret 😊
+          </p>
+          <button
+            type="button"
+            class="button-success"
+            appCustomMatRipple
+            (click)="
+              viewTransitionService.goForward(content, '/online/force=login')
+            "
+          >
+            Get me to login
+          </button>
+        </div>
+        <div class="result" *ngSwitchCase="'failure'">
+          <h2 class="result__header">Oh no! We've crushed 😬</h2>
+          <p>
+            Please click the button below to get us back on track
+            <app-bullet-train-emoji />
+          </p>
+          <button type="button" class="button-failure" appCustomMatRipple>
+            Try again
+          </button>
+        </div>
+        <div *ngSwitchDefault>Unknown error</div>
+      </div>
+    </div>
+  </section>
+</main>
