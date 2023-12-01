@@ -1,0 +1,48 @@
+<main class="color-transition">
+  <section #container class="container">
+    <img
+      class="background-image"
+      width="543"
+      height="966"
+      ngSrc="../../../assets/getting-started/Whiteboard-List-Shoper.webp"
+      priority
+      alt="background photo of a note"
+    />
+    <app-shopping-three
+      class="shopping-svg"
+      svgPrimaryColor="var(--color-primary-400)"
+      [svgMinMaxWidth]="[250, 350]"
+      svg
+    ></app-shopping-three>
+    <div
+      class="content"
+      aria-label="Choose whether you would like to create an account or continue as a guest."
+    >
+      <h1 class="h1">Choose your path</h1>
+      <p class="content__par">
+        How do you want to use Shopping List Notes? You can either continue as a
+        guest or create an account to share notes with your other devices.
+      </p>
+      <div class="content__CTA">
+        <a
+          class="CTA--alternative"
+          appCustomMatRipple
+          (click)="runTransition('guest')"
+          (keyup.enter)="runTransition('guest')"
+          tabindex="0"
+        >
+          Continue as Guest
+        </a>
+        <a
+          class="CTA"
+          appCustomMatRipple
+          (click)="runTransition('online')"
+          (keyup.enter)="runTransition('online')"
+          tabindex="0"
+        >
+          Continue Online
+        </a>
+      </div>
+    </div>
+  </section>
+</main>

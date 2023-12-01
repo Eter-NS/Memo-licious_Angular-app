@@ -1,0 +1,130 @@
+@use "../../../scss/utils.scss" as *;
+@use "../../../scss/components.scss" as *;
+@use "../../../scss/viewport.scss" as view;
+
+main,
+.container {
+  display: grid;
+}
+
+main {
+  @extend %deselected;
+  place-content: center;
+  justify-content: stretch;
+  --color-background: var(--color-accent-100);
+  --original-color: var(--color-accent-50);
+  --desired-color: var(--color-background);
+  background-color: var(--color-background);
+}
+
+.container {
+  @extend %mainframe;
+  align-items: end;
+  justify-content: center;
+  grid-template-rows: 1fr auto;
+}
+
+.background-image {
+  position: absolute;
+  z-index: 0;
+  -o-object-fit: contain;
+  object-fit: contain;
+  background-repeat: no-repeat;
+  -o-object-position: center;
+  object-position: center;
+  width: auto;
+  height: 50vh;
+  -webkit-clip-path: circle(60% at 100% 49%);
+  clip-path: circle(60% at 100% 49%);
+  top: 0;
+  right: 0;
+}
+
+.shopping-svg {
+  justify-self: start;
+}
+
+.content {
+  align-self: flex-end;
+
+  --padding: #{free-space("xs")};
+  margin: 0 var(--padding) var(--padding);
+  padding: var(--padding);
+  min-height: 45vh;
+  @include border-radius("lg");
+
+  display: grid;
+  place-items: center;
+  text-align: center;
+  row-gap: free-space("xl");
+
+  color: var(--contrast-color-accent-300);
+  background-color: var(--color-accent-300);
+  box-shadow: inset 0 45px 50px -25px var(--color-accent-200);
+
+  &__par {
+    max-width: calc(view.$view-md / 2);
+    margin: {
+      right: 0.5ch;
+      left: 0.5ch;
+    }
+  }
+
+  &__CTA {
+    display: flex;
+    gap: free-space("sm");
+    justify-content: space-between;
+
+    & > * {
+      width: 50%;
+    }
+  }
+}
+
+%CTA {
+  @extend %common-button;
+  display: grid;
+  place-content: center;
+  line-break: auto;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.CTA {
+  @extend %CTA, %primary-button;
+
+  &--alternative {
+    @extend %CTA, %secondary-button;
+  }
+}
+
+@media (min-width: view.$view-sm) {
+  .container {
+    position: relative;
+    margin: {
+      left: auto;
+      right: auto;
+    }
+    max-width: view.$view-lg;
+  }
+
+  .shopping-svg {
+    position: fixed;
+    top: 0px;
+  }
+
+  .content {
+    z-index: 2;
+    align-self: center;
+  }
+
+  .background-image {
+    height: auto;
+    width: 20vmax;
+    max-width: 27.5vh;
+    top: unset;
+    bottom: 0;
+  }
+}
