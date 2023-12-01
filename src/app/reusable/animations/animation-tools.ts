@@ -3,8 +3,12 @@ export type ElementsArray =
   | HTMLCollection
   | Array<HTMLElement>;
 
-export function forEachAndCb(elementArray: ElementsArray, cb: Function) {
-  for (let i = 0; i < elementArray.length; i++) cb(elementArray[i]);
+export function forEachAndCb(
+  elementArray: ElementsArray,
+  cb: (element: HTMLElement) => void
+) {
+  for (let i = 0; i < elementArray.length; i++)
+    cb(elementArray[i] as HTMLElement);
 }
 
 export function addAnimations(
@@ -50,7 +54,7 @@ export function startAnimation(element: HTMLElement | EventTarget) {
   element.classList.add('play');
 }
 
-export function stopAnimation(element: HTMLElement | EventTarget) {
+export function finishAnimation(element: HTMLElement | EventTarget) {
   if (!element) throw new Error('The element is not defined');
   if (!('classList' in element))
     throw new Error('The element does not have a classList property');

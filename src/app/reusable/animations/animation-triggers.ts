@@ -4,24 +4,47 @@ type runWithDelayOptions = {
   reverse?: boolean;
 };
 
-import { forEachAndCb, startAnimation, stopAnimation } from './animation-tools';
+import {
+  forEachAndCb,
+  startAnimation,
+  finishAnimation,
+} from './animation-tools';
 
 /**
  * The animation must have finite amount of iterations
  */
-export function runAnimationOnce(object: HTMLElement, animationClass: string) {
-  object.classList.add(animationClass);
-  object.addEventListener('animationend', () => {
-    object.classList.remove(animationClass);
+export function runAnimationOnce(
+  el: HTMLElement,
+  animationClass: string,
+  options?: {
+    removeAnimationClassOnFinish?: boolean;
+  }
+): Promise<void> {
+  el.classList.add(animationClass);
+  startAnimation(el);
+  return new Promise<void>((resolve) => {
+    el.addEventListener('animationend', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (options?.removeAnimationClassOnFinish) {
+        finishAnimation(el);
+        el.classList.remove(animationClass);
+      }
+      resolve();
+    });
   });
 }
 
+/**
+ * Runs animations specified in animationClass param
+ */
 export function runAnimations(
   object: NodeListOf<HTMLElement> | HTMLElement,
   animationClass: string,
   global?: boolean
 ) {
   if ('style' in object) {
+    // if global is true, the object is the parent of animation elements, otherwise it's a target.
     global
       ? forEachAndCb(object.querySelectorAll(animationClass), startAnimation)
       : startAnimation(object);
@@ -30,6 +53,9 @@ export function runAnimations(
   }
 }
 
+/**
+ * Runs animations in sequence with a specified delay
+ */
 export const runWithDelay = (
   elementsArray:
     | NodeListOf<HTMLElement | Element>
@@ -76,7 +102,10 @@ export const runWithDelay = (
     }, delay);
 
     function afterAnimation(e: Event) {
-      stopAnimation(e.target as HTMLElement);
+      e.stopPropagation();
+      e.preventDefault();
+
+      finishAnimation(e.target as HTMLElement);
     }
 
     function afterLastAnimation(e: Event) {
