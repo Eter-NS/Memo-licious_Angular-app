@@ -1,28 +1,29 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { GettingStartedComponent } from './getting-started.component';
 import { FirstViewComponent } from './first-view/first-view.component';
-import { LoginOrGuestViewComponent } from './login-or-guest-view/login-or-guest-view.component';
+import { ChoosePathComponent } from './choose-path/choose-path.component';
 
 const routes: Routes = [
   {
+    title: 'Getting started',
     path: '',
-    component: GettingStartedComponent,
     children: [
       {
         /* 1. */
-        path: 'getting-started/hello',
+        title: 'Hello 👋',
+        path: 'hello',
         component: FirstViewComponent,
       },
       {
         /* 2. */
-        path: 'getting-started/choose-path',
-        component: LoginOrGuestViewComponent,
+        title: 'Choose account type',
+        path: 'choose-path',
+        component: ChoosePathComponent,
       },
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'getting-started/hello',
+        redirectTo: 'hello',
       },
     ],
   },
