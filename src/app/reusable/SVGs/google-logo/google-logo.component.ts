@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { SvgElementsDirective } from '../svg-elements.directive';
 
 @Component({
@@ -10,8 +10,9 @@ import { SvgElementsDirective } from '../svg-elements.directive';
   hostDirectives: [
     {
       directive: SvgElementsDirective,
-      inputs: ['svgWidth', 'svgHeight'],
+      inputs: ['svgWidthScale', 'svgWidth', 'svgMinMaxWidth'],
     },
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GoogleLogoComponent {}

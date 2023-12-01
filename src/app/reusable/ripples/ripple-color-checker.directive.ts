@@ -13,7 +13,7 @@ export class CustomMatRippleDirective
   // Assign the emitted value to the state var. and then assign to matRippleColor
   // @Input() rippleColor: string = '';
 
-  private el = inject(ElementRef);
+  #el = inject(ElementRef);
 
   ngAfterViewInit(): void {
     this.setColorBrightness();
@@ -24,11 +24,11 @@ export class CustomMatRippleDirective
     const lightShadow = 'hsl(0, 0%, 100%, 0.15)';
     const brightnessMiddlePoint = 170;
     const colorString = window
-      .getComputedStyle(this.el.nativeElement)
+      .getComputedStyle(this.#el.nativeElement)
       .getPropertyValue('background-color');
     let isLowerThanMiddle = false;
 
-    colorString.match(/\d+/g)!.forEach((colorChannel) => {
+    colorString.match(/\d+/g)?.forEach((colorChannel) => {
       if (!isLowerThanMiddle)
         isLowerThanMiddle = brightnessMiddlePoint >= Number(colorChannel);
     });
