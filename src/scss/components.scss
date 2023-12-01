@@ -1,0 +1,67 @@
+@use "./utils.scss" as *;
+
+%input-default {
+  border: none;
+  @include inset-box-shadow-with-transition(var(--color-accent-600));
+  @include border-radius("xs");
+  background-color: var(--color-accent-300);
+  color: var(--contrast-color-accent-300);
+  padding: 0.4em 0.5em;
+  line-height: 1.5;
+  width: 100%;
+
+  &:focus,
+  &:focus-visible {
+    outline: 2px solid var(--color-accent-900);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    @include inset-box-shadow-with-transition(var(--color-accent-200));
+  }
+}
+
+a:focus,
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.5);
+
+  @media (prefers-color-scheme: dark) {
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.5);
+  }
+}
+
+%primary-button {
+  @include inset-box-shadow-with-transition(var(--color-primary-100));
+  background-color: var(--color-primary-600);
+  color: var(--contrast-color-primary-600);
+}
+
+%secondary-button {
+  @include inset-box-shadow-with-transition(var(--color-primary-50));
+  background-color: var(--color-primary-200);
+  color: var(--contrast-color-primary-200);
+}
+
+%common-button {
+  @include border-radius("pill");
+  font-size: clamp(var(--p), 2vmax, 1.05rem);
+  border: none;
+
+  padding: 0.75em 1.35em;
+  min-height: 44px;
+  min-width: 44px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+%floating-action-button {
+  @extend %common-button;
+  @include border-radius("sm");
+  padding: 1.5em 1.5em;
+}
+
+%extended-fab {
+  @extend %floating-action-button;
+  @include border-radius("md");
+  padding: 1em 1.5em;
+}

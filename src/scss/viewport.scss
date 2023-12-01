@@ -1,0 +1,10 @@
+@use "./utils.scss" as *;
+
+$view-xs: 600px;
+$view-sm: 780px;
+$view-md: 960px;
+$view-lg: 1200px;
+
+:root {
+  --dynamic-width: min(100% - (#{free-space("sm")} * 2), 500px);
+}

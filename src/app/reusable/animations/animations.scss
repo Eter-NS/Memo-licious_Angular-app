@@ -1,0 +1,230 @@
+.play {
+  animation-play-state: running !important;
+}
+
+@keyframes fadeIn-vol-1 {
+  from {
+    transform: translateY(10%) scale(1.1);
+  }
+}
+
+.fade-out-animation {
+  animation: fadeOut 500ms cubic-bezier(0.755, 0.05, 0.855, 0.06) forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeOut {
+  75%,
+  100% {
+    opacity: 0;
+    transform: translateY(-5%);
+  }
+}
+
+.fade-out-vol-2-animation {
+  animation: fadeOut 500ms cubic-bezier(0.755, 0.05, 0.855, 0.06) forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeOut-vol-2 {
+  50%,
+  100% {
+    opacity: 0;
+    transform: translateY(-5%);
+  }
+}
+
+.color-transition {
+  animation: changeColor 800ms cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+  /*
+    --original-color: var(--color-accent-50);
+    --desired-color: var(--color-accent-100);
+  */
+}
+
+@keyframes changeColor {
+  from {
+    background-color: var(--original-color);
+  }
+  to {
+    background-color: var(--desired-color);
+  }
+}
+
+.fadeIn-vol-2-animation {
+  opacity: 0;
+  animation: fadeIn-vol-2 500ms 850ms cubic-bezier(0.47, 0, 0.745, 0.715);
+}
+
+@keyframes fadeIn-vol-2 {
+  from {
+    transform: translateY(10%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+.fadeIn-from-left-animation {
+  animation: fadeIn-from-left 400ms cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeIn-from-left {
+  from {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.fadeOut-to-left-animation {
+  animation: fadeOut-to-left 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
+    forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeOut-to-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+}
+
+.fadeIn-from-top-animation {
+  animation: fadeIn-from-top 400ms cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeIn-from-top {
+  from {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+.fadeOut-to-top-animation {
+  animation: fadeIn-to-top 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeOut-to-top {
+  from {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+}
+
+.fadeIn-from-right-animation {
+  animation: fadeIn-from-right 400ms cubic-bezier(0.215, 0.61, 0.355, 1)
+    forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeIn-from-right {
+  from {
+    transform: translateX(50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.fadeOut-to-right-animation {
+  animation: fadeOut-to-right 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
+    forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeOut-to-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(50%);
+    opacity: 0;
+  }
+}
+
+.fadeIn-from-bottom-animation {
+  animation: fadeIn-from-bottom 400ms cubic-bezier(0.215, 0.61, 0.355, 1)
+    forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeIn-from-bottom {
+  from {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+.fadeOut-to-bottom-animation {
+  animation: fadeIn-to-bottom 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
+    forwards;
+  animation-play-state: paused;
+}
+
+@keyframes fadeOut-to-bottom {
+  from {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+}
+
+:root {
+  --fade-in-on-load: fadeInOnLoad 300ms forwards
+    cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.fadeInOnLoad {
+  animation: var(--fade-in-on-load);
+}
+
+@keyframes fadeInOnLoad {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    --duration: 100ms;
+    --delay: 50ms;
+    animation-duration: var(--duration) !important;
+    transition-duration: var(--duration) !important;
+    animation-delay: var(--delay) !important;
+    transition-delay: var(--delay) !important;
+  }
+}

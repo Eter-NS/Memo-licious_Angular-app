@@ -1,0 +1,171 @@
+/* @use "../node_modules/@angular/material/theming" as *;*/
+
+@use "@angular/material" as mat;
+@use "sass:map" as map;
+@use "sass:meta" as meta;
+
+@include mat.core();
+
+/* background-color: var(--color-primary-300); */
+/* color: var(--contrast-color-accent-300); */
+$my-light-palette-primary: (
+  50: hsl(42, 75%, 94%),
+  100: hsl(38, 81%, 85%),
+  200: hsl(39, 81%, 76%),
+  300: hsl(38, 81%, 67%),
+  400: hsl(37, 82%, 61%),
+  500: hsl(34, 82%, 58%),
+  600: hsl(32, 79%, 56%),
+  700: hsl(29, 74%, 54%),
+  800: hsl(26, 71%, 52%),
+  900: hsl(22, 69%, 48%),
+  contrast: (
+    50: #131313ec,
+    100: #131313ec,
+    200: #131313ec,
+    300: #131313ec,
+    400: #131313ec,
+    500: #131313ec,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
+    900: #fff,
+  ),
+);
+$my-dark-palette-primary: (
+  50: hsl(22, 43%, 40%),
+  100: hsl(26, 46%, 52%),
+  200: hsl(29, 49%, 54%),
+  300: hsl(32, 54%, 56%),
+  400: hsl(34, 57%, 58%),
+  500: hsl(37, 57%, 61%),
+  600: hsl(38, 56%, 67%),
+  700: hsl(39, 56%, 76%),
+  800: hsl(38, 56%, 85%),
+  900: hsl(42, 50%, 94%),
+  contrast: (
+    50: #fff,
+    100: #131313ec,
+    200: #131313ec,
+    300: #131313ec,
+    400: #131313ec,
+    500: #131313ec,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
+    900: #131313ec,
+  ),
+);
+
+$my-light-palette-accent: (
+  50: hsl(86, 58%, 95%),
+  100: hsl(86, 57%, 88%),
+  200: hsl(86, 57%, 81%),
+  300: hsl(85, 55%, 74%),
+  400: hsl(85, 53%, 69%),
+  500: hsl(84, 53%, 64%),
+  600: hsl(82, 42%, 59%),
+  700: hsl(79, 31%, 53%),
+  800: hsl(75, 25%, 47%),
+  900: hsl(67, 17%, 37%),
+  contrast: (
+    50: #131313ec,
+    100: #131313ec,
+    200: #131313ec,
+    300: #131313ec,
+    400: #131313ec,
+    500: #131313ec,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
+    900: #fff,
+  ),
+);
+$my-dark-palette-accent: (
+  50: hsl(68, 35%, 13%),
+  100: hsl(68, 35%, 18%),
+  200: hsl(68, 35%, 23%),
+  300: hsl(68, 35%, 28%),
+  400: hsl(68, 35%, 33%),
+  500: hsl(68, 35%, 38%),
+  600: hsl(68, 35%, 43%),
+  700: hsl(68, 35%, 48%),
+  800: hsl(68, 35%, 53%),
+  900: hsl(68, 35%, 58%),
+  contrast: (
+    50: #fff,
+    100: #fff,
+    200: #fff,
+    300: #fff,
+    400: #fff,
+    500: #fff,
+    600: #131313ec,
+    700: #131313ec,
+    800: #131313ec,
+    900: #131313ec,
+  ),
+);
+
+$my-palette-warn: mat.$deep-orange-palette;
+
+$light-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: mat.define-palette($my-light-palette-primary, 200, 300, 400),
+      accent: mat.define-palette($my-light-palette-accent, 500, 100, 200),
+      warn: mat.define-palette($my-palette-warn, 900),
+    ),
+    typography: mat.define-typography-config(),
+    density: 0,
+  )
+);
+
+$dark-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: mat.define-palette($my-dark-palette-primary, 200, 300, 400),
+      accent: mat.define-palette($my-dark-palette-accent, 300, 100, 200),
+      warn: mat.define-palette($my-palette-warn, 100),
+    ),
+    density: 0,
+  )
+);
+
+/*
+Link to color documentation:
+https://mui.com/material-ui/customization/color/
+
+Angular Material documentation topic:
+https://material.angular.io/guide/theming
+
+In case of not single named color do something like this: "$mat-light-green".
+
+Depending on how many colors you create, add them all to the dedicated color theme.
+*/
+
+@mixin createCSSVars($theme) {
+  @if ($theme == "light") {
+    @include formatPaletteToCSSVar("primary", $my-light-palette-primary);
+    @include formatPaletteToCSSVar("accent", $my-light-palette-accent);
+    @include formatPaletteToCSSVar("warn", $my-palette-warn);
+  }
+  @if ($theme == "dark") {
+    @include formatPaletteToCSSVar("primary", $my-dark-palette-primary);
+    @include formatPaletteToCSSVar("accent", $my-dark-palette-accent);
+    @include formatPaletteToCSSVar("warn", $my-palette-warn);
+  }
+}
+
+@mixin formatPaletteToCSSVar($main-accent, $palettes...) {
+  @each $palette in $palettes {
+    @each $name, $value in $palette {
+      @if (meta.type-of($value) == map) {
+        @each $contrastName, $contrastValue in $value {
+          --contrast-color-#{$main-accent}-#{$contrastName}: #{$contrastValue};
+        }
+      } @else {
+        --color-#{$main-accent}-#{$name}: #{$value};
+      }
+    }
+  }
+}

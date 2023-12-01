@@ -1,0 +1,97 @@
+@use "/src/scss/utils.scss" as *;
+@use "/src/scss/components.scss" as *;
+
+:host {
+  @extend %mainframe;
+  color: var(--contrast-color-accent-50);
+  background-color: var(--color-accent-50);
+  --header-height: 80px;
+
+  &::before {
+    @extend %fillBeforeAfter;
+    z-index: 1;
+    height: 100vh;
+    background: var(--color-accent-50);
+    background: linear-gradient(
+      340deg,
+      var(--color-accent-50) 35%,
+      var(--color-accent-300) 100%
+    );
+    backdrop-filter: blur(1px);
+  }
+
+  & > * {
+    z-index: 2;
+    position: relative;
+  }
+}
+
+main,
+footer {
+  width: var(--dynamic-width);
+  margin: {
+    right: auto;
+    left: auto;
+  }
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  object-fit: contain;
+  height: 100%;
+  width: auto;
+  margin-left: free-space("xs");
+}
+
+main {
+  background-color: unset;
+  margin-top: calc(var(--header-height) + free-space("sm"));
+}
+
+.hero {
+  min-height: calc(100vh - var(--header-height));
+}
+
+.container {
+  @extend %flex-center;
+  flex-wrap: wrap;
+  gap: free-space("xs");
+}
+
+h1 {
+  text-align: center;
+}
+
+.get-started {
+  @extend %extended-fab;
+  display: block;
+  width: max-content;
+  text-decoration: none;
+  background-color: var(--color-primary-300);
+  color: var(--contrast-color-primary-300);
+}
+
+footer {
+  background-color: var(--color-accent-50);
+  display: grid;
+  align-content: space-evenly;
+  min-height: 150px;
+  width: 100%;
+  text-align: center;
+
+  & span {
+    display: inline-block;
+  }
+}

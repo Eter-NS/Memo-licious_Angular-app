@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "start:net": "ng serve --host=192.168.0.8 --hmr",
-    "build": "ng build",
+    "start": "ng serve --hmr",
+    "start:net": "ng serve --host=192.168.0.4 --port=5000 --hmr",
+    "prefix": "postcss  -u autoprefixer --autoprefixer.browsers \"defaults\" -r dist/**/*.css",
+    "build": "ng build -c production && npm run prefix",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "firebase": "firebase emulators:start --config firebase.json --import=./export-firebase --export-on-exit",
+    "firebase:net": "firebase emulators:start --config firebase.dev-localnet.json --import=./export-firebase --export-on-exit",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -16,6 +20,7 @@
     "@angular/common": "^16.0.0",
     "@angular/compiler": "^16.0.0",
     "@angular/core": "^16.0.0",
+    "@angular/fire": "^7.6.1",
     "@angular/forms": "^16.0.0",
     "@angular/material": "^16.1.5",
     "@angular/platform-browser": "^16.0.0",
@@ -28,15 +33,27 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.0.5",
+    "@angular-eslint/builder": "16.2.0",
+    "@angular-eslint/eslint-plugin": "16.2.0",
+    "@angular-eslint/eslint-plugin-template": "16.2.0",
+    "@angular-eslint/schematics": "16.2.0",
+    "@angular-eslint/template-parser": "16.2.0",
     "@angular/cli": "~16.0.5",
     "@angular/compiler-cli": "^16.0.0",
     "@types/jasmine": "~4.3.0",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.49.0",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
+    "postcss": "^8.4.30",
+    "postcss-cli": "^10.1.0",
+    "postcss-scss": "^4.0.8",
     "typescript": "~5.0.2"
   }
 }

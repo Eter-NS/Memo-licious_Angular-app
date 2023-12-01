@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "shopping-notes-angular": {
+      "hosting": {
+        "Memo-licious": [
+          "shopping-notes-angular"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "shopping-notes-angular"
+  }
+}

@@ -1,0 +1,33 @@
+<header>
+  <img
+    class="logo"
+    priority
+    height="1024"
+    width="1094"
+    ngSrc="../../assets/shared/logo.webp"
+    alt="Logo of Memo-licious"
+  />
+</header>
+<main>
+  <section class="hero">
+    <div class="container">
+      <h1>
+        Never forget what's on your list again!
+        <app-shopping-bags-emoji
+          svgPrimaryColor="var(--color-primary-400)"
+          svgWidth="calc(var(--h1) * 1.1)"
+        />
+      </h1>
+      <p>
+        <a routerLink="/getting-started/hello" class="get-started"
+          >Get Started!</a
+        >
+      </p>
+    </div>
+  </section>
+</main>
+<footer>
+  <h2>Find me here!</h2>
+  <app-social-media-list />
+  <p>2023 - Designed and created <span>by Norbert Sosnowski</span></p>
+</footer>
