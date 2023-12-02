@@ -16,7 +16,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
             "outputPath": "dist/memo-licious",
             "index": "src/index.html",
@@ -55,13 +55,13 @@
                 }
               ],
               "outputHashing": "all",
-              "buildOptimizer": true,
-              "optimization": true
+              "optimization": true,
+              "progress": true,
+              "aot": true,
+              "buildOptimizer": true
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
@@ -73,12 +73,12 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "Memo-licious:build:production"
+              "buildTarget": "Memo-licious:build:production"
             },
             "development": {
-              "browserTarget": "Memo-licious:build:development",
               "host": "127.0.0.1",
-              "hmr": true
+              "hmr": true,
+              "buildTarget": "Memo-licious:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -86,7 +86,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "Memo-licious:build"
+            "buildTarget": "Memo-licious:build"
           }
         },
         "test": {
