@@ -7,12 +7,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { environment } from '../environments/environment.dev';
-import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
-import {
-  provideDatabase,
-  getDatabase,
-  connectDatabaseEmulator,
-} from '@angular/fire/database';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { provideDatabase, getDatabase } from '@angular/fire/database';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
