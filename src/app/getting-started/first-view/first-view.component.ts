@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,6 +16,8 @@ import { runAnimations } from 'src/app/reusable/animations/animation-triggers';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
 
 @Component({
+  standalone: true,
+  imports: [NgOptimizedImage],
   selector: 'app-first-view',
   templateUrl: './first-view.component.html',
   styleUrls: ['./first-view.component.scss'],

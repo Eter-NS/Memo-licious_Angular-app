@@ -1,12 +1,13 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AppViewComponent } from './app-view.component';
+import { redirectUnauthorizedToGettingStarted } from '../app.routes';
 
-const routes: Routes = [
+export const appViewRoutes: Routes = [
   {
     title: 'App',
     path: '',
     component: AppViewComponent,
+    canActivate: [redirectUnauthorizedToGettingStarted],
     children: [
       { path: 'home' /* component: */ },
       { path: ':noteGroupId' /* component: */ },
@@ -26,9 +27,3 @@ const routes: Routes = [
     ],
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class AppViewRoutingModule {}
