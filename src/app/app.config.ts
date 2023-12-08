@@ -15,7 +15,6 @@ import { appViewRoutes } from './app-view/app-view.routes';
 import { gettingStartedRoutes } from './getting-started/getting-started.routes';
 
 const routes = [/* ...appViewRoutes, */ ...gettingStartedRoutes, ...appRoutes];
-console.log(routes);
 
 export const appConfig: ApplicationConfig = {
   providers: [
