@@ -19,6 +19,7 @@ import {
   runWithDelay,
 } from 'src/app/reusable/animations/animation-triggers';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
+import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 
 @Component({
@@ -37,6 +38,7 @@ import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-
 export class ChoosePathComponent implements AfterViewInit {
   #router = inject(Router);
   viewTransitionService = inject(ViewTransitionService);
+  #localStorageService = inject(LocalStorageService);
   @ViewChild('container') hostElement!: ElementRef<HTMLElement>;
 
   ngAfterViewInit(): void {
@@ -50,14 +52,13 @@ export class ChoosePathComponent implements AfterViewInit {
   }
 
   runTransition(suffix: string) {
-    removeAnimations(
-      this.hostElement.nativeElement,
-      'fadeIn-vol-2-animation',
-      true
-    );
-    addAnimations(this.hostElement.nativeElement, 'fade-out-animation', true);
+    this.#localStorageService.saveToStorage('finishedTutorial', true);
+    const element = this.hostElement.nativeElement;
 
-    runWithDelay(this.hostElement.nativeElement.children, {
+    removeAnimations(element, 'fadeIn-vol-2-animation', true);
+    addAnimations(element, 'fade-out-animation', true);
+
+    runWithDelay(element.children, {
       reverse: true,
       timeoutTime: 1000,
     })
