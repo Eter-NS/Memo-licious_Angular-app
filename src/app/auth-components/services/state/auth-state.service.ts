@@ -1,5 +1,12 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Auth, User, UserCredential, user } from '@angular/fire/auth';
+import { Injectable, OnInit, inject, signal } from '@angular/core';
+import {
+  Auth,
+  User,
+  UserCredential,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  user,
+} from '@angular/fire/auth';
 
 export function isUser(user: User | null): user is User {
   return user !== null;
@@ -13,10 +20,14 @@ export class AuthStateService {
   auth = inject(Auth);
   user$ = user(this.auth);
 
+  constructor() {
+    this.auth.setPersistence(browserSessionPersistence);
+  }
+
   rememberMe(action: boolean) {
     action
-      ? this.auth.setPersistence({ type: 'LOCAL' })
-      : this.auth.setPersistence({ type: 'SESSION' });
+      ? this.auth.setPersistence(browserLocalPersistence)
+      : this.auth.setPersistence(browserSessionPersistence);
   }
 
   checkUserSession() {
