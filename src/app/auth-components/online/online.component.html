@@ -13,56 +13,48 @@
     </div>
     <div class="content" #viewContainer>
       <div class="login-register-content" aria-label="Online account form">
-        <ng-container *ngIf="register; else loginBlock">
-          <app-register
-            [emailAlreadyInUse]="alreadyInUseError"
-            (data)="handleSubmit($event)"
-            (rememberMe)="authStateService.rememberMe($event)"
-          />
-        </ng-container>
-        <ng-template #loginBlock>
-          <app-login
-            [wrongEmailOrPassword]="wrongEmailOrPassword"
-            [emailDoesNotExist]="emailDoesNotExist"
-            (data)="handleSubmit($event)"
-            (rememberMe)="authStateService.rememberMe($event)"
-          />
-        </ng-template>
+        @if (register) {
+        <app-register
+          [emailAlreadyInUse]="alreadyInUseError"
+          (data)="handleSubmit($event)"
+          (rememberMe)="authStateService.rememberMe($event)"
+        />
+        } @else {
+        <app-login
+          [wrongEmailOrPassword]="wrongEmailOrPassword"
+          [emailDoesNotExist]="emailDoesNotExist"
+          (data)="handleSubmit($event)"
+          (rememberMe)="authStateService.rememberMe($event)"
+        />
+        }
       </div>
       <div class="component-content">
         <div class="login-register-switch">
-          <ng-container *ngIf="register; else loginText">
-            <a
-              (click)="this.register = !this.register"
-              (keyup.enter)="this.register = !this.register"
-              tabindex="0"
-              >Wanna Log in?</a
-            >
-          </ng-container>
-          <ng-template #loginText>
-            <a
-              (click)="
-                viewTransitionService.goForward(
-                  viewContainer,
-                  '/forgot-password'
-                )
-              "
-              (keyup.enter)="
-                viewTransitionService.goForward(
-                  viewContainer,
-                  '/forgot-password'
-                )
-              "
-              tabindex="0"
-              >Forgot your password?</a
-            >
-            <a
-              (click)="this.register = !this.register"
-              (keyup.enter)="this.register = !this.register"
-              tabindex="0"
-              >Wanna Register?</a
-            >
-          </ng-template>
+          @if (register) {
+          <a
+            (click)="this.register = !this.register"
+            (keyup.enter)="this.register = !this.register"
+            tabindex="0"
+            >Wanna Log in?</a
+          >
+          } @else {
+          <a
+            (click)="
+              viewTransitionService.goForward(viewContainer, '/forgot-password')
+            "
+            (keyup.enter)="
+              viewTransitionService.goForward(viewContainer, '/forgot-password')
+            "
+            tabindex="0"
+            >Forgot your password?</a
+          >
+          <a
+            (click)="this.register = !this.register"
+            (keyup.enter)="this.register = !this.register"
+            tabindex="0"
+            >Wanna Register?</a
+          >
+          }
         </div>
         <button
           type="button"

@@ -13,12 +13,14 @@ import { provideDatabase, getDatabase } from '@angular/fire/database';
 import { environment } from 'src/environments/environment.dev';
 import { appViewRoutes } from './app-view/app-view.routes';
 import { gettingStartedRoutes } from './getting-started/getting-started.routes';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 const routes = [/* ...appViewRoutes, */ ...gettingStartedRoutes, ...appRoutes];
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
+    provideAnimations(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       // Register the ServiceWorker as soon as the application is stable
@@ -26,10 +28,10 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     importProvidersFrom(
-      provideFirebaseApp(() => initializeApp(environment.firebase))
+      provideFirebaseApp(() => initializeApp(environment.firebase)),
+      provideAuth(() => getAuth()),
+      provideDatabase(() => getDatabase())
     ),
-    importProvidersFrom(provideAuth(() => getAuth())),
-    importProvidersFrom(provideDatabase(() => getDatabase())),
     // importProvidersFrom(
     //   provideAuth(() => {
     //     const auth = getAuth();

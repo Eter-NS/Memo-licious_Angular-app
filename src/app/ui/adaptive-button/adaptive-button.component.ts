@@ -13,50 +13,42 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <ng-container *ngIf="formula === 'anchor'; else button">
-      <ng-container *ngIf="href && href.length > 0 && ripple">
-        <a
-          appCustomMatRipple
-          [routerLink]="[href]"
-          (click)="buttonClick.emit($event)"
-          [ngClass]="type + ' ' + color + ' ' + classes"
-        >
-          {{ placeholder }}
-        </a>
-      </ng-container>
-
-      <ng-container *ngIf="href && href.length > 0 && !ripple; else noHref">
-        <a
-          [routerLink]="[href]"
-          (click)="buttonClick.emit($event)"
-          [ngClass]="type + ' ' + color + ' ' + classes"
-        >
-          {{ placeholder }}
-        </a>
-      </ng-container>
-
-      <ng-template #noHref>
-        <a
-          (click)="buttonClick.emit($event)"
-          (keyup.enter)="buttonClick.emit($event)"
-          [ngClass]="type + ' ' + color + ' ' + classes"
-          tabindex="0"
-        >
-          {{ placeholder }}
-        </a>
-      </ng-template>
-    </ng-container>
-
-    <ng-template #button>
-      <button
-        appCustomMatRipple
-        [type]="type"
-        (click)="buttonClick.emit($event)"
-        [ngClass]="type + ' ' + color + ' ' + classes"
-      >
-        {{ placeholder }}
-      </button>
-    </ng-template>
+    @if (formula === 'anchor') { @if (href && href.length > 0 && ripple) {
+    <a
+      appCustomMatRipple
+      [routerLink]="[href]"
+      (click)="buttonClick.emit($event)"
+      [ngClass]="type + ' ' + color + ' ' + classes"
+    >
+      {{ placeholder }}
+    </a>
+    } @if (href && href.length > 0 && !ripple) {
+    <a
+      [routerLink]="[href]"
+      (click)="buttonClick.emit($event)"
+      [ngClass]="type + ' ' + color + ' ' + classes"
+    >
+      {{ placeholder }}
+    </a>
+    } @else {
+    <a
+      (click)="buttonClick.emit($event)"
+      (keyup.enter)="buttonClick.emit($event)"
+      [ngClass]="type + ' ' + color + ' ' + classes"
+      tabindex="0"
+    >
+      {{ placeholder }}
+    </a>
+    } }@else {
+    <button
+      appCustomMatRipple
+      [type]="type"
+      (click)="buttonClick.emit($event)"
+      [ngClass]="type + ' ' + color + ' ' + classes"
+    >
+      {{ placeholder }}
+    </button>
+    }
   `,
   styles: [
     `

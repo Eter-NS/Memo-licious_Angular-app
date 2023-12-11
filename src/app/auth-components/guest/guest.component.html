@@ -20,30 +20,20 @@
               <p class="form-label">Name</p>
               <input type="text" formControlName="name" />
             </label>
-            <p
-              class="input-error"
-              *ngIf="
-                getError('name', 'required') &&
-                localUserForm.get('name')?.touched
-              "
-            >
-              This field is required!
-            </p>
-            <p
-              class="input-error"
-              *ngIf="getError('name', 'includesSpecialChars')"
-            >
+            @if (getError('name', 'required') &&
+            localUserForm.get('name')?.touched) {
+            <p class="input-error">This field is required!</p>
+            } @if (getError('name', 'includesSpecialChars')) {
+            <p class="input-error">
               Your name can't include special characters
             </p>
-            <p class="input-error" *ngIf="getError('name', 'includesNumbers')">
-              Your name can't include numbers
-            </p>
-            <p class="input-error" *ngIf="getError('name', 'minlength')">
-              Your name is too short
-            </p>
-            <p class="input-error" *ngIf="getError('name', 'maxlength')">
-              Your name is too long
-            </p>
+            } @if (getError('name', 'includesNumbers')) {
+            <p class="input-error">Your name can't include numbers</p>
+            } @if (getError('name', 'minlength')) {
+            <p class="input-error">Your name is too short</p>
+            } @if (getError('name', 'maxlength')) {
+            <p class="input-error">Your name is too long</p>
+            }
           </fieldset>
           <fieldset class="form-element">
             <h2 class="auth-header">Type of authentication</h2>
@@ -67,65 +57,43 @@
               </mat-radio-button>
             </mat-radio-group>
           </fieldset>
-          <ng-container
-            *ngIf="isPasswordSelected; else pinTemplate"
-            formGroupName="passwordGroup"
-          >
+          @if (isPasswordSelected) {
+          <ng-container formGroupName="passwordGroup">
             <fieldset class="form-element">
               <label>
                 <p class="form-label">Create your Password</p>
                 <input type="password" formControlName="password" />
               </label>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(['passwordGroup', 'password'], 'required') &&
-                  localUserForm.get(['passwordGroup', 'password'])?.touched
-                "
-              >
-                This field is required!
-              </p>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(['passwordGroup', 'password'], 'passwordError') &&
-                  localUserForm.get(['passwordGroup', 'password'])?.dirty
-                "
-              >
+              @if ( getError(['passwordGroup', 'password'], 'required') &&
+              localUserForm.get(['passwordGroup', 'password'])?.touched) {
+              <p class="input-error">This field is required!</p>
+              } @if ( getError(['passwordGroup', 'password'], 'passwordError')
+              && localUserForm.get(['passwordGroup', 'password'])?.dirty) {
+              <p class="input-error">
                 The password must have 8 characters, numbers, and special
                 characters
               </p>
+              }
             </fieldset>
             <fieldset class="form-element">
               <label>
                 <p class="form-label">Confirm your Password</p>
                 <input type="password" formControlName="confirmPassword" />
               </label>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(['passwordGroup', 'confirmPassword'], 'required') &&
-                  localUserForm.get(['passwordGroup', 'confirmPassword'])
-                    ?.touched
-                "
-              >
-                This field is required!
-              </p>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(
-                    ['passwordGroup', 'confirmPassword'],
-                    'passwordMatch'
-                  ) &&
-                  localUserForm.get(['passwordGroup', 'confirmPassword'])?.dirty
-                "
-              >
-                The passwords are not the same
-              </p>
+              @if ( getError(['passwordGroup', 'confirmPassword'], 'required')
+              && localUserForm.get(['passwordGroup', 'confirmPassword'])
+              ?.touched) {
+              <p class="input-error">This field is required!</p>
+              } @if ( getError( ['passwordGroup', 'confirmPassword'],
+              'passwordMatch' ) && localUserForm.get(['passwordGroup',
+              'confirmPassword'])?.dirty) {
+
+              <p class="input-error">The passwords are not the same</p>
+              }
             </fieldset>
           </ng-container>
-          <ng-template #pinTemplate formGroupName="pinGroup">
+          } @else {
+          <ng-template formGroupName="pinGroup">
             <fieldset class="form-element">
               <label>
                 <p class="form-label">Create your PIN</p>
@@ -135,24 +103,13 @@
                   formControlName="pin"
                 />
               </label>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(['pinGroup', 'pin'], 'required') &&
-                  localUserForm.get(['pinGroup', 'pin'])?.touched
-                "
-              >
-                This field is required!
-              </p>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(['pinGroup', 'pin'], 'pinError') &&
-                  localUserForm.get(['pinGroup', 'pin'])?.dirty
-                "
-              >
-                Invalid PIN. Use from 4 to 8 digits.
-              </p>
+              @if ( getError(['pinGroup', 'pin'], 'required') &&
+              localUserForm.get(['pinGroup', 'pin'])?.touched) {
+              <p class="input-error">This field is required!</p>
+              } @if ( getError(['pinGroup', 'pin'], 'pinError') &&
+              localUserForm.get(['pinGroup', 'pin'])?.dirty) {
+              <p class="input-error">Invalid PIN. Use from 4 to 8 digits.</p>
+              }
             </fieldset>
             <fieldset class="form-element">
               <label>
@@ -163,26 +120,16 @@
                   formControlName="confirmPin"
                 />
               </label>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(['pinGroup', 'confirmPin'], 'required') &&
-                  localUserForm.get(['pinGroup', 'confirmPin'])?.touched
-                "
-              >
-                This field is required!
-              </p>
-              <p
-                class="input-error"
-                *ngIf="
-                  getError(['pinGroup', 'confirmPin'], 'unmatchedPins') &&
-                  localUserForm.get(['pinGroup', 'confirmPin'])?.dirty
-                "
-              >
-                Your PINs are not the same
-              </p>
+              @if ( getError(['pinGroup', 'confirmPin'], 'required') &&
+              localUserForm.get(['pinGroup', 'confirmPin'])?.touched) {
+              <p class="input-error">This field is required!</p>
+              } @if ( getError(['pinGroup', 'confirmPin'], 'unmatchedPins') &&
+              localUserForm.get(['pinGroup', 'confirmPin'])?.dirty) {
+              <p class="input-error">Your PINs are not the same</p>
+              }
             </fieldset>
           </ng-template>
+          }
 
           <fieldset class="form-element">
             <mat-checkbox formControlName="rememberMe"
@@ -193,9 +140,9 @@
           <button type="submit" class="submit-button" appCustomMatRipple>
             Join Now
           </button>
-          <p class="input-error" *ngIf="localUserForm.hasError('invalidForm')">
-            Check the inputs above
-          </p>
+          @if (localUserForm.hasError('invalidForm')) {
+          <p class="input-error">Check the inputs above</p>
+          }
         </form>
       </div>
     </div>
