@@ -26,6 +26,7 @@ import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers
 import { AuthAccountService } from '../services/account/auth-account.service';
 import { AuthUserData } from '../services/form-common-features/form-common-features.service';
 import { AuthStateService } from '../services/state/auth-state.service';
+import { environment } from 'src/environments/environment.dev';
 
 @Component({
   standalone: true,
@@ -142,8 +143,15 @@ export class OnlineComponent implements OnInit, AfterViewInit {
           break;
         case 'unknownError':
         default:
+          this.#snackBar.open(
+            'An error occurred. Please try again later.',
+            'close',
+            { duration: 5000 }
+          );
           // Only for dev options, not for production
-          throw new Error(errors[key]?.message);
+          if (!environment.production) {
+            throw new Error(errors[key]?.message);
+          }
       }
     }
   }

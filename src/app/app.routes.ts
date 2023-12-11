@@ -1,31 +1,15 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { LandingPageComponent } from './landing-page/landing-page.component';
-import { redirectUnauthorizedToGuard } from './auth-components/guards/redirect-unauthorized-to.guard';
+import { Routes } from '@angular/router';
 import { redirectLoggedInToGuard } from './auth-components/guards/redirect-logged-in-to.guard';
+import { redirectUnauthorizedToGuard } from './auth-components/guards/redirect-unauthorized-to.guard';
+import { LandingPageComponent } from './landing-page/landing-page.component';
 
-const redirectUnauthorizedToGettingStarted =
+export const redirectUnauthorizedToGettingStarted =
   redirectUnauthorizedToGuard('/getting-started');
-const redirectUnauthorizedToOnline = redirectUnauthorizedToGuard('/online');
-const redirectLoggedInToApp = redirectLoggedInToGuard('/app');
+export const redirectUnauthorizedToOnline =
+  redirectUnauthorizedToGuard('/online');
+export const redirectLoggedInToApp = redirectLoggedInToGuard('/app');
 
-const routes: Routes = [
-  {
-    path: 'app',
-    loadChildren: () =>
-      import('./app-view/app-view-routing.module').then(
-        (m) => m.AppViewRoutingModule
-      ),
-    canActivate: [redirectUnauthorizedToGettingStarted],
-  },
-  {
-    path: 'getting-started',
-    loadChildren: () =>
-      import('./getting-started/getting-started.module').then(
-        (m) => m.GettingStartedModule
-      ),
-    canActivate: [redirectLoggedInToGuard('/app')],
-  },
+export const appRoutes: Routes = [
   {
     title: 'Create a local account',
     path: 'guest',
@@ -91,15 +75,11 @@ const routes: Routes = [
     canActivate: [redirectLoggedInToApp],
   },
 
+  { path: 'home', redirectTo: '', pathMatch: 'full' },
+
   {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

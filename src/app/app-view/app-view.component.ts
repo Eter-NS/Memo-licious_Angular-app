@@ -1,11 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthAccountService } from '../auth-components/services/account/auth-account.service';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  templateUrl: './app-view.component.html',
-  styleUrls: ['./app-view.component.scss'],
+  standalone: true,
+  imports: [],
+  template: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppViewComponent {
-  authAccountService = inject(AuthAccountService);
-}
+export class AppViewComponent {}
