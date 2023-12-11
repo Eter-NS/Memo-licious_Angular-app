@@ -6,56 +6,53 @@
         (clicked)="viewTransitionService.goBack(content, '/forgot-password')"
       />
     </div>
-    <ng-container [ngSwitch]="urlData?.operation">
-      <div *ngSwitchCase="'VERIFY_EMAIL'" class="form-wrapper verify">
-        <h1>Your email has been verified</h1>
-        <p>You can now sign in with your fresh account 😊</p>
-        <a
-          (click)="
-            viewTransitionService.goForward(content, '/online/force=login')
-          "
-          (keyup.enter)="
-            viewTransitionService.goForward(content, '/online/force=login')
-          "
-          tabindex="0"
-        >
-          <mat-icon>arrow_forward</mat-icon>
-        </a>
-      </div>
+    @switch (urlData?.operation) { @case ('VERIFY_EMAIL') {
 
-      <div
-        *ngSwitchCase="'RESET_PASSWORD'"
-        class="form-wrapper reset"
-        aria-label="A form for new password"
+    <div class="form-wrapper verify">
+      <h1>Your email has been verified</h1>
+      <p>You can now sign in with your fresh account 😊</p>
+      <a
+        (click)="
+          viewTransitionService.goForward(content, '/online/force=login')
+        "
+        (keyup.enter)="
+          viewTransitionService.goForward(content, '/online/force=login')
+        "
+        tabindex="0"
       >
-        <h1>Here your new password goes 😊</h1>
-        <form (submit)="handleChangePassword($event)">
-          <fieldset class="form-element">
-            <label>
-              <p class="form-label">New Password</p>
-              <input type="password" [formControl]="newPassword" />
-            </label>
-            <p
-              class="input-error"
-              *ngIf="
-                newPassword.hasError('noSpecialCharacter') && newPassword.dirty
-              "
-            >
-              You wrote a wrong code, please check again.
-            </p>
-          </fieldset>
-          <button type="submit" class="submit-button" appCustomMatRipple>
-            Save
-          </button>
-        </form>
-      </div>
-      <div *ngSwitchDefault class="form-wrapper">
-        <h1>Whoops 😅</h1>
-        <p>
-          Sorry, but we don't know what would you like to do here. Try to go
-          back to your email and click the link again 😊
-        </p>
-      </div>
-    </ng-container>
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </div>
+
+    } @case ('RESET_PASSWORD') {
+
+    <div class="form-wrapper reset" aria-label="A form for new password">
+      <h1>Here your new password goes 😊</h1>
+      <form (submit)="handleChangePassword($event)">
+        <fieldset class="form-element">
+          <label>
+            <p class="form-label">New Password</p>
+            <input type="password" [formControl]="newPassword" />
+          </label>
+          @if ( newPassword.hasError('noSpecialCharacter') && newPassword.dirty)
+          {
+          <p class="input-error">You wrote a wrong code, please check again.</p>
+          }
+        </fieldset>
+        <button type="submit" class="submit-button" appCustomMatRipple>
+          Save
+        </button>
+      </form>
+    </div>
+
+    } @default {
+    <div class="form-wrapper">
+      <h1>Whoops 😅</h1>
+      <p>
+        Sorry, but we don't know what would you like to do here. Try to go back
+        to your email and click the link again 😊
+      </p>
+    </div>
+    } }
   </section>
 </main>

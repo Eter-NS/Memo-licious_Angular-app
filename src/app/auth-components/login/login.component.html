@@ -29,12 +29,15 @@
           autocomplete="current-password"
         />
       </label>
-      <p class="input-error" *ngIf="wrongEmailOrPassword">
+      @if (wrongEmailOrPassword) {
+      <p class="input-error">
         The password you entered is incorrect. Try again
       </p>
-      <p class="input-error" *ngIf="emailDoesNotExist">
+      } @if (emailDoesNotExist) {
+      <p class="input-error">
         The email you entered does not belong to any account.
       </p>
+      }
     </fieldset>
 
     <fieldset class="form-element">
@@ -47,10 +50,9 @@
       appCustomMatRipple
       [appMatSpinnerToggler]="loginForm.valid"
     >
-      <ng-container *ngIf="sending; else buttonContent">
-        <mat-spinner class="sending-spinner"></mat-spinner>
-      </ng-container>
-      <ng-template #buttonContent>Log In</ng-template>
+      @if (sending) {
+      <mat-spinner class="sending-spinner"></mat-spinner>
+      } @else { Log In }
     </button>
   </form>
 </div>
