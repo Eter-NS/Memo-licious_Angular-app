@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { CanActivateFn } from '@angular/router';
 
 import { redirectLoggedInToGuard } from './redirect-logged-in-to.guard';
 
 describe('redirectLoggedInToGuard', () => {
-  const executeGuard: CanActivateFn = (...guardParameters) => 
-      TestBed.runInInjectionContext(() => redirectLoggedInToGuard(...guardParameters));
+  const executeGuard = (loggedInFallback: string) => {
+    return TestBed.runInInjectionContext(() => {
+      return redirectLoggedInToGuard(loggedInFallback);
+    });
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

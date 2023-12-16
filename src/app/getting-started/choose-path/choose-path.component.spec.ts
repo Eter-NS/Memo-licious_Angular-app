@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LoginOrGuestViewComponent } from './login-or-guest-view.component';
+import { ChoosePathComponent } from './choose-path.component';
 
 describe('LoginOrGuestViewComponent', () => {
-  let component: LoginOrGuestViewComponent;
-  let fixture: ComponentFixture<LoginOrGuestViewComponent>;
+  let component: ChoosePathComponent;
+  let fixture: ComponentFixture<ChoosePathComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [LoginOrGuestViewComponent]
+      imports: [ChoosePathComponent],
     });
-    fixture = TestBed.createComponent(LoginOrGuestViewComponent);
+    fixture = TestBed.createComponent(ChoosePathComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

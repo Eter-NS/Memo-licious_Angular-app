@@ -1,4 +1,4 @@
-import { AfterViewInit, Directive, ElementRef, inject } from '@angular/core';
+import { AfterViewChecked, Directive, ElementRef, inject } from '@angular/core';
 import { MatRipple } from '@angular/material/core';
 
 @Directive({
@@ -8,14 +8,11 @@ import { MatRipple } from '@angular/material/core';
 })
 export class CustomMatRippleDirective
   extends MatRipple
-  implements AfterViewInit
+  implements AfterViewChecked
 {
-  // Assign the emitted value to the state var. and then assign to matRippleColor
-  // @Input() rippleColor: string = '';
-
   #el = inject(ElementRef);
 
-  ngAfterViewInit(): void {
+  ngAfterViewChecked(): void {
     this.setColorBrightness();
   }
 
@@ -28,10 +25,12 @@ export class CustomMatRippleDirective
       .getPropertyValue('background-color');
     let isLowerThanMiddle = false;
 
-    colorString.match(/\d+/g)?.forEach((colorChannel) => {
-      if (!isLowerThanMiddle)
-        isLowerThanMiddle = brightnessMiddlePoint >= Number(colorChannel);
-    });
+    colorString
+      .match(/\d+/g)
+      ?.forEach(
+        (colorChannel) =>
+          (isLowerThanMiddle = brightnessMiddlePoint >= Number(colorChannel))
+      );
 
     this.color = isLowerThanMiddle ? lightShadow : darkShadow;
   }
