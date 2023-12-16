@@ -9,13 +9,14 @@
     <div #content class="content">
       <h1 class="content__header">Email Verification</h1>
       <div
-        [ngSwitch]="sendingState$ | async"
         aria-label="Summary of whether the email was sent or an error occurred during this action."
       >
-        <div *ngSwitchCase="'sending'">
+        @switch (sendingState$ | async) { @case ('sending') {
+        <div>
           <mat-spinner class="progress-spinner"></mat-spinner>
         </div>
-        <div class="result" *ngSwitchCase="'success'">
+        } @case ('success') {
+        <div class="result">
           <app-completion-one
             svgPrimaryColor="var(--color-primary-500)"
             [svgMinMaxWidth]="[200, 300]"
@@ -40,7 +41,8 @@
             Get me to login
           </button>
         </div>
-        <div class="result" *ngSwitchCase="'failure'">
+        } @case ('failure') {
+        <div class="result">
           <h2 class="result__header">Oh no! We've crushed 😬</h2>
           <p>
             Please click the button below to get us back on track
@@ -50,7 +52,9 @@
             Try again
           </button>
         </div>
-        <div *ngSwitchDefault>Unknown error</div>
+        } @default {
+        <div>Unknown error</div>
+        } }
       </div>
     </div>
   </section>

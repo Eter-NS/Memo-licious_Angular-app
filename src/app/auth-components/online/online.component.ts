@@ -155,6 +155,9 @@ export class OnlineComponent implements OnInit, AfterViewInit {
           if (!environment.production) {
             throw new Error(errors[key]?.message);
           }
+          if (!environment.production) {
+            throw new Error(errors[key]?.message);
+          }
       }
     }
   }

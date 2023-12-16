@@ -1,6 +1,6 @@
-@use "/src/scss/utils.scss" as *;
-@use "/src/scss/components.scss" as *;
-@use "/src/scss/viewport.scss" as view;
+@use "src/scss/utils.scss" as *;
+@use "src/scss/components.scss" as *;
+@use "src/scss/viewport.scss" as view;
 
 .form-wrapper {
   background-color: var(--color-accent-100);

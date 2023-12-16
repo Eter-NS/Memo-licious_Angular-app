@@ -120,7 +120,7 @@ export class GuestComponent implements AfterViewInit {
     toggleFormGroup('passwordGroup', this.isPasswordSelected);
   }
 
-  async onSubmit() {
+  onSubmit() {
     const onFailure = () => {
       this.localUserForm.setErrors({ invalidForm: true });
       return;

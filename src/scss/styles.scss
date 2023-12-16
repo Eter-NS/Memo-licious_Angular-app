@@ -1,6 +1,6 @@
 @use "sass:map";
 @use "@angular/material" as mat;
-@use "/src/app/reusable/animations/animations.scss" as anim;
+@use "src/app/reusable/animations/animations.scss" as anim;
 @use "./themes.scss" as theme;
 @use "./utils.scss" as util;
 @use "./typography.scss";

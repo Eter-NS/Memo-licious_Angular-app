@@ -93,10 +93,9 @@
       appCustomMatRipple
       [appMatSpinnerToggler]="registerForm.valid && !emailAlreadyInUse"
     >
-      <ng-container *ngIf="sending && !emailAlreadyInUse; else buttonContent">
-        <mat-spinner class="sending-spinner"></mat-spinner>
-      </ng-container>
-      <ng-template #buttonContent>Register</ng-template>
+      @if (sending && !emailAlreadyInUse) {
+      <mat-spinner class="sending-spinner"></mat-spinner>
+      } @else { Register }
     </button>
     <p class="input-error">
       {{

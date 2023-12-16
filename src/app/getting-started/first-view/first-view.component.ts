@@ -1,3 +1,4 @@
+import { NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,6 +16,8 @@ import { runAnimations } from 'src/app/reusable/animations/animation-triggers';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
 
 @Component({
+  standalone: true,
+  imports: [NgOptimizedImage],
   selector: 'app-first-view',
   templateUrl: './first-view.component.html',
   styleUrls: ['./first-view.component.scss'],
@@ -22,29 +25,22 @@ import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage
 })
 export class FirstViewComponent implements OnInit {
   #router = inject(Router);
-  #localStorageService = inject(LocalStorageService);
-
+  localStorageService = inject(LocalStorageService);
   @ViewChild('container') sectionContainer!: ElementRef<HTMLDivElement>;
 
   ngOnInit(): void {
-    this.#localStorageService.saveToStorage('finishedTutorial', false);
+    this.localStorageService.saveToStorage('finishedTutorial', false);
   }
 
   fillView() {
-    addAnimations(
-      this.sectionContainer.nativeElement,
-      'fill-the-view-animation'
-    );
-
-    startAnimation(this.sectionContainer.nativeElement);
+    const element = this.sectionContainer.nativeElement;
+    addAnimations(element, 'fill-the-view-animation');
+    startAnimation(element);
   }
 
   runTransition() {
-    runAnimations(
-      this.sectionContainer.nativeElement,
-      '.fade-out-animation',
-      true
-    );
+    const element = this.sectionContainer.nativeElement;
+    runAnimations(element, '.fade-out-animation', true);
 
     setTimeout(() => {
       this.fillView();
