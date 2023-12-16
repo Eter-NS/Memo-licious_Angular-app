@@ -4,7 +4,8 @@ main,
 .content,
 .container,
 .component-content,
-.login-register-content {
+.login-register-content,
+.loading-state {
   display: grid;
 }
 
@@ -84,5 +85,20 @@ main {
 .go-back-button {
   &-wrapper {
     padding: free-space("xs") 0;
+  }
+}
+
+.loading-state {
+  min-height: 100px;
+  place-content: center;
+}
+
+.loading-defer-spinner {
+  --size: max(var(--h1) * 1.5, 7.5vmin);
+  width: var(--size) !important;
+  height: var(--size) !important;
+  margin: {
+    left: auto;
+    right: auto;
   }
 }

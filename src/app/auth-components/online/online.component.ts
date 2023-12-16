@@ -26,6 +26,8 @@ import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers
 import { AuthAccountService } from '../services/account/auth-account.service';
 import { AuthUserData } from '../services/form-common-features/form-common-features.service';
 import { AuthStateService } from '../services/state/auth-state.service';
+import { environment } from 'src/environments/environment.dev';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   standalone: true,
@@ -40,6 +42,7 @@ import { AuthStateService } from '../services/state/auth-state.service';
     CustomMatRippleDirective,
     MatSnackBarModule,
     PreviousPageButtonComponent,
+    MatProgressSpinnerModule,
   ],
 })
 export class OnlineComponent implements OnInit, AfterViewInit {
@@ -105,6 +108,7 @@ export class OnlineComponent implements OnInit, AfterViewInit {
   }
 
   private _handleAuthErrors(errors: Errors) {
+    const duration = 5000;
     for (const key of objectKeys(errors)) {
       switch (key) {
         case 'alreadyInUseError':
@@ -123,27 +127,34 @@ export class OnlineComponent implements OnInit, AfterViewInit {
           this.#snackBar.open(
             'Something went wrong when creating your account, try again',
             'close',
-            { duration: 5000 }
+            { duration: duration }
           );
           break;
         case 'unverifiedEmail':
           this.#snackBar.open(
             'Sorry, but you have not verified your email 😥 Do it first, and then try again.',
             'close',
-            { duration: 5000 }
+            { duration: duration }
           );
           break;
         case 'noEmailProvided':
           this.#snackBar.open(
             'It looks like someone has forgotten to write an email 😉',
             'close',
-            { duration: 5000 }
+            { duration: duration }
           );
           break;
         case 'unknownError':
         default:
+          this.#snackBar.open(
+            'An error occurred. Please try again later.',
+            'close',
+            { duration: duration }
+          );
           // Only for dev options, not for production
-          throw new Error(errors[key]?.message);
+          if (!environment.production) {
+            throw new Error(errors[key]?.message);
+          }
       }
     }
   }
