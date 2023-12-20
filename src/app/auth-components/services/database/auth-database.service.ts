@@ -36,7 +36,6 @@ export class AuthDatabaseService {
   }
 
   async isUserInDatabase(): Promise<boolean | undefined> {
-    /* Takes the user collection and searches if there's already an account with this email */
     try {
       const userRef = ref(
         this.#db,
@@ -60,7 +59,6 @@ export class AuthDatabaseService {
     user: { email, photoURL },
   }: UserCredential): Promise<boolean> {
     if (!email) {
-      console.error('No email provided');
       return false;
     }
     const payload: DbInitialPayload = {
@@ -75,8 +73,11 @@ export class AuthDatabaseService {
     try {
       await set(userRef, payload);
       return true;
-    } catch (error) {
-      console.error('Error when saving user data: ', error);
+    } catch (error: unknown) {
+      console.error(
+        'Error when saving user data: ',
+        (error as { message: string }).message
+      );
       return false;
     }
   }
