@@ -19,6 +19,4 @@ import { RouterOutlet } from '@angular/router';
     MatListModule,
   ],
 })
-export class AppComponent {
-  title = 'Memo-licious';
-}
+export class AppComponent {}
