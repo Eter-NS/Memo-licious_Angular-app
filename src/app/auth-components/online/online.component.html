@@ -13,14 +13,18 @@
     </div>
     <div class="content" #viewContainer>
       <div class="login-register-content" aria-label="Online account form">
-        @if (register) { @defer (on immediate) {
+        @if (register) { @defer (on immediate; prefetch on immediate) {
         <app-register
           [emailAlreadyInUse]="alreadyInUseError"
           (data)="handleSubmit($event)"
           (rememberMe)="authStateService.rememberMe($event)"
         />
         } @loading (after 200) {
-        <mat-spinner class="loading-defer-spinner"></mat-spinner>
+        <mat-spinner
+          class="loading-defer-spinner loading-state-register"
+        ></mat-spinner>
+        }@placeholder {
+        <span class="loading-state-register"> Loading... </span>
         } } @else { @defer(when register===false; prefetch on immediate) {
         <app-login
           [wrongEmailOrPassword]="wrongEmailOrPassword"
@@ -29,10 +33,10 @@
           (rememberMe)="authStateService.rememberMe($event)"
         />
         } @loading (after 200){<mat-spinner
-          class="loading-defer-spinner"
+          class="loading-defer-spinner loading-state-login"
         ></mat-spinner>
         } @placeholder {
-        <span class="loading-state"> Loading... </span>
+        <span class="loading-state-login"> Loading... </span>
         } }
       </div>
       <div class="component-content">

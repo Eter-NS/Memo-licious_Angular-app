@@ -88,9 +88,18 @@ main {
   }
 }
 
-.loading-state {
-  min-height: 100px;
+%loading-state {
   place-content: center;
+}
+
+.loading-state-register {
+  @extend %loading-state;
+  min-height: 630px;
+}
+
+.loading-state-login {
+  @extend %loading-state;
+  min-height: 400px;
 }
 
 .loading-defer-spinner {
