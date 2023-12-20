@@ -1,4 +1,10 @@
-import { AfterViewChecked, Directive, ElementRef, inject } from '@angular/core';
+import {
+  AfterViewChecked,
+  Directive,
+  ElementRef,
+  Input,
+  inject,
+} from '@angular/core';
 import { MatRipple } from '@angular/material/core';
 
 @Directive({
@@ -11,27 +17,28 @@ export class CustomMatRippleDirective
   implements AfterViewChecked
 {
   #el = inject(ElementRef);
+  @Input({ required: false }) darkShadow = 'hsl(0, 0%, 0%, 0.15)';
+  @Input({ required: false }) lightShadow = 'hsl(0, 0%, 100%, 0.15)';
 
   ngAfterViewChecked(): void {
     this.setColorBrightness();
   }
 
   setColorBrightness(): void {
-    const darkShadow = 'hsl(0, 0%, 0%, 0.15)';
-    const lightShadow = 'hsl(0, 0%, 100%, 0.15)';
-    const brightnessMiddlePoint = 170;
+    const brightnessMiddlePoint = 150;
     const colorString = window
       .getComputedStyle(this.#el.nativeElement)
       .getPropertyValue('background-color');
-    let isLowerThanMiddle = false;
 
-    colorString
+    const colorChannels = colorString
       .match(/\d+/g)
-      ?.forEach(
-        (colorChannel) =>
-          (isLowerThanMiddle = brightnessMiddlePoint >= Number(colorChannel))
-      );
+      ?.map((colorString) => Number(colorString));
 
-    this.color = isLowerThanMiddle ? lightShadow : darkShadow;
+    if (!colorChannels) return;
+
+    const colorAverage = colorChannels.reduce((a, b) => a + b) / 3;
+
+    this.color =
+      colorAverage < brightnessMiddlePoint ? this.lightShadow : this.darkShadow;
   }
 }
