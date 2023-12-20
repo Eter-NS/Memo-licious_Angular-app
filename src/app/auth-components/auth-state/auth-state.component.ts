@@ -8,8 +8,15 @@ import {
 } from '@angular/core';
 import { PreviousPageButtonComponent } from '../../ui/previous-page-button/previous-page-button.component';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
-import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { checkPassword } from 'src/app/custom-validations/custom-validations';
+import {
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import {
+  checkConfirmPassword,
+  checkPassword,
+} from 'src/app/custom-validations/custom-validations';
 import { ActivatedRoute } from '@angular/router';
 import { NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { parseActionCodeURL } from '@angular/fire/auth';
@@ -49,10 +56,20 @@ export class AuthStateComponent implements AfterViewInit {
   @ViewChild('content') content!: ElementRef<HTMLElement>;
   urlData = parseActionCodeURL(location.href);
 
-  newPassword = this.fb.control('', {
-    validators: [checkPassword],
-    updateOn: 'blur',
-  });
+  newPasswordForm = this.fb.group(
+    {
+      password: this.fb.control('', {
+        validators: [Validators.required, checkPassword],
+        updateOn: 'blur',
+      }),
+      confirmPassword: this.fb.control('', {
+        validators: [Validators.required],
+      }),
+    },
+    {
+      validators: [Validators.required, checkConfirmPassword],
+    }
+  );
 
   ngAfterViewInit(): void {
     this.viewTransitionService.viewFadeIn(this.content.nativeElement);
@@ -60,12 +77,12 @@ export class AuthStateComponent implements AfterViewInit {
 
   handleChangePassword(e: Event) {
     e.preventDefault();
-    if (this.newPassword.invalid) return;
+    if (this.newPasswordForm.invalid) return;
     if (!this.urlData || this.urlData.code) return;
     this.authAccountService
       .newPasswordChecker(
         this.urlData.code,
-        this.newPassword.getRawValue() as string
+        this.newPasswordForm.controls.password.getRawValue() as string
       )
       .then(() => {
         setTimeout(() => {

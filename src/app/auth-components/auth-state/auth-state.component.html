@@ -28,15 +28,31 @@
 
     <div class="form-wrapper reset" aria-label="A form for new password">
       <h1>Here your new password goes 😊</h1>
-      <form (submit)="handleChangePassword($event)">
+      <form
+        [formGroup]="newPasswordForm"
+        (ngSubmit)="handleChangePassword($event)"
+      >
         <fieldset class="form-element">
           <label>
             <p class="form-label">New Password</p>
-            <input type="password" [formControl]="newPassword" />
+            <input type="password" formControlName="password" />
           </label>
-          @if ( newPassword.hasError('noSpecialCharacter') && newPassword.dirty)
-          {
-          <p class="input-error">You wrote a wrong code, please check again.</p>
+          @if ( newPasswordForm.get('password')?.hasError('passwordError') &&
+          newPasswordForm.get('password')?.dirty) {
+          <p class="input-error">
+            The password must have 8 characters, numbers, and special characters
+          </p>
+          }
+        </fieldset>
+        <fieldset class="form-element">
+          <label>
+            <p class="form-label">New Password</p>
+            <input type="password" formControlName="confirmPassword" />
+          </label>
+          @if (
+          newPasswordForm.get('confirmPassword')?.hasError('passwordMatch') &&
+          newPasswordForm.get('confirmPassword')?.dirty) {
+          <p class="input-error">The passwords are not the same</p>
           }
         </fieldset>
         <button type="submit" class="submit-button" appCustomMatRipple>
