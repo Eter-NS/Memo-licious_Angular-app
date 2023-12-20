@@ -99,7 +99,8 @@
               "src/manifest.webmanifest"
             ],
             "styles": ["src/scss/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "karmaConfig": "karma.conf.js"
           }
         },
         "deploy": {
