@@ -16,6 +16,10 @@ export type AuthUserData = {
   providedIn: 'root',
 })
 export class FormCommonFeaturesService {
+  addAnimations = addAnimations;
+  runWithDelay = runWithDelay;
+  removeAnimations = removeAnimations;
+
   onInitAnimations() {
     const h1Element = document.querySelector('h1');
     const formInputs: Array<HTMLElement> = [];
@@ -27,17 +31,21 @@ export class FormCommonFeaturesService {
 
     if (!h1Element || !formInputs.length || !submitButton) return;
 
-    addAnimations(h1Element, 'fadeIn-from-top-animation');
-    addAnimations(formInputs, 'fadeIn-from-left-animation');
-    addAnimations(submitButton, 'fadeIn-from-right-animation');
+    this.addAnimations(h1Element, 'fadeIn-from-top-animation');
+    this.addAnimations(formInputs, 'fadeIn-from-left-animation');
+    this.addAnimations(submitButton, 'fadeIn-from-right-animation');
 
-    runWithDelay([h1Element, ...formInputs, submitButton], {
+    this.runWithDelay([h1Element, ...formInputs, submitButton], {
       delayT: 75,
-    }).then(() => {
-      removeAnimations(h1Element, ['fadeIn-from-top-animation']);
-      removeAnimations(formInputs, ['fadeIn-from-left-animation']);
-      removeAnimations(submitButton, ['fadeIn-from-right-animation']);
-    });
+    })
+      .then(() => {
+        this.removeAnimations(h1Element, ['fadeIn-from-top-animation']);
+        this.removeAnimations(formInputs, ['fadeIn-from-left-animation']);
+        this.removeAnimations(submitButton, ['fadeIn-from-right-animation']);
+      })
+      .catch((err: PromiseRejectedResult) => {
+        console.error(err.reason);
+      });
   }
 
   getError = (

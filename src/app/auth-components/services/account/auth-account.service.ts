@@ -8,9 +8,7 @@ import {
   getRedirectResult,
   signOut,
   updateProfile,
-  confirmPasswordReset,
   UserCredential,
-  applyActionCode,
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { isAuthError } from 'src/app/reusable/Models/isAuthError';
@@ -36,27 +34,34 @@ export class AuthAccountService {
 
   checkUserSession = this.#authState.checkUserSession;
 
+  private createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+  private signInWithEmailAndPassword = signInWithEmailAndPassword;
+  private signInWithRedirect = signInWithRedirect;
+  private signInWithPopup = signInWithPopup;
+  private getRedirectResult = getRedirectResult;
+  private signOut = signOut;
+  private updateProfile = updateProfile;
+
   async signupWithEmail(
     email: string,
     password: string,
     options: RegisterCustomOptions
   ): Promise<AuthReturnCredits> {
     try {
-      if (!options) {
-        // Error for implementation failure, not practical use case
-        const noNameError: UnknownError = {
-          code: 'noOptionsProvided',
-          message: 'options parameter is not defined',
+      if (!options.displayName) {
+        const noProfileNameError: UnknownError = {
+          code: 'noDisplayNameProvided',
+          message: 'options parameter is defined without displayName property',
         };
         return {
           errors: {
-            unknownError: noNameError,
+            unknownError: noProfileNameError,
           },
         };
       }
 
       this.#authState.session.set(
-        await createUserWithEmailAndPassword(
+        await this.createUserWithEmailAndPassword(
           this.#authState.auth,
           email,
           password
@@ -69,8 +74,9 @@ export class AuthAccountService {
       return returnObj;
     } catch (error) {
       if (isAuthError(error)) {
-        if (error.code === 'auth/email-already-in-use')
+        if (error.code === 'auth/email-already-in-use') {
           return { errors: { alreadyInUseError: true } };
+        }
       }
       return {
         errors: { unknownError: error as UnknownError },
@@ -84,17 +90,23 @@ export class AuthAccountService {
   ): Promise<AuthReturnCredits> {
     try {
       this.#authState.session.set(
-        await signInWithEmailAndPassword(this.#authState.auth, email, password)
+        await this.signInWithEmailAndPassword(
+          this.#authState.auth,
+          email,
+          password
+        )
       );
       return this.#authState.session()?.user.emailVerified
         ? { passed: true }
         : { errors: { unverifiedEmail: true } };
     } catch (error) {
       if (isAuthError(error)) {
-        if (error.code === 'auth/user-not-found')
+        if (error.code === 'auth/user-not-found') {
           return { errors: { emailDoesNotExist: true } };
-        if (error.code === 'auth/wrong-password')
+        }
+        if (error.code === 'auth/wrong-password') {
           return { errors: { wrongEmailOrPassword: true } };
+        }
       }
       return {
         errors: { unknownError: error as UnknownError },
@@ -106,21 +118,18 @@ export class AuthAccountService {
    * Auth provider for redirect and popup depending on where user runs the app.
    * Beside this method you must apply getDataFromRedirect() in your component to get data from redirect.
    */
-  async continueWithGoogle(): Promise<AuthReturnCredits | void> {
+  async continueWithGoogle(): Promise<AuthReturnCredits> {
     const provider = new GoogleAuthProvider();
     provider.addScope('email');
     provider.addScope('profile');
     try {
-      if (this.isTheDeviceMobile())
-        await signInWithRedirect(this.#authState.auth, provider);
-      else {
+      if (this.isTheDeviceMobile()) {
+        await this.signInWithRedirect(this.#authState.auth, provider);
+      } else {
         this.#authState.session.set(
-          await signInWithPopup(this.#authState.auth, provider)
+          await this.signInWithPopup(this.#authState.auth, provider)
         );
       }
-
-      if (!this.#authState.session())
-        return { errors: { noEmailProvided: true } };
 
       return await this.#authDatabase.databaseRegisterHandler(
         this.#authState.session() as UserCredential
@@ -138,7 +147,7 @@ export class AuthAccountService {
    */
   async getDataFromRedirect(): Promise<AuthReturnCredits | null> {
     try {
-      const result = await getRedirectResult(this.#authState.auth);
+      const result = await this.getRedirectResult(this.#authState.auth);
       if (result) {
         this.#authState.session.set(result);
         return await this.#authDatabase.databaseRegisterHandler(
@@ -156,13 +165,11 @@ export class AuthAccountService {
     }
   }
 
-  async signOutUser() {
-    await signOut(this.#authState.auth);
-    this.#router.navigateByUrl('/online');
-  }
+  signOutUser() {
+    if (!this.#authState.session()) return;
 
-  setUserAsVerified() {
-    applyActionCode;
+    this.signOut(this.#authState.auth);
+    this.#router.navigateByUrl('/online');
   }
 
   async changeUserProfileData(options: RegisterCustomOptions): Promise<void> {
@@ -170,39 +177,39 @@ export class AuthAccountService {
       console.error('No user registered/logged in');
       return;
     }
-    if (!options) {
+
+    console.log(Object.keys(options));
+
+    if (!Object.keys(options).length) {
       console.error('No options provided');
       return;
     }
-    await updateProfile(this.#authState.auth.currentUser, options);
-  }
 
-  newPasswordChecker(oobCode: string, newPassword: string) {
-    //  const result= await verifyPasswordResetCode(this.authState.auth, oobCode);
-
-    return confirmPasswordReset(this.#authState.auth, oobCode, newPassword);
+    await this.updateProfile(this.#authState.auth.currentUser, options);
   }
 
   private isTheDeviceMobile(): boolean {
     let hasTouchScreen = false;
+
     if ('maxTouchPoints' in navigator) {
       hasTouchScreen = navigator.maxTouchPoints > 0;
     } else if ('msMaxTouchPoints' in navigator) {
       hasTouchScreen = (navigator as CustomNavigator).msMaxTouchPoints > 0;
+    } else if (
+      screen.orientation.type !== 'landscape-primary' ||
+      screen.orientation.angle !== 0
+    ) {
+      hasTouchScreen = true;
+    } else if ('orientation' in window) {
+      hasTouchScreen = true;
     } else {
-      const mediaQuery = matchMedia('(pointer:coarse)');
-      if (mediaQuery && mediaQuery.media === '(pointer:coarse)') {
-        hasTouchScreen = !!mediaQuery.matches;
-      } else if ('orientation' in window) {
-        hasTouchScreen = true;
-      } else {
-        const userAgent = (navigator as Navigator).userAgent;
-        hasTouchScreen =
-          /\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
-            userAgent
-          );
-      }
+      const userAgent = (navigator as Navigator).userAgent;
+      hasTouchScreen =
+        /\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
+          userAgent
+        );
     }
+
     return hasTouchScreen;
   }
 }
