@@ -2,6 +2,7 @@ export interface UnknownError {
   code: string;
   message: string;
 }
+export type FirebaseAuthError = UnknownError;
 export interface Errors {
   alreadyInUseError?: true;
   emailDoesNotExist?: true;
