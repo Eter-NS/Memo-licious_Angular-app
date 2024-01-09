@@ -26,8 +26,8 @@ import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers
 import { AuthAccountService } from '../services/account/auth-account.service';
 import { AuthUserData } from '../services/form-common-features/form-common-features.service';
 import { AuthStateService } from '../services/state/auth-state.service';
-import { environment } from 'src/environments/environment.dev';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { environment } from 'src/environments/environment.dev';
 
 @Component({
   standalone: true,
@@ -90,6 +90,8 @@ export class OnlineComponent implements OnInit, AfterViewInit {
     email,
     password,
   }: AuthUserData): Promise<void> {
+    if (!email || !password) return;
+
     const response = displayName
       ? await this.#authAccountService.signupWithEmail(email, password, {
           displayName,
@@ -132,7 +134,7 @@ export class OnlineComponent implements OnInit, AfterViewInit {
           break;
         case 'unverifiedEmail':
           this.#snackBar.open(
-            'Sorry, but you have not verified your email 😥 Do it first, and then try again.',
+            'Sorry, but you have not verified your email 😥 Do it first, and then try again',
             'close',
             { duration: duration }
           );
@@ -145,18 +147,15 @@ export class OnlineComponent implements OnInit, AfterViewInit {
           );
           break;
         case 'unknownError':
-        default:
           this.#snackBar.open(
-            'An error occurred. Please try again later.',
+            `${errors.unknownError?.code}, ${errors.unknownError?.message}`,
             'close',
             { duration: duration }
           );
-          // Only for dev options, not for production
+          break;
+        default:
           if (!environment.production) {
-            throw new Error(errors[key]?.message);
-          }
-          if (!environment.production) {
-            throw new Error(errors[key]?.message);
+            throw new Error('Unhandled error property');
           }
       }
     }
@@ -164,10 +163,15 @@ export class OnlineComponent implements OnInit, AfterViewInit {
 
   /**
    * Returns a next user path based on the form action.
-   * @returns A url suffix based on the registered flag and whether this.redirect is set or not. Only for navigateByUrl() usage.
+   * @return An url suffix based on the result registered flag and whether this.redirect is set or not. Only for navigateByUrl() usage.
    */
   private _redirectUser({ registered }: AuthReturnCredits): string {
-    return registered ? '/verify-email' : `/${this.redirect || 'app'}`;
+    const sessionValue = this.authStateService.session();
+    if (registered || (sessionValue && !sessionValue.user.emailVerified)) {
+      return '/verify-email';
+    }
+
+    return `/${this.redirect || 'app'}`;
   }
 
   private _checkParamMap(): void {
@@ -193,5 +197,9 @@ export class OnlineComponent implements OnInit, AfterViewInit {
         setDefaultValues();
         break;
     }
+  }
+
+  toggleRegister(): void {
+    this.register = !this.register;
   }
 }

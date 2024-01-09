@@ -25,14 +25,15 @@
         ></mat-spinner>
         }@placeholder {
         <span class="loading-state-register"> Loading... </span>
-        } } @else { @defer(when register===false; prefetch on immediate) {
+        } } @else { @defer(on immediate; prefetch on immediate) {
         <app-login
           [wrongEmailOrPassword]="wrongEmailOrPassword"
           [emailDoesNotExist]="emailDoesNotExist"
           (data)="handleSubmit($event)"
           (rememberMe)="authStateService.rememberMe($event)"
         />
-        } @loading (after 200){<mat-spinner
+        } @loading (after 200){
+        <mat-spinner
           class="loading-defer-spinner loading-state-login"
         ></mat-spinner>
         } @placeholder {
@@ -43,8 +44,8 @@
         <div class="login-register-switch">
           @if (register) {
           <a
-            (click)="this.register = !this.register"
-            (keyup.enter)="this.register = !this.register"
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
             tabindex="0"
             >Wanna Log in?</a
           >
@@ -60,8 +61,8 @@
             >Forgot your password?</a
           >
           <a
-            (click)="this.register = !this.register"
-            (keyup.enter)="this.register = !this.register"
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
             tabindex="0"
             >Wanna Register?</a
           >
@@ -72,6 +73,7 @@
           class="sign-in-with-google"
           appCustomMatRipple
           (click)="googleAuth('continueWithGoogle')"
+          (keyup.enter)="googleAuth('continueWithGoogle')"
         >
           <!-- 25px as the view size for the svg -->
           <app-google-logo class="google-logo" svgWidth="25"></app-google-logo>
