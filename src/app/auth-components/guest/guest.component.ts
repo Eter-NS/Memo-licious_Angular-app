@@ -7,6 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import {
+  FormControl,
   FormGroup,
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -24,7 +25,7 @@ import { NgIf } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
-import { AuthLocalUserService } from '../services/auth-local-user.service';
+import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
 import { LocalUserData } from '../services/Models/UserDataModels';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
@@ -126,25 +127,29 @@ export class GuestComponent implements AfterViewInit {
       return;
     };
 
+    const hasNotValidControls = (group: FormGroup) => {
+      return Object.keys(group.controls).some((key) => {
+        const control = group.get(key) as FormControl | null;
+
+        return control && (control.disabled || control.errors);
+      });
+    };
+
     if (!this.localUserForm.controls.name.value) return onFailure();
     if (
-      !this.localUserForm.controls.pinGroup.disabled &&
-      this.localUserForm.controls.pinGroup.errors
-    )
-      return onFailure();
-    if (
-      !this.localUserForm.controls.passwordGroup.disabled &&
-      this.localUserForm.controls.passwordGroup.errors
-    )
-      return onFailure();
+      hasNotValidControls(this.localUserForm.controls.pinGroup) &&
+      hasNotValidControls(this.localUserForm.controls.passwordGroup)
+    ) {
+      onFailure();
+    }
 
     const payload: LocalUserData = {
       auth: {
         name: this.localUserForm.controls.name.value,
         authOption: this.isPasswordSelected ? 'password' : 'pin',
         value: this.isPasswordSelected
-          ? this.localUserForm.controls.passwordGroup.controls.password.value
-          : this.localUserForm.controls.pinGroup.controls.pin.value,
+          ? this.localUserForm.get(['passwordGroup', 'password'])?.value
+          : this.localUserForm.get(['pinGroup', 'pin'])?.value,
       },
       groups: {},
     };
@@ -153,5 +158,12 @@ export class GuestComponent implements AfterViewInit {
       this.localUserForm.controls.rememberMe.getRawValue();
 
     this.authLocalUserService.createUser(payload);
+
+    this.viewTransitionService.goForward(this.mainTagRef.nativeElement, '/app');
   }
 }
+
+/*
+Change this component into a page component and move the register logic to guest-register component.
+Also create a login component which will contain registered users saved into the localStorage, after clicking the username, it will expand and ask user to provide password/PIN depending on user preference from registration.
+*/
