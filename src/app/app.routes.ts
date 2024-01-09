@@ -60,15 +60,6 @@ export const appRoutes: Routes = [
       ).then((m) => m.ForgotPasswordComponent),
   },
   {
-    title: 'Account management',
-    path: 'auth-state',
-    loadComponent: () =>
-      import('./auth-components/auth-state/auth-state.component').then(
-        (m) => m.AuthStateComponent
-      ),
-  },
-
-  {
     title: 'Home - Memo-licious',
     path: '',
     component: LandingPageComponent,
