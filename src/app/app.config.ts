@@ -19,7 +19,10 @@ import { appViewRoutes } from './app-view/app-view.routes';
 import { gettingStartedRoutes } from './getting-started/getting-started.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
-const routes = [/* ...appViewRoutes, */ ...gettingStartedRoutes, ...appRoutes];
+export const routes = [
+  /* ...appViewRoutes, */ ...gettingStartedRoutes,
+  ...appRoutes,
+];
 
 export const appConfig: ApplicationConfig = {
   providers: [
