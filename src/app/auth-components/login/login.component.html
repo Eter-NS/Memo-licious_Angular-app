@@ -30,11 +30,11 @@
         />
       </label>
       @if (wrongEmailOrPassword) {
-      <p class="input-error">
+      <p class="input-error" data-test="error-wrongEmailOrPassword">
         The password you entered is incorrect. Try again
       </p>
       } @if (emailDoesNotExist) {
-      <p class="input-error">
+      <p class="input-error" data-test="error-emailDoesNotExist">
         The email you entered does not belong to any account.
       </p>
       }

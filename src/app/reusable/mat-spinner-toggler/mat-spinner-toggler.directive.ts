@@ -15,7 +15,9 @@ export class MatSpinnerTogglerDirective {
   @Input({ required: true }) appMatSpinnerToggler = false;
 
   @HostListener('click') onClick() {
-    this.appMatSpinnerToggler &&
-      this.button.nativeElement.classList.add('sending');
+    this.button.nativeElement.classList.toggle(
+      'sending',
+      this.appMatSpinnerToggler
+    );
   }
 }

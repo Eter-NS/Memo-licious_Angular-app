@@ -1,22 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-
-import { redirectLoggedInToGuard } from './redirect-logged-in-to.guard';
 import {
   ActivatedRoute,
   CanActivateFn,
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
-import { AuthStateService } from '../services/state/auth-state.service';
-import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
-import { LocalUserData } from '../services/Models/UserDataModels';
+import { redirectUnauthorizedToGuard } from './redirect-unauthorized-to.guard';
 import { of } from 'rxjs';
+import { LocalUserData } from '../services/Models/UserDataModels';
+import { AuthStateService } from '../services/state/auth-state.service';
 import { UserCredential } from '@angular/fire/auth';
+import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
 
-describe('redirectLoggedInToGuard', () => {
+describe('redirectUnauthorizedToGuard', () => {
   const executeGuard = (loggedInFallback: string) => {
     return TestBed.runInInjectionContext(() =>
-      redirectLoggedInToGuard(loggedInFallback)
+      redirectUnauthorizedToGuard(loggedInFallback)
     );
   };
 
@@ -35,7 +34,7 @@ describe('redirectLoggedInToGuard', () => {
       .and.resolveTo(true),
   };
 
-  const path = '/app';
+  const path = '/online';
   let instance: CanActivateFn;
 
   beforeEach(() => {
@@ -70,35 +69,36 @@ describe('redirectLoggedInToGuard', () => {
     expect(instance).toBeTruthy();
   });
 
-  it('should call router.navigateByUrl() if user is logged in (online user)', async () => {
+  it(`should return true when the online user is signed in`, () => {
     authStateServiceMock.session.and.returnValue({} as UserCredential);
+    authLocalUserServiceMock.localUser$ = of(null);
+
+    const result = TestBed.runInInjectionContext(() =>
+      instance(activatedRouteMock.snapshot, {} as RouterStateSnapshot)
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it(`should return true when the online user is signed in`, () => {
+    authStateServiceMock.session.and.returnValue(null);
+    authLocalUserServiceMock.localUser$ = of({} as LocalUserData);
+
+    const result = TestBed.runInInjectionContext(() =>
+      instance(activatedRouteMock.snapshot, {} as RouterStateSnapshot)
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it(`should call router.navigateByUrl() when no user is signed in`, async () => {
+    authStateServiceMock.session.and.returnValue(null);
+    authLocalUserServiceMock.localUser$ = of(null);
 
     await TestBed.runInInjectionContext(() =>
       instance(activatedRouteMock.snapshot, {} as RouterStateSnapshot)
     );
 
     expect(routerMock.navigateByUrl).toHaveBeenCalledWith(path);
-  });
-
-  it('should call router.navigateByUrl() if user is logged in (local user)', async () => {
-    authStateServiceMock.session.and.returnValue(null);
-    authLocalUserServiceMock.localUser$ = of({} as LocalUserData);
-
-    TestBed.runInInjectionContext(() =>
-      instance(activatedRouteMock.snapshot, {} as RouterStateSnapshot)
-    );
-
-    expect(routerMock.navigateByUrl).toHaveBeenCalledWith(path);
-  });
-
-  it('should return true no user is logged in', async () => {
-    authStateServiceMock.session.and.returnValue(null);
-    authLocalUserServiceMock.localUser$ = of(null);
-
-    const result = await TestBed.runInInjectionContext(() =>
-      instance(activatedRouteMock.snapshot, {} as RouterStateSnapshot)
-    );
-
-    expect(result).toBe(true);
   });
 });

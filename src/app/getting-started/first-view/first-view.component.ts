@@ -27,6 +27,9 @@ export class FirstViewComponent implements OnInit {
   #router = inject(Router);
   localStorageService = inject(LocalStorageService);
   @ViewChild('container') sectionContainer!: ElementRef<HTMLDivElement>;
+  startAnimation = startAnimation;
+  runAnimations = runAnimations;
+  addAnimations = addAnimations;
 
   ngOnInit(): void {
     this.localStorageService.saveToStorage('finishedTutorial', false);
@@ -34,13 +37,13 @@ export class FirstViewComponent implements OnInit {
 
   fillView() {
     const element = this.sectionContainer.nativeElement;
-    addAnimations(element, 'fill-the-view-animation');
-    startAnimation(element);
+    this.addAnimations(element, 'fill-the-view-animation');
+    this.startAnimation(element);
   }
 
   runTransition() {
     const element = this.sectionContainer.nativeElement;
-    runAnimations(element, '.fade-out-animation', true);
+    this.runAnimations(element, '.fade-out-animation', true);
 
     setTimeout(() => {
       this.fillView();

@@ -45,6 +45,7 @@
                 [checked]="!isPasswordSelected"
                 (input)="isPasswordSelected = true; toggleAuthMethod()"
                 color="primary"
+                data-test="radio-password"
               >
                 Password
               </mat-radio-button>
@@ -52,13 +53,14 @@
                 [checked]="!isPasswordSelected"
                 (input)="isPasswordSelected = false; toggleAuthMethod()"
                 color="primary"
+                data-test="radio-pin"
               >
                 PIN
               </mat-radio-button>
             </mat-radio-group>
           </fieldset>
           @if (isPasswordSelected) {
-          <ng-container formGroupName="passwordGroup">
+          <div formGroupName="passwordGroup" data-test="password-group">
             <fieldset class="form-element">
               <label>
                 <p class="form-label">Create your Password</p>
@@ -91,9 +93,9 @@
               <p class="input-error">The passwords are not the same</p>
               }
             </fieldset>
-          </ng-container>
+          </div>
           } @else {
-          <ng-template formGroupName="pinGroup">
+          <div formGroupName="pinGroup" data-test="pin-group">
             <fieldset class="form-element">
               <label>
                 <p class="form-label">Create your PIN</p>
@@ -128,7 +130,7 @@
               <p class="input-error">Your PINs are not the same</p>
               }
             </fieldset>
-          </ng-template>
+          </div>
           }
 
           <fieldset class="form-element">

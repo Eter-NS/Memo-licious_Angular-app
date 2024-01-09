@@ -73,18 +73,8 @@ export const checkPassword = (
 ): ValidationErrors | null => {
   const pattern =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  const hasSpecialChar = /[@$!%*?&]+/;
-
   function checkInput(input: string) {
-    if (!pattern.test(input)) {
-      return { passwordError: true };
-    }
-    if (!hasSpecialChar.test(input)) {
-      return { noSpecialCharacter: true };
-    } else {
-      return null;
-    }
-    // return pattern.test(input) ? null : { passwordError: true };
+    return !pattern.test(input) ? { passwordError: true } : null;
   }
 
   if (control instanceof AbstractControl) {

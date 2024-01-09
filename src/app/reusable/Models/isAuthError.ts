@@ -1,6 +1,6 @@
-export function isAuthError(
-  error: unknown
-): error is { message: string; code: string } {
+import { FirebaseAuthError } from 'src/app/auth-components/services/Models/authModels';
+
+export function isAuthError(error: unknown): error is FirebaseAuthError {
   if (
     error &&
     typeof error === 'object' &&

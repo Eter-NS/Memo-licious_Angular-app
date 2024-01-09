@@ -3,6 +3,7 @@ import { Database, get, ref, set } from '@angular/fire/database';
 import { AuthStateService } from '../state/auth-state.service';
 import { UserCredential } from '@angular/fire/auth';
 import { AuthReturnCredits, DbInitialPayload } from '../Models/authModels';
+import { isAuthError } from 'src/app/reusable/Models/isAuthError';
 
 @Injectable({
   providedIn: 'root',
@@ -11,72 +12,78 @@ export class AuthDatabaseService {
   #authState = inject(AuthStateService);
   #db = inject(Database);
 
-  async databaseRegisterHandler(
-    result: UserCredential
-  ): Promise<AuthReturnCredits> {
-    if (!result.user.email) return { errors: { noEmailProvided: true } };
+  private ref = ref;
+  private set = set;
+  private get = get;
 
-    if (await this.isUserInDatabase()) {
+  async databaseRegisterHandler({
+    user: { email, uid, providerId, photoURL },
+  }: UserCredential): Promise<AuthReturnCredits> {
+    if (!email) return { errors: { noEmailProvided: true } };
+
+    if (await this.isUserInDatabase(uid)) {
       return {
         passed: true,
         registered: false,
       };
     } else {
-      const dbResult = await this.registerInDatabase(result);
-      const returnPayload: AuthReturnCredits = {
-        passed: true,
-        registered: dbResult,
-      };
-      if (!dbResult)
-        returnPayload.errors = {
-          sendingPostToDB: true,
+      let returnPayload: AuthReturnCredits;
+
+      if (await this.registerInDatabase(providerId, email, photoURL)) {
+        returnPayload = {
+          passed: true,
+          registered: true,
         };
+      } else {
+        returnPayload = {
+          errors: {
+            sendingPostToDB: true,
+          },
+        };
+      }
+
       return returnPayload;
     }
   }
 
-  async isUserInDatabase(): Promise<boolean | undefined> {
-    /* Takes the user collection and searches if there's already an account with this email */
+  async isUserInDatabase(uid: string): Promise<boolean | undefined> {
     try {
-      const userRef = ref(
-        this.#db,
-        `users/${this.#authState.auth.currentUser?.uid}`
-      );
-      const userSnapshot = await get(userRef);
-      if (userSnapshot.exists()) {
-        const user = userSnapshot.val();
-        return user.email === this.#authState.auth.currentUser?.email;
-      } else {
-        return false;
-      }
+      const userRef = this.ref(this.#db, `users/${uid}`);
+      const userSnapshot = await this.get(userRef);
+
+      return userSnapshot.exists();
     } catch (err) {
-      console.error('Error when checking if user exists: ', err);
+      if (isAuthError(err)) {
+        console.error(`Error when checking if user exists: ${err.message}`);
+      }
       return undefined;
     }
   }
 
-  async registerInDatabase({
-    providerId,
-    user: { email, photoURL },
-  }: UserCredential): Promise<boolean> {
-    if (!email) {
-      console.error('No email provided');
-      return false;
-    }
+  async registerInDatabase(
+    providerId: string | null,
+    email: string,
+    photoURL: string | null
+  ): Promise<boolean> {
     const payload: DbInitialPayload = {
       email,
       photoURL,
       providerId: providerId ?? 'login',
     };
-    const userRef = ref(
+
+    const userRef = this.ref(
       this.#db,
       `users/${this.#authState.auth.currentUser?.uid}`
     );
+
     try {
-      await set(userRef, payload);
+      await this.set(userRef, payload);
       return true;
-    } catch (error) {
-      console.error('Error when saving user data: ', error);
+    } catch (error: unknown) {
+      console.error(
+        'Error when saving user data: ',
+        (error as { message: string }).message
+      );
       return false;
     }
   }

@@ -1,9 +1,10 @@
 type runWithDelayOptions = {
-  timeoutTime?: number;
+  timeout?: number;
   delayT?: number;
   reverse?: boolean;
 };
 
+import { environment } from 'src/environments/environment.dev';
 import {
   forEachAndCb,
   startAnimation,
@@ -39,13 +40,13 @@ export function runAnimationOnce(
  * Runs animations specified in animationClass param
  */
 export function runAnimations(
-  object: NodeListOf<HTMLElement> | HTMLElement,
-  animationClass: string,
-  global?: boolean
-) {
-  if ('style' in object) {
+  object: NodeListOf<HTMLElement> | HTMLElement | Array<HTMLElement>,
+  animationClass?: string,
+  parent?: boolean
+): void {
+  if ('classList' in object) {
     // if global is true, the object is the parent of animation elements, otherwise it's a target.
-    global
+    parent && animationClass
       ? forEachAndCb(object.querySelectorAll(animationClass), startAnimation)
       : startAnimation(object);
   } else {
@@ -61,32 +62,34 @@ export const runWithDelay = (
     | NodeListOf<HTMLElement | Element>
     | HTMLCollection
     | Array<HTMLElement>,
-  { delayT, reverse, timeoutTime }: runWithDelayOptions
+  options?: runWithDelayOptions
 ) =>
   new Promise<void>((resolve, reject) => {
-    const delay = delayT ?? 100,
+    const delay = options?.delayT ?? 100,
       calculatedTimeout = delay * elementsArray.length,
-      // reverse = reverse,
-      lastElement = reverse
+      lastElement = options?.reverse
         ? elementsArray[0]
         : elementsArray[elementsArray.length - 1];
 
-    if (timeoutTime)
-      if (calculatedTimeout > timeoutTime)
-        throw new Error(
-          `Timeout time is too short, actual value: ${timeoutTime}, minimum time calculated for the elementsArray: ${calculatedTimeout}`
-        );
-
-    lastElement.addEventListener('animationend', afterLastAnimation);
+    if (
+      options?.timeout &&
+      options.timeout < calculatedTimeout &&
+      !environment.production
+    ) {
+      console.warn(`Your timeout is lower than recommended one`);
+    }
 
     function* runInSequence() {
       for (
-        let i = reverse ? elementsArray.length - 1 : 0;
-        reverse ? i > -1 : i < elementsArray.length;
-        reverse ? i-- : i++
+        let i = options?.reverse ? elementsArray.length - 1 : 0;
+        options?.reverse ? i > -1 : i < elementsArray.length;
+        options?.reverse ? i-- : i++
       ) {
         const el = elementsArray[i] as HTMLElement;
-        if (!el) reject(new Error('Element not found'));
+        if (!el) {
+          reject(new Error(`Element ${i} was not found`));
+          return;
+        }
         el.addEventListener(
           'animationend',
           el === lastElement ? afterLastAnimation : afterAnimation
@@ -95,9 +98,9 @@ export const runWithDelay = (
       }
     }
     const run = runInSequence();
-    const runningEachAnimation = setInterval(() => {
+    const intervalId = setInterval(() => {
       if (run.next().done) {
-        clearInterval(runningEachAnimation);
+        clearInterval(intervalId);
       }
     }, delay);
 
@@ -110,9 +113,11 @@ export const runWithDelay = (
 
     function afterLastAnimation(e: Event) {
       afterAnimation(e);
+
       setTimeout(() => {
         resolve();
-      }, timeoutTime ?? calculatedTimeout);
+      }, options?.timeout ?? calculatedTimeout);
+
       lastElement.removeEventListener('animationend', afterLastAnimation);
     }
   });

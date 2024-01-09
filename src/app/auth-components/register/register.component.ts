@@ -4,7 +4,9 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   Output,
+  SimpleChanges,
   inject,
 } from '@angular/core';
 import {
@@ -24,7 +26,7 @@ import { GoogleLogoComponent } from 'src/app/reusable/SVGs/google-logo/google-lo
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { NgIf } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler.directive';
+import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import {
   AuthUserData,
   FormCommonFeaturesService,
@@ -48,7 +50,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RegisterComponent implements AfterViewInit {
+export class RegisterComponent implements AfterViewInit, OnChanges {
   fb = inject(NonNullableFormBuilder);
   formCommonFeaturesService = inject(FormCommonFeaturesService);
   registerForm = this.fb.group(
@@ -56,7 +58,7 @@ export class RegisterComponent implements AfterViewInit {
       name: this.fb.control('', {
         validators: [
           Validators.required,
-          Validators.minLength(4),
+          Validators.minLength(3),
           Validators.maxLength(15),
           includesSpecialCharacter,
         ],
@@ -84,6 +86,12 @@ export class RegisterComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.formCommonFeaturesService.onInitAnimations();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['emailAlreadyInUse']) {
+      this.sending = false;
+    }
   }
 
   getError = (element: string | string[], validation: string) =>

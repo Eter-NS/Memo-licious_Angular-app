@@ -17,6 +17,7 @@ import { ViewTransitionService } from 'src/app/reusable/animations/view-transiti
 import { PreviousPageButtonComponent } from 'src/app/ui/previous-page-button/previous-page-button.component';
 import { AuthEmailService } from '../services/email/auth-email.service';
 import { AuthStateService } from '../services/state/auth-state.service';
+import { checkEmail } from 'src/app/custom-validations/custom-validations';
 
 const SENDING_STATE = {
   Sending: 'sending',
@@ -48,10 +49,6 @@ export class VerifyComponent implements OnInit, AfterViewInit {
   @ViewChild('content') contentRef!: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
-    if (!this.userEmail) {
-      this.sendingSubject.next(SENDING_STATE.Failure);
-      return;
-    }
     this.sendEmail();
   }
 
@@ -59,7 +56,17 @@ export class VerifyComponent implements OnInit, AfterViewInit {
     this.viewTransitionService.viewFadeIn(this.contentRef.nativeElement);
   }
 
+  isValidEmail() {
+    if (!this.userEmail || checkEmail(this.userEmail)) {
+      this.sendingSubject.next(SENDING_STATE.Failure);
+      return false;
+    }
+    return true;
+  }
+
   async sendEmail() {
+    if (!this.isValidEmail()) return;
+
     try {
       await this.#authEmailService.sendVerificationEmail();
       this.sendingSubject.next(SENDING_STATE.Success);

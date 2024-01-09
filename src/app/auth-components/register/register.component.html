@@ -97,7 +97,7 @@
       <mat-spinner class="sending-spinner"></mat-spinner>
       } @else { Register }
     </button>
-    <p class="input-error">
+    <p class="input-error" data-test="checkInputs||emailAlreadyInUse">
       {{
         registerForm.hasError("checkInputs")
           ? "Check the inputs above"

@@ -1,10 +1,11 @@
 export function hasNestedKey<T extends object>(obj: T, key: string): boolean {
-  if (key in obj) {
-    return true;
-  }
-  for (const key in obj) {
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      if (hasNestedKey(obj[key] as T, key)) {
+  for (const objectKey in obj) {
+    if (objectKey === key) {
+      return true;
+    }
+
+    if (typeof obj[objectKey] === 'object' && obj[objectKey] !== null) {
+      if (hasNestedKey(obj[objectKey] as T, key)) {
         return true;
       }
     }

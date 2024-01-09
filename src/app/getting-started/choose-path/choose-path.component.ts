@@ -30,7 +30,7 @@ import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-
     NgOptimizedImage,
     CustomMatRippleDirective,
   ],
-  selector: 'app-login-or-guest-view',
+  selector: 'app-choose-path',
   templateUrl: './choose-path.component.html',
   styleUrls: ['./choose-path.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +40,9 @@ export class ChoosePathComponent implements AfterViewInit {
   viewTransitionService = inject(ViewTransitionService);
   #localStorageService = inject(LocalStorageService);
   @ViewChild('container') hostElement!: ElementRef<HTMLElement>;
+  removeAnimations = removeAnimations;
+  addAnimations = addAnimations;
+  runWithDelay = runWithDelay;
 
   ngAfterViewInit(): void {
     for (const child of Object.values(
@@ -55,12 +58,12 @@ export class ChoosePathComponent implements AfterViewInit {
     this.#localStorageService.saveToStorage('finishedTutorial', true);
     const element = this.hostElement.nativeElement;
 
-    removeAnimations(element, 'fadeIn-vol-2-animation', true);
-    addAnimations(element, 'fade-out-animation', true);
+    this.removeAnimations(element, 'fadeIn-vol-2-animation', true);
+    this.addAnimations(element, 'fade-out-animation', true);
 
-    runWithDelay(element.children, {
+    this.runWithDelay(element.children, {
       reverse: true,
-      timeoutTime: 1000,
+      timeout: 800,
     })
       .then(() => {
         this.viewTransitionService.goBackClicked = false;

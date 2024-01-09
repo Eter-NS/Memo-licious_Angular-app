@@ -6,6 +6,8 @@ import {
   Input,
   ChangeDetectionStrategy,
   inject,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import {
   NonNullableFormBuilder,
@@ -19,7 +21,7 @@ import { checkEmail } from 'src/app/custom-validations/custom-validations';
 import { GoogleLogoComponent } from 'src/app/reusable/SVGs/google-logo/google-logo.component';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler.directive';
+import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import {
   AuthUserData,
   FormCommonFeaturesService,
@@ -43,7 +45,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
   styleUrls: ['../form.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent implements AfterViewInit, OnChanges {
   fb = inject(NonNullableFormBuilder);
   formCommonFeaturesService = inject(FormCommonFeaturesService);
   loginForm = this.fb.group({
@@ -66,6 +68,12 @@ export class LoginComponent implements AfterViewInit {
     this.formCommonFeaturesService.onInitAnimations();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['wrongEmailOrPassword'] || changes['emailDoesNotExist']) {
+      this.sending = false;
+    }
+  }
+
   getError = (element: string | string[], validation: string) =>
     this.formCommonFeaturesService.getError(
       this.loginForm,
@@ -75,6 +83,6 @@ export class LoginComponent implements AfterViewInit {
 
   onSubmit = () => {
     this.rememberMe.emit(this.loginForm.controls.rememberMe.getRawValue());
-    return this.formCommonFeaturesService.onSubmit(this.loginForm, this.data);
+    this.formCommonFeaturesService.onSubmit(this.loginForm, this.data);
   };
 }
