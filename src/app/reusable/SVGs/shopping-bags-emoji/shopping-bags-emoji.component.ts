@@ -9,12 +9,7 @@ import { SvgElementsDirective } from '../svg-elements.directive';
   hostDirectives: [
     {
       directive: SvgElementsDirective,
-      inputs: [
-        'svgPrimaryColor',
-        'svgWidth',
-        'svgWidthScale',
-        'svgMinMaxWidth',
-      ],
+      inputs: ['svgPrimaryColor', 'svgWidth', 'svgScale', 'svgMinMaxWidth'],
     },
   ],
   styles: [

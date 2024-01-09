@@ -52,6 +52,7 @@ export class PreviousPageButtonComponent implements AfterViewInit, OnDestroy {
   @ViewChild('anchor') anchor!: ElementRef<HTMLAnchorElement>;
   viewTransitionService = inject(ViewTransitionService);
   subscription!: Subscription;
+  runAnimationOnce = runAnimationOnce;
 
   ngAfterViewInit(): void {
     this.subscription = this.viewTransitionService.page$.subscribe((value) => {
@@ -70,8 +71,12 @@ export class PreviousPageButtonComponent implements AfterViewInit, OnDestroy {
   }
 
   fadeOut() {
-    runAnimationOnce(this.anchor.nativeElement, 'fade-out-vol-2-animation', {
-      removeAnimationClassOnFinish: true,
-    });
+    this.runAnimationOnce(
+      this.anchor.nativeElement,
+      'fade-out-vol-2-animation',
+      {
+        removeAnimationClassOnFinish: true,
+      }
+    );
   }
 }

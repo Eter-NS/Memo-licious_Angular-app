@@ -14,9 +14,8 @@ class TestButtonComponent {}
 describe('CustomMatRippleDirective', () => {
   let fixture: ComponentFixture<TestButtonComponent>;
   let directiveEl: DebugElement;
+  let directiveInstance: CustomMatRippleDirective;
   let component: HTMLElement;
-  const darkShadow = 'hsl(0, 0%, 0%, 0.15)';
-  const lightShadow = 'hsl(0, 0%, 100%, 0.15)';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -27,6 +26,7 @@ describe('CustomMatRippleDirective', () => {
     directiveEl = fixture.debugElement.query(
       By.directive(CustomMatRippleDirective)
     );
+    directiveInstance = directiveEl.injector.get(CustomMatRippleDirective);
   });
 
   beforeEach(() => {
@@ -41,13 +41,13 @@ describe('CustomMatRippleDirective', () => {
     component.style.backgroundColor = 'rgba(200, 200, 200, 1)';
     fixture.detectChanges();
 
-    expect(directiveEl.componentInstance.color).toEqual(darkShadow);
+    expect(directiveInstance.color).toEqual(directiveInstance.darkShadow);
   });
 
   it('should override the default color to the bright in case of dark background', () => {
     component.style.backgroundColor = 'rgba(25, 25, 25, 1)';
     fixture.detectChanges();
 
-    expect(directiveEl.componentInstance.color).toEqual(lightShadow);
+    expect(directiveInstance.color).toEqual(directiveInstance.lightShadow);
   });
 });

@@ -17,12 +17,7 @@ import { SvgElementsDirective } from '../svg-elements.directive';
   hostDirectives: [
     {
       directive: SvgElementsDirective,
-      inputs: [
-        'svgWidthScale',
-        'svgPrimaryColor',
-        'svgWidth',
-        'svgMinMaxWidth',
-      ],
+      inputs: ['svgScale', 'svgPrimaryColor', 'svgWidth', 'svgMinMaxWidth'],
     },
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

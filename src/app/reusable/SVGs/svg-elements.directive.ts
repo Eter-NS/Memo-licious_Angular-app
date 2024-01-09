@@ -4,6 +4,8 @@ import {
   ElementRef,
   HostListener,
   Input,
+  OnChanges,
+  SimpleChanges,
   inject,
 } from '@angular/core';
 
@@ -11,20 +13,20 @@ import {
   selector: '[appSvgElements]',
   standalone: true,
 })
-export class SvgElementsDirective implements AfterViewInit {
+export class SvgElementsDirective implements AfterViewInit, OnChanges {
   #svgComponent = inject<ElementRef<HTMLElement>>(ElementRef<HTMLElement>);
-  primaryColorElements!: NodeListOf<HTMLElement>;
+  primaryColorElements?: NodeListOf<HTMLElement>;
   svgElement!: SVGElement;
 
   /**
    * The widthScale is used to change the size of the SVG based on the viewport size.
    * To use this value unset the svgWidth and svgHeight props.
    */
-  @Input() svgWidthScale = 0.6;
+  @Input() svgScale = 0.6;
   /**
    * primaryColor changes the default SVG main color.
    */
-  @Input() svgPrimaryColor = '#000';
+  @Input() svgPrimaryColor?: string;
   /**
    * The static setting for the width, it's not responsive to the viewport.
    * @warn Try not to use it with svgHeight to keep the right aspect ratio.
@@ -38,18 +40,9 @@ export class SvgElementsDirective implements AfterViewInit {
   /**
    * The size matrix for the smallest and the highest possible svg width. It works optionally with widthScale, when it's also set.
    */
-  @Input() svgMinMaxWidth: [number, number] = [200, 450];
+  @Input() svgMinMaxWidth?: [number, number] = [200, 450];
 
   ngAfterViewInit(): void {
-    if (
-      this.svgMinMaxWidth &&
-      this.svgMinMaxWidth[0] >= this.svgMinMaxWidth[1]
-    ) {
-      throw new Error(
-        'minMaxWidth: The minimum width cannot be greater than its maximum size'
-      );
-    }
-
     this.svgElement = this.#svgComponent.nativeElement.querySelector(
       'svg'
     ) as SVGElement;
@@ -59,55 +52,117 @@ export class SvgElementsDirective implements AfterViewInit {
         this.#svgComponent.nativeElement.querySelectorAll(
           '[data-svg-primary-color]'
         );
-
-      // SVG color customization
-      this.primaryColorElements.forEach((el) => {
-        el.style.fill = this.svgPrimaryColor || '#ffc727';
-      });
+      this.assignNewColor();
     }
 
     this.assignNewSize();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (this.hasPropertyChanged(changes, 'svgPrimaryColor')) {
+      this.assignNewColor();
+    }
+
+    if (this.hasPropertyChanged(changes, 'svgMinMaxWidth')) {
+      this.checkSvgMinMaxWidth();
+    }
+
+    const sizeProperties = [
+      'svgMinMaxWidth',
+      'svgScale',
+      'svgWidth',
+      'svgHeight',
+    ] as const;
+
+    if (
+      sizeProperties.some((prop) => this.hasPropertyChanged(changes, prop)) &&
+      this.svgElement
+    ) {
+      this.assignNewSize();
+    }
+  }
+
+  private hasPropertyChanged(
+    changes: SimpleChanges,
+    propName: keyof SvgElementsDirective
+  ): boolean {
+    const prop = changes[propName];
+    return prop && prop.currentValue !== prop.previousValue;
+  }
+
+  assignNewColor() {
+    if (this.svgPrimaryColor != null) {
+      // SVG color customization
+      this.primaryColorElements?.forEach((el) => {
+        el.style.fill = this.svgPrimaryColor as string;
+      });
+    }
+  }
+
+  checkSvgMinMaxWidth() {
+    if (
+      this.svgMinMaxWidth &&
+      this.svgMinMaxWidth[0] >= this.svgMinMaxWidth[1]
+    ) {
+      throw new Error(
+        'minMaxWidth: The minimum width cannot be greater than its maximum size'
+      );
+    }
+  }
+
   @HostListener('window:resize')
   assignNewSize(): void {
-    const metrics = {
-      width: (this.svgHeight ? 'auto' : this.svgWidth) || this.changeSVGSize(),
-      height: (this.svgWidth ? 'auto' : this.svgHeight) || this.changeSVGSize(),
-    };
+    const metrics = this.checkSizeInputs();
 
     this.updateSize(this.#svgComponent.nativeElement, metrics);
     this.updateSize(this.svgElement, metrics);
   }
 
-  private changeSVGSize() {
+  changeSVGSize() {
     const minimumSize = this.svgMinMaxWidth?.[0];
     const maximumSize = this.svgMinMaxWidth?.[1];
 
-    if (!minimumSize || !maximumSize) {
-      throw new Error(
-        'Hey, you forgot to set the minimum and maximum svg size!'
-      );
-    }
     let chosenValue: number;
 
-    // Takes smaller viewport size as the size of the SVG
-    window.outerHeight >= window.outerWidth
-      ? (chosenValue = window.outerWidth)
-      : (chosenValue = window.outerHeight);
+    // Takes the smaller viewport size as SVG size
+    window.outerHeight <= window.outerWidth
+      ? (chosenValue = window.outerHeight)
+      : (chosenValue = window.outerWidth);
 
-    const value = chosenValue * this.svgWidthScale;
+    const value = chosenValue * this.svgScale;
+
+    if (!minimumSize || !maximumSize) {
+      return value.toString();
+    }
 
     if (value < minimumSize) return minimumSize.toString();
     else if (value > maximumSize) return maximumSize.toString();
     else return value.toString();
   }
 
-  private updateSize(
+  updateSize(
     element: HTMLElement | SVGElement,
     { width, height }: { width: string; height: string }
   ) {
     element.style.setProperty('width', width);
     element.style.setProperty('height', height);
+  }
+
+  checkSizeInputs() {
+    let width = this.svgWidth;
+    let height = this.svgHeight;
+
+    if (!width && !height) {
+      width = this.changeSVGSize();
+      height = 'auto';
+    }
+    if (!width && height !== 'auto') {
+      width = 'auto';
+    }
+    if (width !== 'auto' && !height) {
+      height = 'auto';
+    }
+
+    return { width: width as string, height: height as string };
   }
 }

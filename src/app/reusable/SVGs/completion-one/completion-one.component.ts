@@ -11,9 +11,10 @@ import { SvgElementsDirective } from '../svg-elements.directive';
     {
       directive: SvgElementsDirective,
       inputs: [
-        'svgWidthScale',
+        'svgScale',
         'svgPrimaryColor',
         'svgWidth',
+        'svgHeight',
         'svgMinMaxWidth',
       ],
     },

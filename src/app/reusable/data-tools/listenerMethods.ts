@@ -1,28 +1,14 @@
-export default function throttle<
-  T extends (...args: Parameters<T>) => ReturnType<T>
->(cb: T, delay = 1000) {
-  let shouldWait = false;
-  let waitingArgs: Parameters<T> | null;
-
-  const timeoutFunc = () => {
-    if (waitingArgs == null) {
-      shouldWait = false;
-    } else {
-      cb(...(waitingArgs as Parameters<T>));
-      waitingArgs = null;
-      setTimeout(timeoutFunc, delay);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function throttle<T extends (...args: any[]) => void>(
+  func: T,
+  limit: number = 1000
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  return function (...args: Parameters<T>): void {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
     }
-  };
-
-  return (...args: unknown[]) => {
-    if (shouldWait) {
-      waitingArgs = args as Parameters<T>;
-      return;
-    }
-
-    cb(...(args as Parameters<T>));
-    shouldWait = true;
-
-    setTimeout(timeoutFunc, delay);
   };
 }
