@@ -8,7 +8,7 @@ describe('AppViewComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AppViewComponent]
+      imports: [AppViewComponent],
     });
     fixture = TestBed.createComponent(AppViewComponent);
     component = fixture.componentInstance;
