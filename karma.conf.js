@@ -33,5 +33,6 @@ module.exports = function (config) {
     reporters: ["progress", "kjhtml"],
     browsers: ["Chrome"],
     restartOnFileChange: true,
+    browserNoActivityTimeout: 1000 * 60 * 60,
   });
 };
