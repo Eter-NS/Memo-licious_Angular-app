@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { AuthStateService } from '../services/state/auth-state.service';
-import { AuthLocalUserService } from '../services/auth-local-user.service';
+import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
 import { CanActivateFn, Router } from '@angular/router';
 
 export const redirectUnauthorizedToGuard = (
@@ -13,18 +13,17 @@ export const redirectUnauthorizedToGuard = (
     let isOnlineUser = false,
       isLocalUser = false;
 
-    isOnlineUser = !!authStateService.session();
+    isOnlineUser = Boolean(authStateService.session());
 
-    if (isOnlineUser) {
-      return true;
-    } else {
-      const subscription = authLocalUserService
-        .getCurrentUser()
-        .subscribe((userState) => {
-          isLocalUser = !!userState;
-        });
-      subscription.unsubscribe();
-      return isLocalUser || router.navigateByUrl(denyFallback);
-    }
+    if (isOnlineUser) return true;
+
+    const subscription = authLocalUserService.localUser$.subscribe(
+      (userState) => {
+        isLocalUser = Boolean(userState);
+      }
+    );
+    subscription.unsubscribe();
+
+    return isLocalUser || router.navigateByUrl(denyFallback);
   };
 };
