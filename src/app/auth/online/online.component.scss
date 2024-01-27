@@ -1,0 +1,112 @@
+@use "../../../scss/utils.scss" as *;
+
+main,
+.content,
+.container,
+.component-content {
+  display: grid;
+}
+
+main {
+  place-content: center;
+  color: var(--contrast-color-accent-50);
+
+  --original-color: var(--color-accent-100);
+  --desired-color: var(--color-accent-50);
+  overflow: clip;
+}
+
+.container {
+  margin: {
+    left: free-space("sm");
+    right: free-space("sm");
+  }
+}
+
+.content {
+  --min-value-break: 0.5rem;
+  --max-value-break: 2.5vh;
+  --break-between-elements: max(var(--min-value-break), var(--max-value-break));
+
+  grid-template-rows: 1fr auto;
+  row-gap: var(--break-between-elements);
+  padding-bottom: var(--break-between-elements);
+}
+
+.login-register {
+  &-content,
+  &-switch {
+    display: grid;
+    align-content: center;
+  }
+
+  &-content {
+    animation: var(--fade-in-on-load);
+  }
+
+  &-switch {
+    gap: free-space("sm");
+
+    & > a {
+      text-align: center;
+      text-decoration: none;
+      font-size: var(--p);
+      font-weight: 500;
+      cursor: pointer;
+      color: inherit;
+    }
+  }
+}
+
+.component-content {
+  row-gap: var(--break-between-elements);
+  align-content: center;
+  justify-items: center;
+}
+
+.sign-in-with-google {
+  @include inset-box-shadow-with-transition(var(--color-accent-50));
+  @extend %flex-center;
+  @include border-radius("sm");
+  gap: free-space("sm");
+  padding: 1.5vmax;
+  border: none;
+  cursor: pointer;
+  background-color: white;
+  color: black;
+
+  & > span {
+    font-size: var(--form-input);
+    font-weight: 500;
+  }
+}
+
+.go-back-button {
+  &-wrapper {
+    padding: free-space("xs") 0;
+  }
+}
+
+%loading-state {
+  place-content: center;
+}
+
+.loading-state-register {
+  @extend %loading-state;
+  min-height: 630px;
+}
+
+.loading-state-login {
+  @extend %loading-state;
+  min-height: 400px;
+}
+
+.loading-defer-spinner {
+  --size: max(var(--h1) * 1.5, 7.5vmin);
+  width: var(--size) !important;
+  height: var(--size) !important;
+  margin: {
+    left: auto;
+    right: auto;
+  }
+}

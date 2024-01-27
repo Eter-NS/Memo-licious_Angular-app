@@ -1,0 +1,73 @@
+<ul class="accounts-list">
+  @for (user of users; track user.name) {
+  <li
+    class="account"
+    [class.is-selected]="selectedAccount === $index"
+    (click)="togglePassphraseInput($index)"
+    (keyup.enter)="togglePassphraseInput($index)"
+    tabindex="0"
+  >
+    <div
+      class="account__card"
+      [style.--user-avatar-color]="user.profileColor"
+      [attr.data-user-avatar-text]="user.name[0].toUpperCase()"
+    >
+      <p class="account__name">
+        {{
+          user.name.length > maxUsernameLength
+            ? user.name.slice(0, maxUsernameLength)
+            : user.name
+        }}
+      </p>
+    </div>
+    <div
+      [ngClass]="{
+        passphrase: selectedAccount === $index,
+        'passphrase-hidden': selectedAccount !== $index
+      }"
+    >
+      <form
+        class="auth-form"
+        [formGroup]="localLoginForm"
+        (ngSubmit)="onSubmit()"
+      >
+        <input
+          type="password"
+          class="passphrase-input"
+          placeholder="Pin or Password"
+          formControlName="passphrase"
+        />
+        <div class="xyz">
+          <div>
+            <mat-checkbox color="primary" [formControl]="rememberMeControl"
+              >Remember Me</mat-checkbox
+            >
+          </div>
+
+          <button
+            type="submit"
+            class="submit-button"
+            appCustomMatRipple
+            [appMatSpinnerToggler]="localLoginForm.valid"
+          >
+            @if (sending) {
+            <mat-spinner class="sending-spinner"></mat-spinner>
+            } @else { Log In }
+          </button>
+        </div>
+      </form>
+      @if(localLoginForm.hasError('invalidForm')){
+      <p class="input-error">Check the input above</p>
+      }
+      <!--  -->
+      @if(wrongCredentials){
+      <p class="input-error">Wrong credentials</p>
+      }
+    </div>
+  </li>
+  } @empty {
+  <div class="no-accounts">
+    <p>Sorry, but there is no account on this device 😥</p>
+  </div>
+  }
+</ul>
