@@ -1,0 +1,126 @@
+<div class="form-wrapper" aria-label="The local account form">
+  <h1 class="form__header">Create a local account</h1>
+  <form (ngSubmit)="onSubmit()" [formGroup]="localRegisterForm" class="form">
+    <fieldset class="form-element">
+      <label>
+        <p class="form-label">Username</p>
+        <input type="text" formControlName="name" />
+      </label>
+      @if (getError('name', 'required') &&
+      localRegisterForm.get('name')?.touched) {
+      <p class="input-error">This field is required!</p>
+      } @if (getError('name', 'minlength')) {
+      <p class="input-error">Your name is too short</p>
+      } @if (getError('name', 'maxlength')) {
+      <p class="input-error">Your name is too long</p>
+      }
+    </fieldset>
+    <fieldset class="form-element">
+      <h2 class="auth-header">Type of authentication</h2>
+      <mat-radio-group
+        class="radio-options"
+        aria-label="Select the authentication method"
+      >
+        <mat-radio-button
+          [checked]="!isPasswordSelected"
+          (input)="isPasswordSelected = true; toggleAuthMethod()"
+          (keyup.enter)="isPasswordSelected = true; toggleAuthMethod()"
+          color="primary"
+          data-test="radio-password"
+        >
+          Password
+        </mat-radio-button>
+        <mat-radio-button
+          [checked]="!isPasswordSelected"
+          (input)="isPasswordSelected = false; toggleAuthMethod()"
+          (keyup.enter)="isPasswordSelected = false; toggleAuthMethod()"
+          color="primary"
+          data-test="radio-pin"
+        >
+          PIN
+        </mat-radio-button>
+      </mat-radio-group>
+    </fieldset>
+    @if (isPasswordSelected) {
+    <div formGroupName="passwordGroup" data-test="password-group">
+      <fieldset class="form-element">
+        <label>
+          <p class="form-label">Create your Password</p>
+          <input type="password" formControlName="password" />
+        </label>
+        @if ( getError(['passwordGroup', 'password'], 'required') &&
+        localRegisterForm.get(['passwordGroup', 'password'])?.touched) {
+        <p class="input-error">This field is required!</p>
+        } @if ( getError(['passwordGroup', 'password'], 'passwordError') &&
+        localRegisterForm.get(['passwordGroup', 'password'])?.dirty) {
+        <p class="input-error">
+          The password must have 8 characters, numbers, and special characters
+        </p>
+        }
+      </fieldset>
+      <fieldset class="form-element">
+        <label>
+          <p class="form-label">Confirm your Password</p>
+          <input type="password" formControlName="confirmPassword" />
+        </label>
+        @if ( getError(['passwordGroup', 'confirmPassword'], 'required') &&
+        localRegisterForm.get(['passwordGroup', 'confirmPassword']) ?.touched) {
+        <p class="input-error">This field is required!</p>
+        } @if ( getError( ['passwordGroup', 'confirmPassword'], 'passwordMatch'
+        ) && localRegisterForm.get(['passwordGroup', 'confirmPassword'])?.dirty)
+        {
+
+        <p class="input-error">The passwords are not the same</p>
+        }
+      </fieldset>
+    </div>
+    } @else {
+    <div formGroupName="pinGroup" data-test="pin-group">
+      <fieldset class="form-element">
+        <label>
+          <p class="form-label">Create your PIN</p>
+          <input type="password" inputmode="numeric" formControlName="pin" />
+        </label>
+        @if ( getError(['pinGroup', 'pin'], 'required') &&
+        localRegisterForm.get(['pinGroup', 'pin'])?.touched) {
+        <p class="input-error">This field is required!</p>
+        } @if ( getError(['pinGroup', 'pin'], 'pinError') &&
+        localRegisterForm.get(['pinGroup', 'pin'])?.dirty) {
+        <p class="input-error">Invalid PIN. Use from 4 to 8 digits.</p>
+        }
+      </fieldset>
+      <fieldset class="form-element">
+        <label>
+          <p class="form-label">Confirm your PIN</p>
+          <input
+            type="password"
+            inputmode="numeric"
+            formControlName="confirmPin"
+          />
+        </label>
+        @if ( getError(['pinGroup', 'confirmPin'], 'required') &&
+        localRegisterForm.get(['pinGroup', 'confirmPin'])?.touched) {
+        <p class="input-error">This field is required!</p>
+        } @if ( getError(['pinGroup', 'confirmPin'], 'unmatchedPins') &&
+        localRegisterForm.get(['pinGroup', 'confirmPin'])?.dirty) {
+        <p class="input-error">Your PINs are not the same</p>
+        }
+      </fieldset>
+    </div>
+    }
+
+    <button
+      type="submit"
+      class="submit-button"
+      appCustomMatRipple
+      [appMatSpinnerToggler]="localRegisterForm.valid"
+    >
+      @if (sending ) {
+      <mat-spinner class="sending-spinner"></mat-spinner>
+      } @else { Register }
+    </button>
+    @if (localRegisterForm.hasError('invalidForm')) {
+    <p class="input-error">Check the inputs above</p>
+    }
+  </form>
+</div>

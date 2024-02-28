@@ -1,4 +1,4 @@
-import { FirebaseAuthError } from 'src/app/auth-components/services/Models/authModels';
+import { FirebaseAuthError } from 'src/app/auth/services/Models/authModels';
 
 export function isAuthError(error: unknown): error is FirebaseAuthError {
   if (
