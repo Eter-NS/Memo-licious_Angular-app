@@ -49,7 +49,7 @@ export class ChoosePathComponent implements AfterViewInit {
       this.hostElement.nativeElement.children
     )) {
       runAnimationOnce(child as HTMLElement, 'fadeIn-vol-2-animation', {
-        removeAnimationClassOnFinish: true,
+        removeClassOnFinish: true,
       });
     }
   }

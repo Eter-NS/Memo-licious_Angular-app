@@ -51,7 +51,7 @@ main {
   margin: 0 var(--padding) var(--padding);
   padding: var(--padding);
   min-height: 45vh;
-  @include border-radius("lg");
+  @include border-radius("md");
 
   display: grid;
   place-items: center;
@@ -93,10 +93,10 @@ main {
 }
 
 .CTA {
-  @extend %CTA, %primary-button;
+  @extend %CTA, %primary-button-1;
 
   &--alternative {
-    @extend %CTA, %secondary-button;
+    @extend %CTA, %primary-button-2;
   }
 }
 

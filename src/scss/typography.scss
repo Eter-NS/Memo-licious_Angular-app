@@ -24,6 +24,12 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+*,
+*::before,
+*::after {
+  font-size: var(--p);
+}
+
 h1 {
   font-size: var(--h1);
   font-weight: 500;
@@ -35,9 +41,7 @@ h2 {
 h3 {
   font-size: var(--h3);
 }
-p {
-  font-size: var(--p);
-}
+
 input {
   font-size: var(--form-input);
 }

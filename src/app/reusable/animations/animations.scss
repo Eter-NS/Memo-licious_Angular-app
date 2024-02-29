@@ -117,7 +117,8 @@
 }
 
 .fadeOut-to-top-animation {
-  animation: fadeIn-to-top 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+  animation: fadeOut-to-top 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
+    forwards;
   animation-play-state: paused;
 }
 
@@ -184,7 +185,7 @@
 }
 
 .fadeOut-to-bottom-animation {
-  animation: fadeIn-to-bottom 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
+  animation: fadeOut-to-bottom 400ms cubic-bezier(0.55, 0.055, 0.675, 0.19)
     forwards;
   animation-play-state: paused;
 }
@@ -219,12 +220,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
-    --duration: 100ms;
-    --delay: 50ms;
+  *,
+  *::before,
+  *::after {
+    --duration: 2ms;
+    --delay: 1ms;
     animation-duration: var(--duration) !important;
-    transition-duration: var(--duration) !important;
     animation-delay: var(--delay) !important;
+    transition-duration: var(--duration) !important;
     transition-delay: var(--delay) !important;
   }
 }

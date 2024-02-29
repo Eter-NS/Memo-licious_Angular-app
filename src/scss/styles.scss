@@ -6,34 +6,75 @@
 @use "./typography.scss";
 @use "./viewport.scss";
 
+@include mat.core();
+
 @include mat.core-theme(theme.$light-theme);
-@include mat.all-component-themes(theme.$light-theme);
-:root {
+// @include mat.strong-focus-indicators();
+@include mat.toolbar-theme(theme.$light-theme);
+@include mat.sidenav-theme(theme.$light-theme);
+@include mat.dialog-theme(theme.$light-theme);
+@include mat.button-theme(theme.$light-theme);
+@include mat.menu-theme(theme.$light-theme);
+@include mat.slide-toggle-theme(theme.$light-theme);
+@include mat.checkbox-theme(theme.$light-theme);
+@include mat.select-theme(theme.$light-theme);
+@include mat.snack-bar-theme(theme.$light-theme);
+@include mat.radio-theme(theme.$light-theme);
+@include mat.chips-theme(theme.$light-theme);
+@include mat.form-field-theme(theme.$light-theme);
+@include mat.progress-spinner-theme(theme.$progress-spinner-light-theme);
+
+// Default theme
+.light {
+  @include mat.core-color(theme.$light-theme);
+  // @include mat.strong-focus-indicators();
+  @include mat.toolbar-color(theme.$light-theme);
+  @include mat.sidenav-color(theme.$light-theme);
+  @include mat.dialog-color(theme.$light-theme);
+  @include mat.button-color(theme.$light-theme);
+  @include mat.menu-color(theme.$light-theme);
+  @include mat.slide-toggle-color(theme.$light-theme);
+  @include mat.checkbox-color(theme.$light-theme);
+  @include mat.select-color(theme.$light-theme);
+  @include mat.snack-bar-color(theme.$light-theme);
+  @include mat.radio-color(theme.$light-theme);
+  @include mat.chips-color(theme.$light-theme);
+  @include mat.form-field-color(theme.$light-theme);
+  @include mat.progress-spinner-color(theme.$progress-spinner-light-theme);
+
   @include theme.createCSSVars("light");
 
   /* Warn colors */
-  --color-warn-primary: var(--color-warn-300);
+  --color-warn-primary: var(--color-warn-400);
   --contrast-color-warn: #000000de;
-  --color-warn-accent: var(--color-warn-100);
+  --color-warn-accent: var(--color-warn-200);
   --color-warn-input: var(--color-warn-900);
 }
 
-@media (prefers-color-scheme: dark) {
+.dark {
   @include mat.core-color(theme.$dark-theme);
-  @include mat.all-component-colors(theme.$dark-theme);
-  :root {
-    @include theme.createCSSVars("dark");
+  // @include mat.strong-focus-indicators-theme(theme.$dark-theme);
+  @include mat.toolbar-color(theme.$dark-theme);
+  @include mat.sidenav-color(theme.$dark-theme);
+  @include mat.dialog-color(theme.$dark-theme);
+  @include mat.button-color(theme.$dark-theme);
+  @include mat.menu-color(theme.$dark-theme);
+  @include mat.slide-toggle-color(theme.$dark-theme);
+  @include mat.checkbox-color(theme.$dark-theme);
+  @include mat.select-color(theme.$dark-theme);
+  @include mat.snack-bar-color(theme.$dark-theme);
+  @include mat.radio-color(theme.$dark-theme);
+  @include mat.chips-color(theme.$dark-theme);
+  @include mat.form-field-color(theme.$dark-theme);
+  @include mat.progress-spinner-color(theme.$progress-spinner-dark-theme);
 
-    /* Warn colors */
-    --color-warn-primary: var(--color-warn-700);
-    --contrast-color-warn: #ffffffde;
-    --color-warn-accent: var(--color-warn-900);
-    --color-warn-input: var(--color-warn-200);
-  }
+  @include theme.createCSSVars("dark");
 
-  img {
-    filter: brightness(90%) grayscale(15%);
-  }
+  /* Warn colors */
+  --color-warn-primary: var(--color-warn-700);
+  --contrast-color-warn: #ffffffde;
+  --color-warn-accent: #4c2424;
+  --color-warn-input: var(--color-warn-200);
 }
 
 *,
@@ -56,8 +97,21 @@ body {
   color: var(--contrast-color-accent-50);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 main {
   @extend %mainframe;
   background-color: var(--color-accent-50);
   color: var(--contrast-color-accent-50);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.5);
+
+  @media (prefers-color-scheme: dark) {
+    outline-color: rgba(255, 255, 255, 0.5);
+  }
 }
