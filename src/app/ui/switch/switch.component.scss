@@ -1,0 +1,115 @@
+@use "src/scss/utils.scss" as *;
+
+:host {
+  display: block;
+}
+
+::ng-deep .mdc-switch {
+  --mdc-switch-track-height: 30px !important;
+  --mdc-switch-track-shape: #{border-radius-implicit("md")} !important;
+  --mdc-switch-track-width: 60px;
+  --mdc-switch-selected-icon-size: 0px;
+  --mdc-switch-unselected-icon-size: 0px;
+}
+
+::ng-deep .mdc-switch__handle {
+  left: 6px !important;
+}
+
+::ng-deep .mdc-switch--selected .mdc-switch__handle-track {
+  transform: translateX(72%) !important;
+}
+
+::ng-deep .mat-mdc-slide-toggle {
+  --mdc-switch-unselected-track-color: #d3d3d3;
+  --mdc-switch-unselected-hover-track-color: #d3d3d3;
+  --mdc-switch-unselected-focus-track-color: #d3d3d3;
+  --mdc-switch-unselected-pressed-track-color: #d3d3d3;
+
+  --mdc-switch-unselected-handle-color: #aaa;
+  --mdc-switch-unselected-hover-handle-color: #999;
+  --mdc-switch-unselected-focus-handle-color: #999;
+  --mdc-switch-unselected-pressed-handle-color: #999;
+
+  --mdc-switch-unselected-focus-state-layer-color: #e0e0e0;
+  --mdc-switch-unselected-hover-state-layer-color: #e0e0e0;
+  --mdc-switch-unselected-pressed-state-layer-color: #e0e0e0;
+  --mdc-switch-unselected-icon-color: #fff;
+
+  @media (prefers-color-scheme: dark) {
+    --mdc-switch-unselected-track-color: #616161;
+    --mdc-switch-unselected-hover-track-color: #616161;
+    --mdc-switch-unselected-focus-track-color: #616161;
+    --mdc-switch-unselected-pressed-track-color: #616161;
+
+    --mdc-switch-unselected-handle-color: #a5a5a5;
+  }
+
+  &.mat-accent {
+    --mdc-switch-selected-handle-color: var(--color-accent-100);
+
+    --mdc-switch-selected-focus-state-layer-color: var(--color-accent-100);
+    --mdc-switch-selected-hover-state-layer-color: var(--color-accent-100);
+    --mdc-switch-selected-pressed-state-layer-color: var(--color-accent-100);
+
+    --mdc-switch-selected-focus-handle-color: var(--color-accent-300);
+    --mdc-switch-selected-hover-handle-color: var(--color-accent-300);
+    --mdc-switch-selected-pressed-handle-color: var(--color-accent-100);
+
+    --mdc-switch-selected-focus-track-color: var(--color-accent-800);
+    --mdc-switch-selected-hover-track-color: var(--color-accent-800);
+    --mdc-switch-selected-pressed-track-color: var(--color-accent-800);
+    --mdc-switch-selected-track-color: var(--color-accent-800);
+
+    @media (prefers-color-scheme: dark) {
+      --mdc-switch-selected-handle-color: var(--color-accent-700);
+
+      --mdc-switch-selected-focus-state-layer-color: var(--color-accent-700);
+      --mdc-switch-selected-hover-state-layer-color: var(--color-accent-700);
+      --mdc-switch-selected-pressed-state-layer-color: var(--color-accent-700);
+
+      --mdc-switch-selected-focus-handle-color: var(--color-accent-600);
+      --mdc-switch-selected-hover-handle-color: var(--color-accent-600);
+      --mdc-switch-selected-pressed-handle-color: var(--color-accent-600);
+
+      --mdc-switch-selected-focus-track-color: var(--color-accent-200);
+      --mdc-switch-selected-hover-track-color: var(--color-accent-200);
+      --mdc-switch-selected-pressed-track-color: var(--color-accent-200);
+      --mdc-switch-selected-track-color: var(--color-accent-200);
+    }
+  }
+
+  &.mat-primary {
+    --mdc-switch-selected-handle-color: var(--color-primary-100);
+
+    --mdc-switch-selected-focus-state-layer-color: var(--color-primary-100);
+    --mdc-switch-selected-hover-state-layer-color: var(--color-primary-100);
+    --mdc-switch-selected-pressed-state-layer-color: var(--color-primary-100);
+
+    --mdc-switch-selected-focus-handle-color: var(--color-primary-300);
+    --mdc-switch-selected-hover-handle-color: var(--color-primary-300);
+    --mdc-switch-selected-pressed-handle-color: var(--color-primary-100);
+
+    --mdc-switch-selected-focus-track-color: var(--color-primary-800);
+    --mdc-switch-selected-hover-track-color: var(--color-primary-800);
+    --mdc-switch-selected-pressed-track-color: var(--color-primary-800);
+    --mdc-switch-selected-track-color: var(--color-primary-800);
+
+    @media (prefers-color-scheme: dark) {
+      --mdc-switch-selected-handle-color: var(--color-primary-700);
+
+      --mdc-switch-selected-focus-state-layer-color: var(--color-primary-700);
+      --mdc-switch-selected-hover-state-layer-color: var(--color-primary-700);
+      --mdc-switch-selected-pressed-state-layer-color: var(--color-primary-700);
+
+      --mdc-switch-selected-focus-handle-color: var(--color-primary-600);
+      --mdc-switch-selected-hover-handle-color: var(--color-primary-600);
+      --mdc-switch-selected-pressed-handle-color: var(--color-primary-600);
+
+      --mdc-switch-selected-focus-track-color: var(--color-primary-100);
+      --mdc-switch-selected-hover-track-color: var(--color-primary-100);
+      --mdc-switch-selected-pressed-track-color: var(--color-primary-100);
+      --mdc-switch-selected-track-color: var(--color-primary-100);
+    }
+  }
+}
