@@ -1,0 +1,7 @@
+@use "src/scss/utils.scss" as *;
+@use "../note-list-form-editor-common-styles/note-list-form-editor.scss";
+
+main {
+  padding: free-space("xs");
+  overflow: hidden;
+}

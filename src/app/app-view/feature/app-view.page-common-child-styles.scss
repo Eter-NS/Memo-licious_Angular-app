@@ -1,0 +1,9 @@
+%main {
+  min-height: calc(100vh - var(--mat-toolbar-standard-height));
+  min-height: calc(100dvh - var(--mat-toolbar-standard-height));
+
+  @media (max-width: 599px) {
+    min-height: calc(100vh - var(--mat-toolbar-mobile-height));
+    min-height: calc(100dvh - var(--mat-toolbar-mobile-height));
+  }
+}

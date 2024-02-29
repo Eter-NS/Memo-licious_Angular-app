@@ -1,0 +1,87 @@
+@use "src/scss/utils.scss" as *;
+
+:host {
+  --container-size: max(240px, 25vw);
+  --more-vert-icon-size: 48px;
+}
+
+.note-list-card {
+  display: grid;
+  gap: free-space("xs");
+  padding: free-space("sm");
+  @include border-radius("xs");
+  background-color: var(--color-accent-100);
+  cursor: pointer;
+  transition: background-color 300ms 50ms ease-in-out,
+    color 300ms 50ms ease-in-out;
+
+  &.to-delete {
+    background-color: rgb(212, 212, 212, 0.6);
+
+    @media (prefers-color-scheme: dark) {
+      background-color: rgba(45, 45, 45);
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+::ng-deep .mat-mdc-standard-chip .mdc-evolution-chip__cell--primary {
+  justify-content: center;
+}
+
+::ng-deep .mat-mdc-menu-panel {
+  --mat-menu-container-color: var(--color-accent-300);
+}
+
+.chip {
+  flex: 1 0 42px;
+  transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+
+  .note-list-card.to-delete & {
+    background-color: rgb(190, 190, 190) !important;
+
+    @media (prefers-color-scheme: dark) {
+      background-color: rgb(65, 65, 65) !important;
+    }
+  }
+
+  &.do-not-grow {
+    flex-grow: 0;
+  }
+
+  &-container {
+    display: flex;
+    align-items: center;
+    gap: free-space("xs") calc(#{free-space("xs")} / 2);
+    flex-wrap: wrap;
+  }
+}
+
+h3 {
+  width: 100%;
+  max-width: calc(
+    var(--container-size) -
+      (2 * #{free-space("sm")} + var(--more-vert-icon-size))
+  );
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+::ng-deep
+  .mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled)
+  .mdc-evolution-chip__text-label {
+  max-width: calc(
+    var(--container-size) -
+      (2 * #{free-space("sm")} + var(--more-vert-icon-size))
+  );
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}

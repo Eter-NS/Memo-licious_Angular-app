@@ -1,0 +1,44 @@
+<div
+  class="note-list-card"
+  [class.to-delete]="done"
+  (click)="onCardClick($event)"
+  (keyup.enter)="onCardClick($event)"
+  tabindex="0"
+>
+  <div class="note-list-card__header">
+    <h3>{{ groupName }}</h3>
+
+    <button
+      type="button"
+      mat-icon-button
+      [matMenuTriggerFor]="menu"
+      (click)="onCardDetailsClick($event)"
+      (keyup.enter)="onCardDetailsClick($event)"
+      aria-label="more options"
+      tabindex="0"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button
+        mat-menu-item
+        type="button"
+        (click)="toggleRemoveGroup()"
+        (keyup.enter)="toggleRemoveGroup()"
+        tabindex="1"
+      >
+        <mat-icon>done</mat-icon> <span>Mark as done</span>
+      </button>
+    </mat-menu>
+  </div>
+
+  <hr />
+
+  <div class="chip-container">
+    @for (note of groupValue.notes; track note.id) {
+    <mat-chip class="chip" [class.do-not-grow]="groupValue.notes.length < 3">
+      {{ note.value }}
+    </mat-chip>
+    }
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<section
+  #container
+  class="noteList-list"
+  [class.empty]="(notes$ | async) === null"
+>
+  @if (notes$| async; as notes) {
+  <!--  -->
+  @if (notes.length) {
+  <ngx-masonry
+    class="noteList-list__grid"
+    [ordered]="true"
+    [options]="{
+      resize: true,
+      gutter: 25,
+      fitWidth: true,
+      horizontalOrder: true
+    }"
+  >
+    @for(note of notes; track note.id){
+    <div class="noteList-list__element-wrapper" ngxMasonryItem>
+      @if(markForDelete){
+      <app-notes-list-group-element
+        [groupName]="note.title"
+        [groupValue]="note"
+        [done]="!!note.deleteAt"
+        (toggleRemove)="handleGroupMarkForDelete(note.id, $event)"
+      />
+      }@else {
+      <app-notes-list-group-element
+        [groupName]="note.title"
+        [groupValue]="note"
+        [done]="!!note.deleteAt"
+        (cardClick)="handleClick(note.id)"
+        (toggleRemove)="handleGroupMarkForDelete(note.id, $event)"
+      />
+      }
+      <div class="noteList-list__space-between"></div>
+    </div>
+    }
+  </ngx-masonry>
+  } @else {
+  <ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
+  }
+  <!--  -->
+  } @else {
+  <ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
+  }
+</section>

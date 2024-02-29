@@ -1,0 +1,64 @@
+@if (environment==='note-creator') {
+<h2>Create new notes</h2>
+}
+<form [formGroup]="newNoteGroupForm" class="form" (ngSubmit)="submitForm()">
+  <label class="note-list-header-wrapper">
+    <input
+      class="note-list-header"
+      type="text"
+      placeholder="Note list title"
+      formControlName="groupName"
+    />
+    @if (getError('groupName', 'required') &&
+    newNoteGroupForm.get('groupName')?.touched) {
+    <span class="input-error">*This field is required!</span>
+    } @if (getError('groupName', 'maxlength')) {
+    <span class="input-error">Hmm... Please create a shorter list title</span>
+    }
+  </label>
+
+  <mat-form-field class="note-list-elements" appearance="outline">
+    <mat-label>Your items</mat-label>
+    <mat-chip-grid #chipGrid aria-label="Enter what's on your mind">
+      @for (note of notes; track note.id) {
+      <mat-chip-row
+        #chipRow
+        class="note-list-element"
+        aria-description="Press enter to edit {{ note.value }}"
+        [editable]="true"
+        (touchstart)="handleTouchStart()"
+        (touchend)="handleTouchEnd()"
+        (edited)="editNote.emit({note, event: $event});"
+        (removed)="removeNote.emit(note)"
+      >
+        {{ note.value }}
+
+        <button
+          type="button"
+          matChipRemove
+          [attr.aria-label]="'Remove ' + note.value"
+        >
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+      }
+      <input
+        placeholder="New item"
+        [matChipInputFor]="chipGrid"
+        [matChipInputSeparatorKeyCodes]="separatorCodes"
+        matChipInputAddOnBlur
+        (matChipInputTokenEnd)="createNote.emit($event)"
+      />
+    </mat-chip-grid>
+  </mat-form-field>
+
+  @if(environment==='note-creator'){
+  <!--  -->
+  @if(notes?.length){
+  <button type="submit" class="submit-button">
+    <mat-icon>done</mat-icon>
+  </button>
+  }
+  <!--  -->
+  }
+</form>
