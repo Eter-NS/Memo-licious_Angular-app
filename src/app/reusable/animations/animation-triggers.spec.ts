@@ -58,7 +58,7 @@ describe(`animation-triggers`, () => {
       const animation = `fade-out-animation`;
 
       await runAnimationOnce(element, animation, {
-        removeAnimationClassOnFinish: true,
+        removeClassOnFinish: true,
       });
 
       expect(element.classList.contains(animation)).toBeFalse();
