@@ -84,7 +84,7 @@ describe('GoBackButtonComponent', () => {
         expect(spy).toHaveBeenCalledWith(
           component.anchor.nativeElement,
           'fade-out-vol-2-animation',
-          { removeAnimationClassOnFinish: true }
+          { removeClassOnFinish: true }
         );
       });
     });
