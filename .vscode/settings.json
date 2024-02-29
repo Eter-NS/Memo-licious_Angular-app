@@ -1,5 +1,10 @@
 {
-  "cSpell.words": ["licious"],
+  "cSpell.words": [
+    "ABCDEFGHIJKLMNPQRSTUVWXYZ",
+    "keycodes",
+    "licious",
+    "unixtime"
+  ],
   "angular-schematics.schematicsDefaultOptions": {
     "angular-*": {
       "style": "scss"
