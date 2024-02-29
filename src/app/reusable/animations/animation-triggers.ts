@@ -18,21 +18,28 @@ export function runAnimationOnce(
   el: HTMLElement,
   animationClass: string,
   options?: {
-    removeAnimationClassOnFinish?: boolean;
+    removeClassOnFinish?: boolean;
   }
 ): Promise<void> {
   el.classList.add(animationClass);
   startAnimation(el);
+
   return new Promise<void>((resolve) => {
-    el.addEventListener('animationend', (e) => {
+    const effect = (e: AnimationEvent) => {
       e.stopPropagation();
       e.preventDefault();
-      if (options?.removeAnimationClassOnFinish) {
+
+      if (options?.removeClassOnFinish) {
         finishAnimation(el);
         el.classList.remove(animationClass);
       }
+
+      el.removeEventListener('animationend', effect);
+
       resolve();
-    });
+    };
+
+    el.addEventListener('animationend', effect);
   });
 }
 
