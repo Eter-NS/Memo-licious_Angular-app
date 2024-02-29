@@ -19,29 +19,38 @@ export function objectKeys<T extends object>(obj: T): Array<keyof T> {
 }
 
 interface UTCTimestampBody {
-  abbreviation: string;
-  client_ip: string;
-  datetime: string;
   day_of_week: number;
   day_of_year: number;
-  dst: boolean;
-  dst_from: null;
   dst_offset: number;
-  dst_until: null;
   raw_offset: number;
-  timezone: 'Etc/UTC';
   unixtime: number;
-  utc_datetime: string;
-  utc_offset: '+00:00';
   week_number: number;
 }
 
-export async function getUTCTimestamp(): Promise<void | UTCTimestampBody | null> {
-  const response = await fetch('http://worldtimeapi.org/api/timezone/Etc/UTC');
-  if (!response) return console.error('Request timed out');
-  if (response.status >= 500) return console.error('The API has failed');
-  if (response.ok) {
-    return (await response.json()) as UTCTimestampBody;
+export async function getUTCTimestamp(): Promise<UTCTimestampBody> {
+  try {
+    const response = await fetch(
+      'http://worldtimeapi.org/api/timezone/Etc/UTC'
+    );
+
+    return response.json() as Promise<UTCTimestampBody>;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+
+    throw new Error(error as string);
   }
-  return null;
+}
+
+/* a function which returns a random id containing upper and lower letters and number, with 27 length */
+export function randomId(length: number): string {
+  let result = '';
+  const characters =
+    'ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
 }
