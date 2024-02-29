@@ -16,10 +16,10 @@ export class AuthStateService implements OnDestroy {
   session = signal<User | null | undefined>(undefined);
   #subscription!: Subscription;
 
-  user = user;
+  private _user = user;
 
   get user$() {
-    return this.user(this.auth);
+    return this._user(this.auth);
   }
 
   constructor() {

@@ -1,4 +1,5 @@
 @use "../../../scss/utils.scss" as *;
+@use "../../../scss/components.scss" as *;
 
 main,
 .content,
@@ -102,9 +103,7 @@ main {
 }
 
 .loading-defer-spinner {
-  --size: max(var(--h1) * 1.5, 7.5vmin);
-  width: var(--size) !important;
-  height: var(--size) !important;
+  @extend %spinner-defaults;
   margin: {
     left: auto;
     right: auto;

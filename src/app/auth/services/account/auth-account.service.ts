@@ -34,13 +34,13 @@ export class AuthAccountService {
 
   checkUserSession = this.#authState.checkUserSession;
 
-  private createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-  private signInWithEmailAndPassword = signInWithEmailAndPassword;
-  private signInWithRedirect = signInWithRedirect;
-  private signInWithPopup = signInWithPopup;
-  private getRedirectResult = getRedirectResult;
-  private signOut = signOut;
-  private updateProfile = updateProfile;
+  private _createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+  private _signInWithEmailAndPassword = signInWithEmailAndPassword;
+  private _signInWithRedirect = signInWithRedirect;
+  private _signInWithPopup = signInWithPopup;
+  private _getRedirectResult = getRedirectResult;
+  private _signOut = signOut;
+  private _updateProfile = updateProfile;
 
   async signupWithEmail(
     email: string,
@@ -60,7 +60,7 @@ export class AuthAccountService {
         };
       }
 
-      const result = await this.createUserWithEmailAndPassword(
+      const result = await this._createUserWithEmailAndPassword(
         this.#authState.auth,
         email,
         password
@@ -89,7 +89,7 @@ export class AuthAccountService {
     password: string
   ): Promise<AuthReturnCredits> {
     try {
-      const result = await this.signInWithEmailAndPassword(
+      const result = await this._signInWithEmailAndPassword(
         this.#authState.auth,
         email,
         password
@@ -125,9 +125,9 @@ export class AuthAccountService {
     let result: UserCredential;
     try {
       if (this.isTheDeviceMobile()) {
-        await this.signInWithRedirect(this.#authState.auth, provider);
+        await this._signInWithRedirect(this.#authState.auth, provider);
       } else {
-        result = await this.signInWithPopup(this.#authState.auth, provider);
+        result = await this._signInWithPopup(this.#authState.auth, provider);
         this.#authState.session.set(result.user);
       }
 
@@ -145,7 +145,7 @@ export class AuthAccountService {
    */
   async getDataFromRedirect(): Promise<AuthReturnCredits | null> {
     try {
-      const result = await this.getRedirectResult(this.#authState.auth);
+      const result = await this._getRedirectResult(this.#authState.auth);
       if (result) {
         this.#authState.session.set(result.user);
         return await this.#authDatabase.databaseRegisterHandler(result);
@@ -161,11 +161,11 @@ export class AuthAccountService {
     }
   }
 
-  signOutUser() {
+  async signOutUser() {
     if (!this.#authState.session()) return;
 
-    this.signOut(this.#authState.auth);
-    this.#router.navigateByUrl('/online');
+    await this._signOut(this.#authState.auth);
+    await this.#router.navigateByUrl('/online/force=login');
   }
 
   async changeUserProfileData(options: RegisterCustomOptions): Promise<void> {
@@ -179,7 +179,7 @@ export class AuthAccountService {
       return;
     }
 
-    await this.updateProfile(this.#authState.auth.currentUser, options);
+    await this._updateProfile(this.#authState.auth.currentUser, options);
   }
 
   private isTheDeviceMobile(): boolean {

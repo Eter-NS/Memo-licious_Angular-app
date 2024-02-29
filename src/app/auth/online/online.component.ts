@@ -37,6 +37,8 @@ import { ActivatedRoute } from '@angular/router';
   imports: [
     OnlineRegisterComponent,
     OnlineLoginComponent,
+    OnlineRegisterComponent,
+    OnlineLoginComponent,
     GoogleLogoComponent,
     CustomMatRippleDirective,
     MatSnackBarModule,
@@ -46,12 +48,12 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class OnlineComponent implements OnInit, AfterViewInit {
   #authAccountService = inject(AuthAccountService);
-  authStateService = inject(AuthStateService);
-  authCommonFeaturesService = inject(AuthCommonFeaturesService);
+  #authStateService = inject(AuthStateService);
+  #authCommonFeaturesService = inject(AuthCommonFeaturesService);
   #route = inject(ActivatedRoute);
   #snackBar = inject(MatSnackBar);
   viewTransitionService = inject(ViewTransitionService);
-  private cd = inject(ChangeDetectorRef);
+  #cd = inject(ChangeDetectorRef);
   @ViewChild('mainTagRef') mainTagRef!: ElementRef<HTMLDivElement>;
   @ViewChild('viewContainer') viewContainer!: ElementRef<HTMLDivElement>;
 
@@ -63,6 +65,7 @@ export class OnlineComponent implements OnInit, AfterViewInit {
   emailDoesNotExist = false;
 
   ngOnInit(): void {
+    this._checkParams();
     this._checkParams();
   }
 
@@ -119,17 +122,17 @@ export class OnlineComponent implements OnInit, AfterViewInit {
       switch (key) {
         case 'alreadyInUseError':
           this.alreadyInUseError = true;
-          this.cd.markForCheck();
+          this.#cd.markForCheck();
           break;
 
         case 'wrongEmailOrPassword':
           this.wrongEmailOrPassword = true;
-          this.cd.markForCheck();
+          this.#cd.markForCheck();
           break;
 
         case 'emailDoesNotExist':
           this.emailDoesNotExist = true;
-          this.cd.markForCheck();
+          this.#cd.markForCheck();
           break;
 
         case 'sendingPostToDB':
@@ -176,7 +179,7 @@ export class OnlineComponent implements OnInit, AfterViewInit {
    * @return An url suffix based on the result registered flag and whether this.redirect is set or not. Only for navigateByUrl() usage.
    */
   private _redirectUser({ registered }: AuthReturnCredits): string {
-    const sessionValue = this.authStateService.session();
+    const sessionValue = this.#authStateService.session();
 
     if (registered || (sessionValue && !sessionValue.emailVerified)) {
       return '/verify-email';
@@ -186,15 +189,17 @@ export class OnlineComponent implements OnInit, AfterViewInit {
   }
 
   private _checkParams() {
-    const { register, redirect } = this.authCommonFeaturesService.checkParamMap(
-      this.#route,
-      'siteAction'
-    );
+    const { register, redirect } =
+      this.#authCommonFeaturesService.checkParamMap(this.#route, 'siteAction');
     this.register = register;
     this.redirect = redirect;
   }
 
   toggleRegister(): void {
     this.register = !this.register;
+  }
+
+  updateRememberMe(action: boolean) {
+    this.#authStateService.rememberMe(action);
   }
 }

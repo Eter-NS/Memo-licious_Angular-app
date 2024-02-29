@@ -16,7 +16,6 @@ import {
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { NgIf } from '@angular/common';
 import { checkEmail } from 'src/app/custom-validations/custom-validations';
 import { GoogleLogoComponent } from 'src/app/reusable/SVGs/google-logo/google-logo.component';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
@@ -34,7 +33,6 @@ import {
 @Component({
   standalone: true,
   imports: [
-    NgIf,
     ReactiveFormsModule,
     GoogleLogoComponent,
     RouterLink,

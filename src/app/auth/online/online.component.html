@@ -11,9 +11,17 @@
         "
       />
     </div>
-    <div class="content" #viewContainer>
-      <div class="login-register-content" aria-label="Online account form">
-        @defer (when register; prefetch on immediate) {
+    <div
+      class="content"
+      #viewContainer
+    >
+      <div
+        class="login-register-content"
+        aria-label="Online account form"
+      >
+        @if (register) {
+        <!--  -->
+        @defer (on immediate; prefetch on immediate) {
         <app-online-register
           [emailAlreadyInUse]="alreadyInUseError"
           (data)="handleSubmit($event)"
@@ -24,19 +32,25 @@
         ></mat-spinner>
         }@placeholder (minimum 500ms) {
         <span class="loading-state-register"> Loading... </span>
-        } @defer(when !register; prefetch on immediate) {
+        }
+        <!--  -->
+        } @else {
+        <!--  -->
+        @defer(on immediate; prefetch on immediate) {
         <app-online-login
           [wrongEmailOrPassword]="wrongEmailOrPassword"
           [emailDoesNotExist]="emailDoesNotExist"
           (data)="handleSubmit($event)"
-          (rememberMe)="authStateService.rememberMe($event)"
+          (rememberMe)="updateRememberMe($event)"
         />
-        } @loading ( minimum 250ms){
+        } @loading ( minimum 250ms) {
         <mat-spinner
           class="loading-defer-spinner loading-state-login"
         ></mat-spinner>
         } @placeholder (minimum 500ms) {
         <span class="loading-state-login"> Loading... </span>
+        }
+        <!--  -->
         }
       </div>
 
@@ -49,7 +63,24 @@
           (keyup.enter)="googleAuth('continueWithGoogle')"
         >
           <!-- 25px as the view size for the svg -->
-          <app-google-logo class="google-logo" svgWidth="25"></app-google-logo>
+          <app-google-logo
+            class="google-logo"
+            svgWidth="25"
+          ></app-google-logo>
+          <span>Continue with Google</span>
+        </button>
+        <button
+          type="button"
+          class="sign-in-with-google"
+          appCustomMatRipple
+          (click)="googleAuth('continueWithGoogle')"
+          (keyup.enter)="googleAuth('continueWithGoogle')"
+        >
+          <!-- 25px as the view size for the svg -->
+          <app-google-logo
+            class="google-logo"
+            svgWidth="25"
+          ></app-google-logo>
           <span>Continue with Google</span>
         </button>
         <div class="login-register-switch">

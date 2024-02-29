@@ -1,9 +1,18 @@
 import { Injectable, inject } from '@angular/core';
-import { Database, get, ref, set } from '@angular/fire/database';
+import {
+  Database,
+  get,
+  listVal,
+  ref,
+  set,
+  update,
+} from '@angular/fire/database';
 import { AuthStateService } from '../state/auth-state.service';
 import { UserCredential } from '@angular/fire/auth';
 import { AuthReturnCredits, DbInitialPayload } from '../Models/authModels';
 import { isAuthError } from 'src/app/reusable/Models/isAuthError';
+import { NoteGroupModel } from '../Models/UserDataModels';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,12 +21,14 @@ export class AuthDatabaseService {
   #authState = inject(AuthStateService);
   #db = inject(Database);
 
-  private ref = ref;
-  private set = set;
-  private get = get;
+  private _ref = ref;
+  private _set = set;
+  private _get = get;
+  private _listVal = listVal;
+  private _update = update;
 
   async databaseRegisterHandler({
-    user: { email, uid, providerId, photoURL },
+    user: { email, uid, photoURL },
   }: UserCredential): Promise<AuthReturnCredits> {
     if (!email) return { errors: { noEmailProvided: true } };
 
@@ -29,7 +40,7 @@ export class AuthDatabaseService {
     } else {
       let returnPayload: AuthReturnCredits;
 
-      if (await this.registerInDatabase(providerId, email, photoURL)) {
+      if (await this.registerInDatabase(email, photoURL)) {
         returnPayload = {
           passed: true,
           registered: true,
@@ -48,8 +59,8 @@ export class AuthDatabaseService {
 
   async isUserInDatabase(uid: string): Promise<boolean | undefined> {
     try {
-      const userRef = this.ref(this.#db, `users/${uid}`);
-      const userSnapshot = await this.get(userRef);
+      const userRef = this._ref(this.#db, `users/${uid}`);
+      const userSnapshot = await this._get(userRef);
 
       return userSnapshot.exists();
     } catch (err) {
@@ -61,29 +72,56 @@ export class AuthDatabaseService {
   }
 
   async registerInDatabase(
-    providerId: string | null,
     email: string,
     photoURL: string | null
   ): Promise<boolean> {
     const payload: DbInitialPayload = {
       email,
       photoURL,
-      providerId: providerId ?? 'login',
+      groups: [],
     };
 
-    const userRef = this.ref(
+    const userRef = this._ref(
       this.#db,
       `users/${this.#authState.auth.currentUser?.uid}`
     );
 
     try {
-      await this.set(userRef, payload);
+      await this._set(userRef, payload);
       return true;
     } catch (error: unknown) {
       console.error(
         'Error when saving user data: ',
         (error as { message: string }).message
       );
+      return false;
+    }
+  }
+
+  getGroups(uid: string): Observable<NoteGroupModel[]> {
+    const notesRef = this._ref(this.#db, `users/${uid}/groups`);
+
+    return this._listVal<NoteGroupModel>(notesRef);
+  }
+
+  async updateGroups(payload: NoteGroupModel[]) {
+    const uid = this.#authState.session()?.uid;
+    const path = `users/${uid}`;
+
+    try {
+      await this._update(this._ref(this.#db, path), { groups: payload });
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
+  async deleteGroup(payload: NoteGroupModel[]) {
+    try {
+      return await this.updateGroups(payload);
+    } catch (err) {
+      console.error(err);
       return false;
     }
   }

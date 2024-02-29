@@ -1,15 +1,21 @@
-export interface GroupModel {
-  // serverTimestamp() for createdAt and deleteAt
-  createdAt: Date;
-  deleteAt?: Date;
-  values: Array<NoteModel>;
-}
 export interface NoteModel {
+  id: string;
   value: string;
-  // serverTimestamp() for createdAt and deleteAt
-  createdAt: Date;
-  deleteAt?: Date;
+  // getUTCTimestamp().unixtime for createdAt and deleteAt
+  createdAt: number;
+  deleteAt?: number;
 }
+export interface NoteGroupModel {
+  id: string;
+  title: string;
+  notes: Array<NoteModel>;
+  // getUTCTimestamp().unixtime for createdAt and deleteAt
+  createdAt: number;
+  deleteAt?: number;
+}
+// export interface NamedNoteGroups {
+//   [key: string]: NoteGroupModel;
+// }
 export interface LocalUserFormData {
   auth: {
     name: string;
@@ -19,7 +25,7 @@ export interface LocalUserFormData {
 }
 export interface LocalUserAccount extends LocalUserFormData {
   profileColor: string;
-  groups: { [key: string]: GroupModel };
+  groups: NoteGroupModel[];
 }
 export interface LocalUsers {
   name: string;

@@ -25,9 +25,6 @@ import {
   FormCommonFeaturesService,
   LocalAuthUserData,
 } from '../../services/form-common-features/form-common-features.service';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -37,12 +34,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
     MatRadioModule,
-    MatCheckboxModule,
-    MatSpinnerTogglerDirective,
     MatProgressSpinnerModule,
+    MatSpinnerTogglerDirective,
   ],
   templateUrl: './guest-register.component.html',
   styleUrls: [

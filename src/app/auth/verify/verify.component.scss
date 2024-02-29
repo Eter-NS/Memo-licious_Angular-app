@@ -1,5 +1,5 @@
-@use "src/scss/utils.scss" as *;
-@use "src/scss/components.scss" as *;
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/components.scss' as *;
 
 main,
 .content,
@@ -23,32 +23,36 @@ main {
 
 .go-back-button {
   &-wrapper {
-    padding: free-space("xs") 0;
+    padding: free-space('xs') 0;
   }
 }
 
 .content {
-  padding: free-space("sm");
-  @include border-radius("md");
+  padding: free-space('sm');
+  @include border-radius('md');
   background-color: var(--color-accent-100);
   color: var(--contrast-color-accent-100);
 
   &__header {
-    margin: free-space("sm") 0;
+    margin: {
+      top: free-space('sm');
+      bottom: free-space('sm');
+    }
   }
 }
 
 .progress-spinner {
-  --size: max(var(--h1) * 1.5, 7.5vmin);
-  width: var(--size) !important;
-  height: var(--size) !important;
+  @extend %spinner-defaults;
 }
 
 .result {
-  gap: free-space("sm");
+  gap: free-space('sm');
 
   &__header {
-    margin: free-space("xs") 0;
+    margin: {
+      top: free-space('xs');
+      bottom: free-space('xs');
+    }
     font-weight: 500;
   }
 }
@@ -61,7 +65,7 @@ main {
   }
 
   &-success {
-    @extend %primary-button;
+    @extend %primary-button-1;
   }
 
   &-failure {

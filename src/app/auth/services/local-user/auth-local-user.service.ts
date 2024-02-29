@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { BehaviorSubject, filter, map } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
-import { environment } from 'src/environments/environment.dev';
+
 import {
   LocalUserAccount,
   LocalUserFormData,
@@ -15,6 +15,7 @@ export interface LocalPersistence {
   user: LocalUserAccount | undefined;
 }
 
+const USER_PATH = 'userData';
 const REMEMBER_ME_TOKEN = 'localRememberMe';
 
 type ValidateUserError = {
@@ -31,9 +32,8 @@ export class AuthLocalUserService implements OnDestroy {
   private rccHsl = hsl;
 
   #allUsers =
-    this.#localStorageService.loadFromStorage<LocalUserAccount[]>(
-      environment.USER_PATH
-    ) ?? [];
+    this.#localStorageService.loadFromStorage<LocalUserAccount[]>(USER_PATH) ??
+    [];
 
   #localUserSubject$ = new BehaviorSubject<LocalUserAccount | null | undefined>(
     undefined
@@ -51,17 +51,6 @@ export class AuthLocalUserService implements OnDestroy {
 
   get localUser$() {
     return this.#localUserSubject$.asObservable();
-  }
-
-  /**
-   * Contains latest user data from the localStorage.
-   * @warn Remember to unsubscribe before destroying the component.
-   */
-  getCurrentUser() {
-    return this.localUser$.pipe(
-      filter((user) => !!user),
-      map((user) => user as LocalUserAccount)
-    );
   }
 
   get allUsers(): LocalUsers[] {
@@ -140,16 +129,17 @@ export class AuthLocalUserService implements OnDestroy {
     this.redirectToLoginPage();
   }
 
-  modifyCurrentUser(modifiedData: LocalUserAccount): void {
+  modifyCurrentUser(modifiedData: Partial<LocalUserAccount>): boolean {
     if (!this.#allUsers.length) {
       console.error('No users on the device');
-      return;
+      return false;
     }
 
-    const previousData = this.#localUserSubject$.getValue();
+    const previousData = this.#localUserSubject$.value;
 
     if (!previousData) {
-      return this.noLoggedInUser();
+      this.noLoggedInUser();
+      return false;
     }
 
     const updatedUser: LocalUserAccount = { ...previousData, ...modifiedData };
@@ -164,6 +154,30 @@ export class AuthLocalUserService implements OnDestroy {
 
     this.loadUserData(updatedUser);
     this.saveUsersData(updatedUserList);
+
+    return true;
+  }
+
+  deleteGroup(id: string) {
+    const previousData = this.#localUserSubject$.value;
+
+    if (!previousData) {
+      this.noLoggedInUser();
+      return false;
+    }
+
+    if (!previousData.groups.length) {
+      console.warn(`No groups in the storage`);
+      return false;
+    }
+
+    const updatedGroups = previousData.groups.filter(
+      ({ id: storedId }) => storedId !== id
+    );
+
+    this.modifyCurrentUser({ groups: updatedGroups });
+
+    return true;
   }
 
   private saveNewUser(data: LocalUserAccount) {
@@ -178,7 +192,7 @@ export class AuthLocalUserService implements OnDestroy {
    * It saves the user data changes and keeps the #allUsers up-to-date without re-reading from storage
    */
   private saveUsersData(data: LocalUserAccount[]): void {
-    this.#localStorageService.saveToStorage(environment.USER_PATH, data);
+    this.#localStorageService.saveToStorage(USER_PATH, data);
     this.#allUsers = data;
   }
 
@@ -227,7 +241,7 @@ export class AuthLocalUserService implements OnDestroy {
     const account: LocalUserAccount = {
       ...formData,
       profileColor: this.createAvatarColor(),
-      groups: {},
+      groups: [],
     };
     return account;
   }

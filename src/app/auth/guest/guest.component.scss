@@ -1,4 +1,5 @@
-@use "src/scss/utils.scss" as *;
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/components.scss' as *;
 
 main,
 .content,
@@ -14,15 +15,15 @@ main {
 }
 
 .container {
-  --free-space-around-view: #{free-space("sm")};
+  --free-space-around-view: #{free-space('sm')};
   width: min(calc(100vw - (var(--free-space-around-view) * 2)), 420px);
 }
 
 .go-back-button {
   &-wrapper {
     padding: {
-      top: free-space("xs");
-      bottom: free-space("xs");
+      top: free-space('xs');
+      bottom: free-space('xs');
     }
   }
 }
@@ -54,9 +55,7 @@ main {
 }
 
 .loading-defer-spinner {
-  --size: max(var(--h1) * 1.5, 7.5vmin);
-  width: var(--size) !important;
-  height: var(--size) !important;
+  @extend %spinner-defaults;
   margin: {
     left: auto;
     right: auto;

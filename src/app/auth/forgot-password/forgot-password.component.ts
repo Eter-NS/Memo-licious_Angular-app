@@ -13,7 +13,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { checkEmail } from 'src/app/custom-validations/custom-validations';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { PreviousPageButtonComponent } from 'src/app/ui/previous-page-button/previous-page-button.component';
 import { AuthEmailService } from '../services/email/auth-email.service';
@@ -26,7 +26,6 @@ import { takeLast } from 'rxjs';
   imports: [
     PreviousPageButtonComponent,
     ReactiveFormsModule,
-    NgIf,
     CustomMatRippleDirective,
     AsyncPipe,
   ],

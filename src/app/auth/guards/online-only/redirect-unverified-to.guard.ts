@@ -21,6 +21,7 @@ export const redirectUnverifiedToGuard = (
         if (onlineUser?.emailVerified || localUser) {
           return true;
         }
+
         router.navigateByUrl(unverifiedFallback);
         return false;
       })

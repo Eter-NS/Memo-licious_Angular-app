@@ -1,3 +1,5 @@
+import { NoteGroupModel } from './UserDataModels';
+
 export interface UnknownError {
   code: string;
   message: string;
@@ -25,5 +27,5 @@ export interface AuthReturnCredits {
 export interface DbInitialPayload {
   email: string;
   photoURL: string | null;
-  providerId: string;
+  groups: NoteGroupModel[];
 }

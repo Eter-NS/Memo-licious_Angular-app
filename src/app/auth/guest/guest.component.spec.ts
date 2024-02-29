@@ -224,7 +224,6 @@ describe('GuestComponent', () => {
         await fixture.render(DeferBlockState.Complete);
       });
 
-      console.log(fixture.debugElement.nativeElement);
       const loginComponent = fixture.debugElement.query(
         By.css('app-guest-login')
       );

@@ -239,7 +239,7 @@ describe('AuthLocalUserService', () => {
           groups: {
             Test: {
               createdAt: new Date(),
-              values: [
+              notes: [
                 {
                   value: 'tomato',
                   createdAt: new Date(),

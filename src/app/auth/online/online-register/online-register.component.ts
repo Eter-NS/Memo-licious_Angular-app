@@ -24,14 +24,12 @@ import { RouterLink } from '@angular/router';
 
 import { GoogleLogoComponent } from 'src/app/reusable/SVGs/google-logo/google-logo.component';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
-import { NgIf } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import {
   AuthUserData,
   FormCommonFeaturesService,
 } from '../../services/form-common-features/form-common-features.service';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   standalone: true,
@@ -42,11 +40,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     ReactiveFormsModule,
     GoogleLogoComponent,
     RouterLink,
-    CustomMatRippleDirective,
-    NgIf,
     MatProgressSpinnerModule,
     MatSpinnerTogglerDirective,
-    MatCheckboxModule,
+    CustomMatRippleDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
