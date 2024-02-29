@@ -23,6 +23,11 @@ export class LocalStorageService {
   }
 
   saveToStorage<T>(id: string, data: T): void {
+    if (typeof data === 'string') {
+      localStorage.setItem(id, data);
+      return;
+    }
+
     localStorage.setItem(id, JSON.stringify(data));
   }
 
