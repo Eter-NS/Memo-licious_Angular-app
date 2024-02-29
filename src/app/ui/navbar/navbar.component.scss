@@ -1,15 +1,23 @@
 @use "src/scss/utils.scss" as *;
 
-.sidenav-container {
-  height: 100%;
-}
-
 .sidenav {
   width: 200px;
+  --mat-sidenav-container-divider-color: var(--color-accent-300);
+
+  &-container {
+    --mat-sidenav-content-background-color: var(--color-accent-50);
+    --mat-sidenav-content-text-color: var(--contrast-color-accent-50);
+  }
 }
 
-.sidenav .mat-toolbar {
-  background: inherit;
+.nav-list {
+  display: grid;
+  align-content: stretch;
+  height: calc(100% - var(--mat-toolbar-standard-height));
+
+  @media (max-width: 599px) {
+    height: calc(100% - var(--mat-toolbar-mobile-height));
+  }
 }
 
 .mat-toolbar.mat-primary {
@@ -18,13 +26,7 @@
   z-index: 1;
 }
 
-.nav-list {
-  margin-left: free-space("lg");
-}
-
 .toolbar {
-  background: transparent;
-  color: var(--contrast-color-accent-50);
   padding: 0;
   display: flex;
   position: relative;
@@ -33,16 +35,8 @@
     @extend %fillBeforeAfter;
     left: 50%;
     transform: translateX(-50%);
-    width: min-content;
+    width: fit-content;
     display: grid;
     place-content: center;
-  }
-}
-
-.container {
-  width: 90%;
-  margin: {
-    left: auto;
-    right: auto;
   }
 }

@@ -1,19 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
+  ContentChild,
+  Input,
+  TemplateRef,
+  ViewChild,
   inject,
 } from '@angular/core';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
-import { CommonModule } from '@angular/common';
-import throttle from 'src/app/reusable/data-tools/listenerMethods';
+import { AsyncPipe, NgStyle, NgTemplateOutlet } from '@angular/common';
+import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 
 @Component({
   selector: 'app-navbar',
@@ -25,28 +24,22 @@ import throttle from 'src/app/reusable/data-tools/listenerMethods';
     MatToolbarModule,
     MatButtonModule,
     MatSidenavModule,
-    MatListModule,
     MatIconModule,
-    CommonModule,
+    NgTemplateOutlet,
+    AsyncPipe,
+    NgStyle,
   ],
 })
-export class NavbarComponent implements OnInit {
-  #breakpointObserver = inject(BreakpointObserver);
-  isDarkMode = false;
+export class NavbarComponent {
+  viewportListenersService = inject(ViewportListenersService);
 
-  ngOnInit(): void {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener(
-      'change',
-      throttle((e: Event) => {
-        if (e instanceof MediaQueryListEvent) this.isDarkMode = !e.matches;
-      }, 1000 / 30)
-    );
-  }
+  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
+  @Input() sidenavColor: string = '';
 
-  isHandset$: Observable<boolean> = this.#breakpointObserver
-    .observe(Breakpoints.Handset)
-    .pipe(
-      map((result) => result.matches),
-      shareReplay()
-    );
+  @ContentChild('logo') logo!: TemplateRef<unknown>;
+  @ContentChild('sidenavHeading') sidenavHeading!: TemplateRef<unknown>;
+  @ContentChild('sidenavLinks') sidenavLinks!: TemplateRef<unknown>;
+  @ContentChild('content') content!: TemplateRef<unknown>;
+
+  @ViewChild('drawer') drawer!: MatSidenav;
 }
