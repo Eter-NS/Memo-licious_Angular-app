@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  NgZone,
   OnDestroy,
   Output,
   ViewChild,
@@ -36,6 +37,7 @@ import { ViewTransitionService } from 'src/app/reusable/animations/view-transiti
       :host {
         display: block;
         width: min-content;
+        animation: var(--fade-in-on-load);
       }
 
       a {
@@ -51,6 +53,7 @@ export class PreviousPageButtonComponent implements AfterViewInit, OnDestroy {
   @Output() clicked = new EventEmitter<void>(true);
   @ViewChild('anchor') anchor!: ElementRef<HTMLAnchorElement>;
   viewTransitionService = inject(ViewTransitionService);
+  #zone = inject(NgZone);
   subscription!: Subscription;
   runAnimationOnce = runAnimationOnce;
 
@@ -70,13 +73,23 @@ export class PreviousPageButtonComponent implements AfterViewInit, OnDestroy {
     this.clicked.emit();
   }
 
+  fadeIn() {
+    this.#zone.runOutsideAngular(() => {
+      this.runAnimationOnce(this.anchor.nativeElement, '', {
+        removeClassOnFinish: true,
+      });
+    });
+  }
+
   fadeOut() {
-    this.runAnimationOnce(
-      this.anchor.nativeElement,
-      'fade-out-vol-2-animation',
-      {
-        removeAnimationClassOnFinish: true,
-      }
-    );
+    this.#zone.runOutsideAngular(() => {
+      this.runAnimationOnce(
+        this.anchor.nativeElement,
+        'fade-out-vol-2-animation',
+        {
+          removeClassOnFinish: true,
+        }
+      );
+    });
   }
 }
