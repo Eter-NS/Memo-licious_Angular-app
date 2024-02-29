@@ -1,0 +1,116 @@
+@use "src/scss/utils.scss" as *;
+@use "src/scss/viewport.scss" as *;
+
+.accounts-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: free-space("xs");
+  padding: free-space("xs");
+
+  background-color: var(--color-accent-100);
+  color: var(--contrast-color-accent-100);
+  @include border-radius("md");
+}
+
+.account {
+  --size: min(15vmin, 64px);
+  --gap: #{free-space("sm")};
+
+  display: grid;
+  gap: calc(var(--gap) / 1.5);
+  position: relative;
+  cursor: pointer;
+  width: min(100%, 420px);
+  min-height: calc(var(--size) * 1.75);
+  padding: free-space("xs");
+  @include border-radius("sm");
+  overflow: clip;
+  z-index: 1;
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    color: var(--contrast-color-accent-200);
+    background-image: radial-gradient(
+      var(--color-accent-200) 60%,
+      var(--color-accent-100)
+    );
+    background-position: 25% center;
+    transform: scale(0);
+    z-index: -1;
+    transition: transform 250ms ease-in-out;
+  }
+
+  &:is(:hover, :focus-visible)::after,
+  &.is-selected::after {
+    transform: scale(1.5);
+  }
+
+  &.is-selected {
+    cursor: default;
+  }
+
+  &__card {
+    --user-avatar-color: #222;
+
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+
+    // Avatar
+    &::before {
+      content: attr(data-user-avatar-text);
+      background-color: var(--user-avatar-color);
+      width: var(--size);
+      height: var(--size);
+      font-size: calc(var(--size) / 2.5);
+      display: grid;
+      place-content: center;
+      @include border-radius("xs");
+    }
+  }
+
+  &__name {
+    font-size: var(--h2);
+  }
+}
+
+.passphrase {
+  display: block;
+  opacity: 0;
+  animation: fadeIn-vol-2 250ms forwards cubic-bezier(0.47, 0, 0.745, 0.715);
+
+  &-hidden {
+    display: none;
+  }
+
+  &-input {
+    background-color: var(--color-accent-400);
+    color: var(--contrast-color-accent-400);
+  }
+}
+
+.auth-form {
+  display: grid;
+  gap: calc(var(--gap) / 2.5);
+}
+
+.submit-button {
+  padding: 0.75em 1em;
+}
+
+.input-error {
+  margin-top: free-space("xs");
+}
+
+.no-accounts {
+  text-align: center;
+}
+
+.xyz {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+}

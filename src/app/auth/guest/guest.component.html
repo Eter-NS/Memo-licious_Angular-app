@@ -1,0 +1,73 @@
+<main #mainTagRef>
+  <section class="container">
+    <div class="go-back-button-wrapper">
+      <app-previous-page-button
+        class="go-back-button"
+        (clicked)="
+          viewTransitionService.goBack(
+            viewContainer,
+            '/getting-started/choose-path'
+          )
+        "
+      />
+    </div>
+    <div #viewContainer class="content">
+      <div class="login-register-content" aria-label="Guest account form">
+        @if (register) {
+        <!--  -->
+        @defer (on immediate; prefetch on immediate) {
+        <app-guest-register
+          [emailAlreadyInUse]="alreadyInUseError"
+          (data)="handleRegister($event)"
+        />
+        } @loading ( minimum 250ms) {
+        <mat-spinner
+          class="loading-defer-spinner loading-state-register"
+        ></mat-spinner>
+        }@placeholder (minimum 500ms) {
+        <span class="loading-state-register"> Loading... </span>
+        }
+        <!--  -->
+        } @else {
+        <!--  -->
+        @defer (on immediate; prefetch on immediate) {
+        <app-guest-login
+          [wrongCredentials]="wrongCredentials"
+          [users]="authLocalUserService.allUsers"
+          (data)="handleLogin($event)"
+          (rememberMe)="rememberMe = $event"
+        />
+        } @loading ( minimum 250ms) {
+        <mat-spinner
+          class="loading-defer-spinner loading-state-login"
+        ></mat-spinner>
+        }@placeholder (minimum 500ms) {
+        <span class="loading-state-login"> Loading... </span>
+        }
+        <!--  -->
+        }
+      </div>
+      <div class="component-content">
+        <div class="login-register-switch">
+          @if (register) {
+          <a
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
+            tabindex="0"
+            data-test="to-login-button"
+            >Wanna Log in?</a
+          >
+          } @else {
+          <a
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
+            tabindex="0"
+            data-test="to-register-button"
+            >Wanna Register?</a
+          >
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

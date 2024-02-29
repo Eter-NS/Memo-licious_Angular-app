@@ -1,0 +1,24 @@
+.form {
+  &-wrapper {
+    animation: var(--fade-in-on-load);
+  }
+}
+
+.form__header {
+  margin-bottom: 1.5rem;
+}
+
+.auth-header {
+  text-align: center;
+  font-size: clamp(var(--h3), 3.1vmax, var(--h2));
+}
+
+.radio-options {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-evenly;
+
+  & > *:first-child {
+    margin-right: 1rem;
+  }
+}

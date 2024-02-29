@@ -1,0 +1,93 @@
+<main #mainTagRef>
+  <section class="container">
+    <div class="go-back-button-wrapper">
+      <app-previous-page-button
+        class="go-back-button"
+        (clicked)="
+          viewTransitionService.goBack(
+            viewContainer,
+            '/getting-started/choose-path'
+          )
+        "
+      />
+    </div>
+    <div class="content" #viewContainer>
+      <div class="login-register-content" aria-label="Online account form">
+        @if (register) {
+        <!--  -->
+        @defer (on immediate; prefetch on immediate) {
+        <app-online-register
+          [emailAlreadyInUse]="alreadyInUseError"
+          (data)="handleSubmit($event)"
+        />
+        } @loading ( minimum 250ms) {
+        <mat-spinner
+          class="loading-defer-spinner loading-state-register"
+        ></mat-spinner>
+        }@placeholder (minimum 500ms) {
+        <span class="loading-state-register"> Loading... </span>
+        }
+        <!--  -->
+        } @else {
+        <!--  -->
+        @defer(on immediate; prefetch on immediate) {
+        <app-online-login
+          [wrongEmailOrPassword]="wrongEmailOrPassword"
+          [emailDoesNotExist]="emailDoesNotExist"
+          (data)="handleSubmit($event)"
+          (rememberMe)="updateRememberMe($event)"
+        />
+        } @loading ( minimum 250ms){
+        <mat-spinner
+          class="loading-defer-spinner loading-state-login"
+        ></mat-spinner>
+        } @placeholder (minimum 500ms) {
+        <span class="loading-state-login"> Loading... </span>
+        }
+        <!--  -->
+        }
+      </div>
+
+      <div class="component-content">
+        <button
+          type="button"
+          class="sign-in-with-google"
+          appCustomMatRipple
+          (click)="googleAuth('continueWithGoogle')"
+          (keyup.enter)="googleAuth('continueWithGoogle')"
+        >
+          <!-- 25px as the view size for the svg -->
+          <app-google-logo class="google-logo" svgWidth="25"></app-google-logo>
+          <span>Continue with Google</span>
+        </button>
+        <div class="login-register-switch">
+          @if (register) {
+          <a
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
+            tabindex="0"
+            >Wanna Log in?</a
+          >
+          } @else {
+          <a
+            (click)="
+              viewTransitionService.goForward(viewContainer, '/forgot-password')
+            "
+            (keyup.enter)="
+              viewTransitionService.goForward(viewContainer, '/forgot-password')
+            "
+            tabindex="0"
+            >Forgot your password?</a
+          >
+          <a
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
+            tabindex="0"
+            >Wanna Register?</a
+          >
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
