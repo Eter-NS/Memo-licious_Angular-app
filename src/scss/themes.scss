@@ -4,8 +4,6 @@
 @use "sass:map" as map;
 @use "sass:meta" as meta;
 
-@include mat.core();
-
 /* background-color: var(--color-primary-300); */
 /* color: var(--contrast-color-accent-300); */
 $my-light-palette-primary: (
@@ -18,7 +16,7 @@ $my-light-palette-primary: (
   600: hsl(32, 79%, 56%),
   700: hsl(29, 74%, 54%),
   800: hsl(26, 71%, 52%),
-  900: hsl(22, 69%, 48%),
+  900: hsl(22, 43%, 40%),
   contrast: (
     50: #131313ec,
     100: #131313ec,
@@ -44,7 +42,7 @@ $my-dark-palette-primary: (
   800: hsl(38, 56%, 85%),
   900: hsl(42, 50%, 94%),
   contrast: (
-    50: #fff,
+    50: #e8e8e8,
     100: #131313ec,
     200: #131313ec,
     300: #131313ec,
@@ -58,7 +56,7 @@ $my-dark-palette-primary: (
 );
 
 $my-light-palette-accent: (
-  50: hsl(86, 58%, 95%),
+  50: hsl(86, 58%, 92%),
   100: hsl(86, 57%, 88%),
   200: hsl(86, 57%, 81%),
   300: hsl(85, 55%, 74%),
@@ -67,7 +65,7 @@ $my-light-palette-accent: (
   600: hsl(82, 42%, 59%),
   700: hsl(79, 31%, 53%),
   800: hsl(75, 25%, 47%),
-  900: hsl(67, 17%, 37%),
+  900: hsl(69, 38%, 23%),
   contrast: (
     50: #131313ec,
     100: #131313ec,
@@ -93,12 +91,12 @@ $my-dark-palette-accent: (
   800: hsl(68, 35%, 53%),
   900: hsl(68, 35%, 58%),
   contrast: (
-    50: #fff,
-    100: #fff,
-    200: #fff,
-    300: #fff,
-    400: #fff,
-    500: #fff,
+    50: #e8e8e8,
+    100: #e8e8e8,
+    200: #e8e8e8,
+    300: #e8e8e8,
+    400: #e8e8e8,
+    500: #e8e8e8,
     600: #131313ec,
     700: #131313ec,
     800: #131313ec,
@@ -111,7 +109,7 @@ $my-palette-warn: mat.$deep-orange-palette;
 $light-theme: mat.define-light-theme(
   (
     color: (
-      primary: mat.define-palette($my-light-palette-primary, 200, 300, 400),
+      primary: mat.define-palette($my-light-palette-primary, 500, 600, 700),
       accent: mat.define-palette($my-light-palette-accent, 500, 100, 200),
       warn: mat.define-palette($my-palette-warn, 900),
     ),
@@ -128,6 +126,28 @@ $dark-theme: mat.define-dark-theme(
       warn: mat.define-palette($my-palette-warn, 100),
     ),
     density: 0,
+  )
+);
+
+$progress-spinner-light-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: mat.define-palette($my-light-palette-primary, 900),
+      accent: mat.define-palette($my-light-palette-accent, 900),
+      warn: mat.define-palette($my-palette-warn, 900),
+    ),
+    typography: mat.define-typography-config(),
+    density: 0,
+  )
+);
+
+$progress-spinner-dark-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: mat.define-palette($my-dark-palette-primary, 900),
+      accent: mat.define-palette($my-dark-palette-accent, 900),
+      warn: mat.define-palette($my-palette-warn, 100),
+    ),
   )
 );
 

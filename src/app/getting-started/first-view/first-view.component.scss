@@ -94,7 +94,7 @@ main {
 
     &::before {
       z-index: -1;
-      @extend %fillBeforeAfter, %primary-button;
+      @extend %fillBeforeAfter, %primary-button-1;
       transition: opacity 300ms cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
