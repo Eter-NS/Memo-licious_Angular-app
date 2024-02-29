@@ -1,0 +1,45 @@
+<main #mainTagRef>
+  <section class="container">
+    <div
+      #viewContainer
+      class="content"
+      aria-label="you can edit your notes here"
+    >
+      <app-note-list-form
+        #form
+        environment="note-edit"
+        [noteListTitle]="(noteGroup$ | async)?.title || ''"
+        [notes]="groupNotes$ | async"
+        (createNote)="onCreateNote($event)"
+        (editNote)="onEditNote($event)"
+        (removeNote)="onRemoveNote($event)"
+      />
+
+      <div class="note-edit__action-buttons">
+        <app-button
+          ripple
+          [styleConfiguration]="{ look: 'extended-fab', color: 'primary-less' }"
+          (clicked)="closeEditor('close')"
+        >
+          <ng-template #content>
+            <div class="note-edit__action-button-content">
+              <mat-icon>cancel</mat-icon> Close
+            </div>
+          </ng-template>
+        </app-button>
+
+        <app-button
+          ripple
+          [styleConfiguration]="{ look: 'extended-fab', color: 'primary' }"
+          (clicked)="closeEditor('save')"
+        >
+          <ng-template #content>
+            <div class="note-edit__action-button-content">
+              <mat-icon>save</mat-icon> Save
+            </div>
+          </ng-template>
+        </app-button>
+      </div>
+    </div>
+  </section>
+</main>

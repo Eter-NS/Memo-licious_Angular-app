@@ -1,0 +1,65 @@
+<main #container>
+  @if(!(viewportListenersService.isHandset$ | async)){
+  <section class="create-new-noteList">
+    <app-note-list-form
+      environment="note-creator"
+      [notes]="notesBuffer$ | async"
+      (createNote)="onCreateNote($event)"
+      (editNote)="onEditNote($event)"
+      (removeNote)="onRemoveNote($event)"
+      (data)="handleGroupCreation($event)"
+    />
+  </section>
+  }
+  <!--  -->
+  @defer{
+  <app-note-group-list-container>
+    <ng-template #noElementsInfo>
+      <div class="empty">
+        <span> Whoops... It looks like you have no lists for now </span>
+        <app-grinning-face-with-sweat-emoji class="emoji" />
+      </div>
+    </ng-template>
+  </app-note-group-list-container>
+  } @loading (minimum 500ms){
+  <mat-spinner class="note-group-loading"></mat-spinner>
+  }
+  <!--  -->
+  @if(viewportListenersService.isHandset$ | async){
+  <section class="add-new-noteList">
+    <div
+      #mobileAddNoteGroupButton
+      class="add-new-noteList__open-button"
+      [class.add-new-noteList__open-button--toggled]="mobileFormVisible"
+    >
+      <app-button
+        ripple
+        [styleConfiguration]="{ shape: 'circle' }"
+        title="Add new note list"
+        (clicked)="toggleNoteListForm('open')"
+      >
+        <ng-template #content>
+          <mat-icon>add</mat-icon>
+        </ng-template>
+      </app-button>
+    </div>
+    @defer {
+    <app-bottom-sheet
+      [open]="mobileFormVisible"
+      (openChange)="toggleNoteListForm('close')"
+    >
+      <ng-template #content>
+        <app-note-list-form
+          environment="note-creator"
+          [notes]="notesBuffer$ | async"
+          (createNote)="onCreateNote($event)"
+          (editNote)="onEditNote($event)"
+          (removeNote)="onRemoveNote($event)"
+          (data)="handleGroupCreation($event)"
+        />
+      </ng-template>
+    </app-bottom-sheet>
+    }
+  </section>
+  }
+</main>

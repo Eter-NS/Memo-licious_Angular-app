@@ -1,0 +1,65 @@
+@use "src/scss/utils.scss" as *;
+@use "src/scss/components.scss" as *;
+@use "../app-view.page-common-child-styles.scss" as defaults;
+
+main {
+  @extend %main;
+  width: calc(100% - (2 * #{free-space("sm")}));
+  margin: {
+    left: auto;
+    right: auto;
+  }
+}
+
+.create-new-noteList {
+  display: grid;
+  place-items: center;
+}
+
+.reload-button {
+  @extend %common-button, %error-button;
+}
+
+.add-new-noteList {
+  &__open-button {
+    position: fixed;
+    bottom: free-space("sm");
+    right: free-space("sm");
+
+    &--toggled {
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+
+  &__close-button {
+    justify-self: end;
+  }
+}
+
+.empty {
+  @extend %absolute-center;
+  @include border-radius("sm");
+  padding: free-space("sm");
+  width: calc(100% - (#{free-space("sm")} * 2));
+  max-width: max-content;
+  background-color: var(--color-accent-100);
+  color: var(--contrast-color-accent-100);
+  text-align: center;
+  opacity: 0;
+
+  animation: fadeInOnLoad 200ms 1s forwards
+    cubic-bezier(0.55, 0.085, 0.68, 0.53);
+
+  & span {
+    font-size: var(--p);
+  }
+
+  .emoji {
+    --custom-svg-size: clamp(1.1rem, 2vmax, var(--h3));
+  }
+}
+
+.note-group-loading {
+  @extend %absolute-center, %spinner-defaults;
+}

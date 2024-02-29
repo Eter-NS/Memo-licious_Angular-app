@@ -1,0 +1,58 @@
+<app-navbar #navbar color="accent" sidenavColor="var(--color-accent-100)">
+  <ng-template #logo>
+    <img
+      ngSrc="assets/shared/logo.webp"
+      alt="Memo-licious logo"
+      height="56"
+      width="56"
+      priority
+    />
+  </ng-template>
+
+  <ng-template #sidenavLinks>
+    <div class="sidenav">
+      <div class="sidenav__links">
+        <a
+          appCustomMatRipple
+          routerLink="/app/notes"
+          class="sidenav__link"
+          routerLinkActive="sidenav__link--active"
+          (click)="closeNavbar()"
+        >
+          <mat-icon>home</mat-icon> Home
+        </a>
+        <a
+          appCustomMatRipple
+          routerLink="/app/recycle-bin"
+          class="sidenav__link"
+          routerLinkActive="sidenav__link--active"
+          (click)="closeNavbar()"
+        >
+          <mat-icon>delete</mat-icon> Recycle bin
+        </a>
+        <a
+          appCustomMatRipple
+          routerLink="/app/settings"
+          class="sidenav__link"
+          routerLinkActive="sidenav__link--active"
+          (click)="closeNavbar()"
+        >
+          <mat-icon>settings</mat-icon> Settings
+        </a>
+        <a
+          appCustomMatRipple
+          class="sidenav__link"
+          (click)="logOut()"
+          (keyup.enter)="logOut()"
+          tabindex="0"
+        >
+          <mat-icon>logout</mat-icon> Log out
+        </a>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #content>
+    <router-outlet></router-outlet>
+  </ng-template>
+</app-navbar>
