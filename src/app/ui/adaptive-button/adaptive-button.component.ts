@@ -1,61 +1,64 @@
-import { CommonModule } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  ContentChild,
   EventEmitter,
   Input,
   Output,
+  TemplateRef,
+  booleanAttribute,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
+
+interface IButtonStyleOptions {
+  look: 'common' | 'fab' | 'extended-fab';
+  shape: 'circle' | 'pill';
+  color: 'primary' | 'primary-less' | 'accent' | 'accent-less';
+}
+
+export type ButtonConfiguration = Partial<IButtonStyleOptions>;
 
 @Component({
-  selector: 'app-adaptive-button',
+  selector: 'app-button',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [NgTemplateOutlet, CustomMatRippleDirective],
   template: `
-    @if (formula === 'anchor') { @if (href && href.length > 0 && ripple) {
-    <a
-      appCustomMatRipple
-      [routerLink]="[href]"
-      (click)="buttonClick.emit($event)"
-      [ngClass]="type + ' ' + color + ' ' + classes"
-    >
-      {{ placeholder }}
-    </a>
-    } @if (href && href.length > 0 && !ripple) {
-    <a
-      [routerLink]="[href]"
-      (click)="buttonClick.emit($event)"
-      [ngClass]="type + ' ' + color + ' ' + classes"
-    >
-      {{ placeholder }}
-    </a>
-    } @else {
-    <a
-      (click)="buttonClick.emit($event)"
-      (keyup.enter)="buttonClick.emit($event)"
-      [ngClass]="type + ' ' + color + ' ' + classes"
-      tabindex="0"
-    >
-      {{ placeholder }}
-    </a>
-    } }@else {
+    @if (ripple) {
     <button
       appCustomMatRipple
       [type]="type"
-      (click)="buttonClick.emit($event)"
-      [ngClass]="type + ' ' + color + ' ' + classes"
+      [title]="title"
+      (click)="clicked.emit($event)"
+      [class]="classes"
+      [class.not-animated]="!animate"
     >
-      {{ placeholder }}
+      <ng-container *ngTemplateOutlet="content"></ng-container>
     </button>
+    <!--  -->
+    }@else {
+    <!--  -->
+    <button [type]="type" (click)="clicked.emit($event)" [class]="classes">
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </button>
+
     }
   `,
   styles: [
     `
-      @use '/src/scss/utils.scss' as *;
-      @use '/src/scss/components.scss' as *;
+      @use 'src/scss/utils.scss' as *;
+      @use 'src/scss/components.scss' as *;
 
-      .common-button {
+      :host {
+        display: block;
+      }
+
+      button {
+        display: grid;
+        place-content: center;
+      }
+
+      .common {
         @extend %common-button;
       }
       .fab {
@@ -66,26 +69,51 @@ import { RouterLink } from '@angular/router';
       }
 
       .primary {
-        @extend %primary-button;
+        @extend %primary-button-1;
       }
-      .secondary {
-        @extend %secondary-button;
+      .primary-less {
+        @extend %primary-button-2;
+      }
+      .accent {
+        @extend %accent-button-1;
+      }
+      .accent-less {
+        @extend %accent-button-2;
+      }
+
+      .circle {
+        padding: 0.75em;
+      }
+      .not-animated {
+        transition-property: none;
       }
     `,
   ],
-
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdaptiveButtonComponent {
-  @Input({ required: true }) type!: 'common-button' | 'fab' | 'extended-fab';
-  @Input({ required: true }) formula!: 'anchor' | 'button';
-  /**
-   * Applied only to formula='anchor'
-   */
-  @Input() color: 'primary' | 'secondary' = 'secondary';
-  @Input() classes = '';
-  @Input() placeholder = '';
-  @Input() ripple?: boolean;
-  @Input() href?: string;
-  @Output() buttonClick = new EventEmitter<Event | null>();
+  @Input() type: 'button' | 'submit' = 'button';
+  @Input() title = '';
+  @Input() animate = true;
+  @Input({ transform: booleanAttribute }) ripple = false;
+
+  @Input() set styleConfiguration(value: ButtonConfiguration) {
+    this.updateClasses({ ...this.currentStyles, ...value });
+  }
+
+  @Output() clicked = new EventEmitter<Event>();
+
+  @ContentChild('content') content!: TemplateRef<unknown>;
+
+  currentStyles: IButtonStyleOptions = {
+    look: 'common',
+    shape: 'pill',
+    color: 'accent',
+  };
+
+  classes: string = Object.values(this.currentStyles).filter(Boolean).join(' ');
+
+  updateClasses(changes: IButtonStyleOptions) {
+    this.classes = Object.values(changes).filter(Boolean).join(' ');
+  }
 }
