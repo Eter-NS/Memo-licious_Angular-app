@@ -1,20 +1,21 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { runAnimationOnce } from './animation-triggers';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { Location } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ViewTransitionService implements OnDestroy {
+export class ViewTransitionService {
   #router = inject(Router);
   #location = inject(Location);
+  #zone = inject(NgZone);
   #history: Array<string> = [];
   #pageSubject = new BehaviorSubject<'start' | 'end' | 'idle'>('idle');
-  #subscription!: Subscription;
 
-  private runAnimationOnce = runAnimationOnce;
+  private _runAnimationOnce = runAnimationOnce;
   goBackClicked = false;
 
   get page$() {
@@ -22,38 +23,38 @@ export class ViewTransitionService implements OnDestroy {
   }
 
   constructor() {
-    this.#subscription = this.#router.events.subscribe((event) => {
+    this.#router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        if (this.#history.at(-1) !== event.urlAfterRedirects) {
-          this.#history.push(event.urlAfterRedirects);
-          this.#pageSubject.next('end');
+        const currentUrl = event.urlAfterRedirects.replace(location.origin, '');
+
+        if (this.#history.at(-1) !== currentUrl) {
+          this._pushNewHistoryRecord(currentUrl);
         }
       }
     });
   }
 
-  ngOnDestroy(): void {
-    this.#subscription.unsubscribe();
-  }
-
-  async goForward(element: HTMLElement | Event, destination: string) {
-    this.modifyStateOnTransition(false);
-    await this.runTransition(element, 'fadeOut-to-left-animation');
+  async goForward(
+    element: HTMLElement | Event,
+    destination: string
+  ): Promise<void> {
+    this._modifyStateOnTransition(false);
+    await this._runTransition(element, 'fadeOut-to-left-animation');
 
     const path = destination.startsWith('http')
       ? destination.replace(location.origin, '')
       : destination;
 
-    await this.#router.navigateByUrl(path);
-
-    this.#history.push(path);
-    this.#pageSubject.next('end');
+    this.#router.navigateByUrl(path);
+    this._pushNewHistoryRecord(path);
   }
 
-  async goBack(element: HTMLElement | Event, fallback?: string) {
-    this.modifyStateOnTransition(true);
-    await this.runTransition(element, 'fadeOut-to-right-animation');
-    this.#history.pop();
+  async goBack(element: HTMLElement | Event, fallback?: string): Promise<void> {
+    this._modifyStateOnTransition(true);
+    await this._runTransition(element, 'fadeOut-to-right-animation');
+
+    this._popLatestHistoryRecord();
+
     if (this.#history.length > 0) {
       this.#location.back();
     } else {
@@ -61,32 +62,54 @@ export class ViewTransitionService implements OnDestroy {
     }
   }
 
-  async viewFadeIn(element: HTMLElement | Event) {
-    await this.runTransition(element, 'fadeIn-from-bottom-animation', true);
+  async viewFadeIn(element: HTMLElement | Event): Promise<void> {
+    try {
+      await this._runTransition(element, 'fadeIn-from-bottom-animation', true);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  private async runTransition(
+  reloadPage() {
+    this.#router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.#router.navigateByUrl(this.#router.url);
+    });
+  }
+
+  private async _runTransition(
     element: HTMLElement | Event,
     animationClass: string,
-    removeAnimationClassOnFinish?: boolean
-  ) {
+    removeClassOnFinish?: boolean
+  ): Promise<void> {
     const target =
       element instanceof Event ? (element.target as HTMLElement) : element;
 
-    const options = {
-      removeAnimationClassOnFinish,
-    };
+    const options = { removeClassOnFinish };
 
     if (element instanceof Event) {
       element.stopPropagation();
       element.preventDefault();
     }
 
-    await this.runAnimationOnce(target, animationClass, options);
+    try {
+      await this._runAnimationOnce(target, animationClass, options);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  private modifyStateOnTransition(clickState: boolean) {
+  private _modifyStateOnTransition(value: boolean) {
+    this.goBackClicked = value;
     this.#pageSubject.next('start');
-    this.goBackClicked = clickState;
+  }
+
+  private _pushNewHistoryRecord(path: string) {
+    this.#history = [...this.#history, path];
+    this.#pageSubject.next('end');
+  }
+
+  private _popLatestHistoryRecord() {
+    this.#history.pop();
+    this.#history = [...this.#history];
   }
 }
