@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ViewTransitionService } from './view-transition.service';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { Component, Provider, inject } from '@angular/core';
 import { Location } from '@angular/common';
@@ -28,14 +28,17 @@ class TestComponent {
 }
 
 describe('ViewTransitionService', () => {
+  const MockRouterEventsSubject = new BehaviorSubject<
+    NavigationEnd | NavigationStart
+  >(
+    new NavigationEnd(
+      1,
+      'http://localhost:9876/',
+      'http://localhost:9876/example'
+    )
+  );
   const MockRouter = {
-    events: of<NavigationEnd | NavigationStart>(
-      new NavigationEnd(
-        1,
-        'http://localhost:9876/',
-        'http://localhost:9876/example'
-      )
-    ),
+    events: MockRouterEventsSubject.asObservable(),
     navigateByUrl: jasmine.createSpy(
       'navigateByUrl',
       Router.prototype.navigateByUrl
