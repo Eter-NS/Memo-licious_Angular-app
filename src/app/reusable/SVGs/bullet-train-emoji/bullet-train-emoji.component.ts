@@ -4,8 +4,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'app-bullet-train-emoji',
   standalone: true,
   templateUrl: './bullet-train-emoji.component.html',
-  styles: [
-    `
+  styles: `
       :host,
       svg {
         display: inline-block;
@@ -14,7 +13,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         transform: translateY(10%);
       }
     `,
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BulletTrainEmojiComponent {}
