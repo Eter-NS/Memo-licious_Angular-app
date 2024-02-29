@@ -1,51 +1,63 @@
-<mat-sidenav-container class="sidenav-container" [hasBackdrop]="isDarkMode">
+<mat-sidenav-container
+  class="sidenav-container"
+  [hasBackdrop]="viewportListenersService.isHandset$ | async"
+>
   <mat-sidenav
     #drawer
     class="sidenav"
-    fixedInViewport
-    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    [opened]="(isHandset$ | async) === false"
+    [attr.role]="
+      (viewportListenersService.isHandset$ | async) ? 'dialog' : 'navigation'
+    "
+    [mode]="(viewportListenersService.isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(viewportListenersService.isHandset$ | async) === false"
   >
-    <mat-toolbar class="toolbar">
-      @if (isHandset$ | async) {
+    <mat-toolbar [color]="color" class="toolbar">
+      @if (viewportListenersService.isHandset$ | async) {
       <button
         type="button"
+        class="hamburger-button"
         aria-label="Close sidenav"
         mat-icon-button
         (click)="drawer.close()"
+        (keyup.enter)="drawer.close()"
+        tabindex="0"
       >
         <mat-icon aria-label="Side nav close icon">close</mat-icon>
       </button>
       }
       <div class="toolbar__content">
-        <span>Menu</span>
+        <ng-container *ngTemplateOutlet="sidenavHeading"></ng-container>
       </div>
     </mat-toolbar>
-    <mat-nav-list class="nav-list">
-      <ng-content select="#links"></ng-content>
+
+    <mat-nav-list
+      class="nav-list"
+      [ngStyle]="{ backgroundColor: sidenavColor }"
+    >
+      <ng-container *ngTemplateOutlet="sidenavLinks"></ng-container>
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
-    <mat-toolbar color="primary" class="toolbar">
-      @if (isHandset$ | async) {
+    <mat-toolbar [color]="color" class="toolbar">
+      @if (viewportListenersService.isHandset$ | async) {
       <button
         type="button"
+        class="hamburger-button"
         aria-label="Toggle sidenav"
         mat-icon-button
         (click)="drawer.toggle()"
+        (keyup.enter)="drawer.toggle()"
+        tabindex="0"
       >
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
       }
 
       <div class="toolbar__content">
-        <ng-content select="#logo"></ng-content>
+        <ng-container *ngTemplateOutlet="logo"></ng-container>
       </div>
     </mat-toolbar>
 
-    <div class="container">
-      <ng-content select="#content"></ng-content>
-    </div>
+    <ng-container *ngTemplateOutlet="content"></ng-container>
   </mat-sidenav-content>
 </mat-sidenav-container>
