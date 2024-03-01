@@ -12,7 +12,21 @@ export const redirectUnverifiedToVerifyEmail =
   redirectUnverifiedToGuard('/verify-email');
 export const redirectLoggedInToApp = redirectLoggedInToGuard('/app');
 
-export const appRoutes: Routes = [
+export const routes: Routes = [
+  {
+    path: 'app',
+    loadChildren: () =>
+      import('./app-view/feature/app-view-shell/app-view.routes').then(
+        (r) => r.appViewRoutes
+      ),
+  },
+  {
+    path: 'getting-started',
+    loadChildren: () =>
+      import('./getting-started/getting-started.routes').then(
+        (r) => r.gettingStartedRoutes
+      ),
+  },
   {
     title: 'Create a local account',
     path: 'guest',

@@ -4,7 +4,7 @@ import { redirectLoggedInToApp } from '../app.routes';
 export const gettingStartedRoutes: Routes = [
   {
     title: 'Getting started',
-    path: 'getting-started',
+    path: '',
     canActivate: [redirectLoggedInToApp],
     children: [
       {

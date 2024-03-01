@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
-import { appRoutes } from './app.routes';
+import { routes } from './app.routes';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
@@ -15,11 +15,7 @@ import {
   connectDatabaseEmulator,
 } from '@angular/fire/database';
 import { environment } from 'src/environments/environment.dev';
-import { appViewRoutes } from './app-view/feature/app-view-shell/app-view.routes';
-import { gettingStartedRoutes } from './getting-started/getting-started.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
-
-export const routes = [...appViewRoutes, ...gettingStartedRoutes, ...appRoutes];
 
 export const appConfig: ApplicationConfig = {
   providers: [
