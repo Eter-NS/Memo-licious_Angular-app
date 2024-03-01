@@ -18,7 +18,7 @@ import {
 import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
 import { AdaptiveButtonComponent } from 'src/app/ui/adaptive-button/adaptive-button.component';
-import { NoteRestService } from '../../data-access/note-rest/note-rest.service';
+import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { NotesService } from '../../data-access/notes/notes.service';
 import { BottomSheetComponent } from '../../../ui/bottom-sheet/bottom-sheet.component';
 import {

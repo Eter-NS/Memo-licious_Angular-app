@@ -6,7 +6,7 @@ import {
 } from '../../../app.routes';
 import { redirectNotFoundNoteListToGuard } from '../../utils/guards/redirect-not-found-note-list-to/redirect-not-found-note-list-to.guard';
 import { NotesService } from '../../data-access/notes/notes.service';
-import { NoteRestService } from '../../data-access/note-rest/note-rest.service';
+import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { groupNotesResolver } from '../../utils/resolvers/groupNotes/group-notes.resolver';
 
 const redirectNotFoundNoteListToAppNotes = redirectNotFoundNoteListToGuard([
