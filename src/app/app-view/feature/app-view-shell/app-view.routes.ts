@@ -16,7 +16,7 @@ const redirectNotFoundNoteListToAppNotes = redirectNotFoundNoteListToGuard([
 export const appViewRoutes: Routes = [
   {
     title: 'App',
-    path: 'app',
+    path: '',
     component: AppViewComponent,
     providers: [NotesService, NoteRestService],
     canActivate: [
@@ -25,6 +25,7 @@ export const appViewRoutes: Routes = [
     ],
     children: [
       {
+        title: 'Notes',
         path: 'notes',
         children: [
           {
@@ -47,8 +48,8 @@ export const appViewRoutes: Routes = [
           },
         ],
       },
-
       {
+        title: 'Recycle-bin',
         path: 'recycle-bin',
         loadComponent: () =>
           import('../app-recycle-bin/app-recycle-bin.component').then(
@@ -56,6 +57,7 @@ export const appViewRoutes: Routes = [
           ),
       },
       {
+        title: 'Settings',
         path: 'settings',
         loadComponent: () =>
           import('../app-settings/app-settings.component').then(
