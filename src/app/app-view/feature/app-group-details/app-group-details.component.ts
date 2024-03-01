@@ -17,7 +17,7 @@ import {
   NoteModel,
 } from 'src/app/auth/services/Models/UserDataModels';
 import { ActivatedRoute, ResolveEnd, Router } from '@angular/router';
-import { NoteRestService } from '../../data-access/note-rest/note-rest.service';
+import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { MatChipInputEvent, MatChipEditedEvent } from '@angular/material/chips';
 import {
   EMPTY,
