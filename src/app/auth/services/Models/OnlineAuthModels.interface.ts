@@ -1,4 +1,4 @@
-import { NoteGroupModel } from './UserDataModels';
+import { NoteGroupModel } from './UserDataModels.interface';
 
 export interface UnknownError {
   code: string;
