@@ -9,6 +9,7 @@ import {
   signOut,
   updateProfile,
   UserCredential,
+  updatePassword,
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { isAuthError } from 'src/app/reusable/Models/isAuthError';
@@ -16,7 +17,7 @@ import {
   RegisterCustomOptions,
   AuthReturnCredits,
   UnknownError,
-} from '../Models/authModels';
+} from '../Models/OnlineAuthModels.interface';
 import { AuthDatabaseService } from '../database/auth-database.service';
 import { AuthStateService } from '../state/auth-state.service';
 
@@ -41,6 +42,7 @@ export class AuthAccountService {
   private _getRedirectResult = getRedirectResult;
   private _signOut = signOut;
   private _updateProfile = updateProfile;
+  private _updatePassword = updatePassword;
 
   async signupWithEmail(
     email: string,
@@ -180,6 +182,31 @@ export class AuthAccountService {
     }
 
     await this._updateProfile(this.#authState.auth.currentUser, options);
+  }
+
+  async updatePassword(newPassword: string): Promise<AuthReturnCredits> {
+    try {
+      const session = this.#authState.session();
+
+      if (!session) {
+        return {
+          errors: {
+            unknownError: {
+              code: 'NoUser',
+              message: 'No user is currently logged in.',
+            },
+          },
+        };
+      }
+      await this._updatePassword(session, newPassword);
+
+      return { passed: true };
+    } catch (err) {
+      console.error(err);
+      return {
+        errors: { unknownError: err as UnknownError },
+      };
+    }
   }
 
   private isTheDeviceMobile(): boolean {
