@@ -43,7 +43,7 @@
           (data)="handleSubmit($event)"
           (rememberMe)="updateRememberMe($event)"
         />
-        } @loading ( minimum 250ms) {
+        } @loading ( minimum 250ms){
         <mat-spinner
           class="loading-defer-spinner loading-state-login"
         ></mat-spinner>
@@ -55,20 +55,6 @@
       </div>
 
       <div class="component-content">
-        <button
-          type="button"
-          class="sign-in-with-google"
-          appCustomMatRipple
-          (click)="googleAuth('continueWithGoogle')"
-          (keyup.enter)="googleAuth('continueWithGoogle')"
-        >
-          <!-- 25px as the view size for the svg -->
-          <app-google-logo
-            class="google-logo"
-            svgWidth="25"
-          ></app-google-logo>
-          <span>Continue with Google</span>
-        </button>
         <button
           type="button"
           class="sign-in-with-google"

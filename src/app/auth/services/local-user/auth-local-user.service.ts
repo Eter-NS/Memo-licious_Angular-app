@@ -1,7 +1,6 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
-
 import {
   LocalUserAccount,
   LocalUserFormData,
@@ -15,7 +14,6 @@ export interface LocalPersistence {
   user: LocalUserAccount | undefined;
 }
 
-const USER_PATH = 'userData';
 const REMEMBER_ME_TOKEN = 'localRememberMe';
 
 type ValidateUserError = {

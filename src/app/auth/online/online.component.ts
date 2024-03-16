@@ -37,8 +37,6 @@ import { ActivatedRoute } from '@angular/router';
   imports: [
     OnlineRegisterComponent,
     OnlineLoginComponent,
-    OnlineRegisterComponent,
-    OnlineLoginComponent,
     GoogleLogoComponent,
     CustomMatRippleDirective,
     MatSnackBarModule,
@@ -65,7 +63,6 @@ export class OnlineComponent implements OnInit, AfterViewInit {
   emailDoesNotExist = false;
 
   ngOnInit(): void {
-    this._checkParams();
     this._checkParams();
   }
 
