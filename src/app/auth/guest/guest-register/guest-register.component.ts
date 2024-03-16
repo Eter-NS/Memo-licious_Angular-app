@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  Input,
   OnChanges,
   Output,
   SimpleChanges,
@@ -24,10 +23,11 @@ import {
 import {
   FormCommonFeaturesService,
   LocalAuthUserData,
-} from '../../services/form-common-features/form-common-features.service';
+} from '../../../reusable/data-access/form-common-features/form-common-features.service';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 
 @Component({
   selector: 'app-guest-register',
@@ -37,20 +37,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatRadioModule,
     MatProgressSpinnerModule,
     MatSpinnerTogglerDirective,
+    CustomMatRippleDirective,
   ],
   templateUrl: './guest-register.component.html',
-  styleUrls: [
-    '../../form.scss',
-    '../guest-forms.scss',
-    './guest-register.component.scss',
-  ],
+  styleUrls: ['/src/app/reusable/forms/form.scss', '../guest-forms.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GuestRegisterComponent implements AfterViewInit, OnChanges {
   formCommonFeaturesService = inject(FormCommonFeaturesService);
   fb = inject(NonNullableFormBuilder);
 
-  @Input({ required: true }) emailAlreadyInUse = false;
   @Output() data = new EventEmitter<LocalAuthUserData>();
   sending = false;
   isPasswordSelected = false;
