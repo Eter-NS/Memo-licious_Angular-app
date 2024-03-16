@@ -1,5 +1,5 @@
-@use "../../../scss/utils.scss" as *;
-@use "../../../scss/components.scss" as *;
+@use '../../../scss/utils.scss' as *;
+@use '../../../scss/components.scss' as *;
 
 main,
 .content,
@@ -19,8 +19,8 @@ main {
 
 .container {
   margin: {
-    left: free-space("sm");
-    right: free-space("sm");
+    left: free-space('sm');
+    right: free-space('sm');
   }
 }
 
@@ -46,7 +46,7 @@ main {
   }
 
   &-switch {
-    gap: free-space("sm");
+    gap: free-space('sm');
 
     & > a {
       text-align: center;
@@ -65,26 +65,9 @@ main {
   justify-items: center;
 }
 
-.sign-in-with-google {
-  @include inset-box-shadow-with-transition(var(--color-accent-50));
-  @extend %flex-center;
-  @include border-radius("sm");
-  gap: free-space("sm");
-  padding: 1.5vmax;
-  border: none;
-  cursor: pointer;
-  background-color: white;
-  color: black;
-
-  & > span {
-    font-size: var(--form-input);
-    font-weight: 500;
-  }
-}
-
 .go-back-button {
   &-wrapper {
-    padding: free-space("xs") 0;
+    padding: free-space('xs') 0;
   }
 }
 

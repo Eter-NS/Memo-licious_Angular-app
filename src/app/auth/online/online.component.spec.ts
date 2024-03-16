@@ -15,8 +15,11 @@ import { AuthStateService } from '../services/state/auth-state.service';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
-import { AuthReturnCredits, Errors } from '../services/Models/authModels';
-import { AuthUserData } from '../services/form-common-features/form-common-features.service';
+import {
+  AuthReturnCredits,
+  Errors,
+} from '../services/Models/OnlineAuthModels.interface';
+import { AuthUserData } from '../../reusable/data-access/form-common-features/form-common-features.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { UserCredential } from '@angular/fire/auth';
 

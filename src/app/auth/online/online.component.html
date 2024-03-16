@@ -55,20 +55,10 @@
       </div>
 
       <div class="component-content">
-        <button
-          type="button"
-          class="sign-in-with-google"
-          appCustomMatRipple
+        <app-google-logo
           (click)="googleAuth('continueWithGoogle')"
           (keyup.enter)="googleAuth('continueWithGoogle')"
-        >
-          <!-- 25px as the view size for the svg -->
-          <app-google-logo
-            class="google-logo"
-            svgWidth="25"
-          ></app-google-logo>
-          <span>Continue with Google</span>
-        </button>
+        />
         <div class="login-register-switch">
           @if (register) {
           <a

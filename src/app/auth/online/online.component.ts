@@ -13,16 +13,15 @@ import { OnlineRegisterComponent } from './online-register/online-register.compo
 import {
   AuthReturnCredits,
   Errors,
-} from 'src/app/auth/services/Models/authModels';
-import { GoogleLogoComponent } from 'src/app/reusable/SVGs/google-logo/google-logo.component';
+} from 'src/app/auth/services/Models/OnlineAuthModels.interface';
+import { GoogleLogoComponent } from '../../reusable/SVGs/google-logo/google-logo.component';
 import { objectKeys } from 'src/app/reusable/data-tools/objectTools';
-import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
 import { PreviousPageButtonComponent } from 'src/app/ui/previous-page-button/previous-page-button.component';
 import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers';
 import { AuthAccountService } from '../services/account/auth-account.service';
-import { AuthUserData } from '../services/form-common-features/form-common-features.service';
+import { AuthUserData } from '../../reusable/data-access/form-common-features/form-common-features.service';
 import { AuthStateService } from '../services/state/auth-state.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from 'src/environments/environment.dev';
@@ -38,7 +37,6 @@ import { ActivatedRoute } from '@angular/router';
     OnlineRegisterComponent,
     OnlineLoginComponent,
     GoogleLogoComponent,
-    CustomMatRippleDirective,
     MatSnackBarModule,
     PreviousPageButtonComponent,
     MatProgressSpinnerModule,
