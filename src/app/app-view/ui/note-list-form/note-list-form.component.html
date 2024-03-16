@@ -1,7 +1,11 @@
 @if (environment==='note-creator') {
 <h2>Create new notes</h2>
 }
-<form [formGroup]="newNoteGroupForm" class="form" (ngSubmit)="submitForm()">
+<form
+  [formGroup]="newNoteGroupForm"
+  class="form"
+  (ngSubmit)="submitForm()"
+>
   <label class="note-list-header-wrapper">
     <input
       class="note-list-header"
@@ -17,9 +21,17 @@
     }
   </label>
 
-  <mat-form-field class="note-list-elements" appearance="outline">
+  <mat-form-field
+    class="note-list-elements"
+    appearance="outline"
+  >
     <mat-label>Your items</mat-label>
-    <mat-chip-grid #chipGrid aria-label="Enter what's on your mind">
+    <mat-chip-grid
+      #chipGrid
+      aria-label="Enter what's on your mind"
+    >
+      @if(notes){
+      <!--  -->
       @for (note of notes; track note.id) {
       <mat-chip-row
         #chipRow
@@ -28,7 +40,7 @@
         [editable]="true"
         (touchstart)="handleTouchStart()"
         (touchend)="handleTouchEnd()"
-        (edited)="editNote.emit({note, event: $event});"
+        (edited)="handleNoteEvent({note, event: $event})"
         (removed)="removeNote.emit(note)"
       >
         {{ note.value }}
@@ -42,23 +54,31 @@
         </button>
       </mat-chip-row>
       }
+      <!--  -->
+      }@else {
+      <mat-label>There are no notes yet</mat-label>
+      }
       <input
+        matInput
         placeholder="New item"
         [matChipInputFor]="chipGrid"
         [matChipInputSeparatorKeyCodes]="separatorCodes"
         matChipInputAddOnBlur
-        (matChipInputTokenEnd)="createNote.emit($event)"
+        (matChipInputTokenEnd)="handleNoteEvent($event)"
       />
     </mat-chip-grid>
   </mat-form-field>
 
-  @if(environment==='note-creator'){
-  <!--  -->
-  @if(notes?.length){
-  <button type="submit" class="submit-button">
-    <mat-icon>done</mat-icon>
-  </button>
+  @if(errorMessage$ | async; as errorMessage ){
+  <small class="form-error">{{ errorMessage.cause }}</small>
   }
   <!--  -->
+  @if(environment==='note-creator' && notes?.length){
+  <button
+    type="submit"
+    class="submit-button"
+  >
+    <mat-icon>done</mat-icon>
+  </button>
   }
 </form>
