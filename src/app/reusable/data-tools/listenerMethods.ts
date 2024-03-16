@@ -26,7 +26,13 @@ export function darkModeListener<T extends GenericFunction>(
   const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
 
   // First value just after subscribing
-  callback(matchMedia.matches);
+  callback(
+    new MediaQueryListEvent('change', {
+      bubbles: false,
+      matches: matchMedia.matches,
+      media: '(prefers-color-scheme: dark)',
+    })
+  );
 
   // Further changes
   matchMedia.addEventListener('change', callback);
