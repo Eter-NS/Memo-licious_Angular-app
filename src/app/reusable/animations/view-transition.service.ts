@@ -81,21 +81,17 @@ export class ViewTransitionService {
     animationClass: string,
     removeClassOnFinish?: boolean
   ): Promise<void> {
-    const target =
-      element instanceof Event ? (element.target as HTMLElement) : element;
+    const isEventInstance = element instanceof Event;
+    const target = isEventInstance ? (element.target as HTMLElement) : element;
 
-    const options = { removeClassOnFinish };
-
-    if (element instanceof Event) {
+    if (isEventInstance) {
       element.stopPropagation();
       element.preventDefault();
     }
 
-    try {
-      await this._runAnimationOnce(target, animationClass, options);
-    } catch (err) {
-      console.error(err);
-    }
+    await this._runAnimationOnce(target, animationClass, {
+      removeClassOnFinish,
+    });
   }
 
   private _modifyStateOnTransition(value: boolean) {
