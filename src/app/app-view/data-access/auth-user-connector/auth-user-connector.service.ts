@@ -1,5 +1,14 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, combineLatest, map, throwError } from 'rxjs';
+import {
+  EMPTY,
+  Observable,
+  catchError,
+  combineLatest,
+  map,
+  of,
+  switchMap,
+  throwError,
+} from 'rxjs';
 import { LocalUserAccount } from 'src/app/auth/services/Models/LocalAuthModels.interface';
 import { AuthAccountService } from 'src/app/auth/services/account/auth-account.service';
 import { AuthLocalUserService } from 'src/app/auth/services/local-user/auth-local-user.service';
@@ -8,6 +17,8 @@ import { ErrorHandlerService } from '../error-handler/error-handler.service';
 import { User } from '@angular/fire/auth';
 import { UserProfile } from '../../utils/models/user-profile.interface';
 import { UpdateUserInterface } from '../../utils/models/update-user.interface';
+
+export type UserType = 'online' | 'local' | null;
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +29,8 @@ export class AuthUserConnectorService {
   #authStateService = inject(AuthStateService);
   #errorHandlerService = inject(ErrorHandlerService);
 
-  #activeUserType = signal<'online' | 'local' | null>(null);
+  #previousUserType = signal<UserType>(null);
+  #activeUserType = signal<UserType>(null);
 
   get activeUserTypeSig() {
     return this.#activeUserType.asReadonly();
@@ -29,18 +41,24 @@ export class AuthUserConnectorService {
       this.#authLocalUserService.localUser$,
       this.#authStateService.user$,
     ]).pipe(
-      map(([localUser, onlineUser]) => {
+      switchMap(([localUser, onlineUser]) => {
         if (localUser) {
           this._updateUserType('local');
-          return localUser;
+          return of(localUser);
         }
 
         if (onlineUser) {
           this._updateUserType('online');
-          return onlineUser;
+          return of(onlineUser);
         }
 
         this._updateUserType(null);
+        if (this.#previousUserType()) {
+          // Ends the stream when user logs out
+          return EMPTY;
+        }
+
+        // Throws the error when no user was logged in ever before
         throw new Error('No user logged in');
       }),
       catchError((err: Error) => {
@@ -81,8 +99,21 @@ export class AuthUserConnectorService {
     );
   }
 
-  private _updateUserType(value: 'online' | 'local' | null) {
-    this.#activeUserType.set(value);
+  private _updateUserType(value: UserType, period?: 'last' | 'current') {
+    switch (period) {
+      case 'current':
+        this.#activeUserType.set(value);
+        break;
+
+      case 'last':
+        this.#previousUserType.set(value);
+        break;
+
+      default:
+        this.#previousUserType.set(this.#activeUserType());
+        this.#activeUserType.set(value);
+        break;
+    }
   }
 
   updateUser(changes: UpdateUserInterface) {
