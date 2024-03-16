@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { NotesService } from '../notes/notes.service';
 import { MatChipInputEvent, MatChipEditedEvent } from '@angular/material/chips';
-import { NoteModel } from 'src/app/auth/services/Models/UserDataModels';
+import { NoteModel } from 'src/app/auth/services/Models/UserDataModels.interface';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Injectable()

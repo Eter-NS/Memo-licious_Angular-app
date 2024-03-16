@@ -9,9 +9,12 @@ import {
 } from '@angular/fire/database';
 import { AuthStateService } from '../state/auth-state.service';
 import { UserCredential } from '@angular/fire/auth';
-import { AuthReturnCredits, DbInitialPayload } from '../Models/authModels';
+import {
+  AuthReturnCredits,
+  DbInitialPayload,
+} from '../Models/OnlineAuthModels.interface';
 import { isAuthError } from 'src/app/reusable/Models/isAuthError';
-import { NoteGroupModel } from '../Models/UserDataModels';
+import { NoteGroupModel } from '../Models/UserDataModels.interface';
 import { Observable } from 'rxjs';
 
 @Injectable({

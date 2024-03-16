@@ -7,7 +7,7 @@ import {
 } from '@angular/router';
 import { redirectUnauthorizedToGuard } from './redirect-unauthorized-to.guard';
 import { Observable, of } from 'rxjs';
-import { LocalUserAccount } from '../services/Models/UserDataModels';
+import { LocalUserAccount } from '../services/Models/LocalAuthModels.interface';
 import { AuthStateService } from '../services/state/auth-state.service';
 import { User } from '@angular/fire/auth';
 import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';

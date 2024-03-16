@@ -23,7 +23,7 @@ import { MatChipInputEvent, MatChipEditedEvent } from '@angular/material/chips';
 import {
   NoteGroupModel,
   NoteModel,
-} from 'src/app/auth/services/Models/UserDataModels';
+} from 'src/app/auth/services/Models/UserDataModels.interface';
 import { EMPTY, filter, map, of, switchMap, take } from 'rxjs';
 import { AdaptiveButtonComponent } from 'src/app/ui/adaptive-button/adaptive-button.component';
 import { MatIconModule } from '@angular/material/icon';
@@ -36,7 +36,6 @@ export interface INoteListFormDialogData {
 }
 
 @Component({
-  selector: 'app-note-list-form-dialog-editor',
   standalone: true,
   templateUrl: './note-list-form-dialog-editor.component.html',
   styleUrl: './note-list-form-dialog-editor.component.scss',

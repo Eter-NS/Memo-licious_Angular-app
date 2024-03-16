@@ -9,7 +9,7 @@ import {
 } from '@angular/router';
 import { AuthStateService } from '../services/state/auth-state.service';
 import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
-import { LocalUserAccount } from '../services/Models/UserDataModels';
+import { LocalUserAccount } from '../services/Models/LocalAuthModels.interface';
 import { Observable, of } from 'rxjs';
 import { User } from '@angular/fire/auth';
 

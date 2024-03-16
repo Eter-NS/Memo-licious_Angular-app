@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { NoteGroupModel } from 'src/app/auth/services/Models/UserDataModels';
+import { NoteGroupModel } from 'src/app/auth/services/Models/UserDataModels.interface';
 
 @Component({
   selector: 'app-notes-list-group-element',
