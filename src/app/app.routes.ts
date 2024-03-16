@@ -12,7 +12,7 @@ export const redirectUnverifiedToVerifyEmail =
   redirectUnverifiedToGuard('/verify-email');
 export const redirectLoggedInToApp = redirectLoggedInToGuard('/app');
 
-export const routes: Routes = [
+export const appRoutes: Routes = [
   {
     path: 'app',
     loadChildren: () =>
