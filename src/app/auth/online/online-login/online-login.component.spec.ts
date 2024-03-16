@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OnlineLoginComponent } from './online-login.component';
 import { By } from '@angular/platform-browser';
-import { FormCommonFeaturesService } from '../../services/form-common-features/form-common-features.service';
+import { FormCommonFeaturesService } from '../../../reusable/data-access/form-common-features/form-common-features.service';
 import { SimpleChange } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 

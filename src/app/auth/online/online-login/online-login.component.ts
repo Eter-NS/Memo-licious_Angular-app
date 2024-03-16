@@ -17,14 +17,13 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { checkEmail } from 'src/app/custom-validations/custom-validations';
-import { GoogleLogoComponent } from 'src/app/reusable/SVGs/google-logo/google-logo.component';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import {
   AuthUserData,
   FormCommonFeaturesService,
-} from '../../services/form-common-features/form-common-features.service';
+} from '../../../reusable/data-access/form-common-features/form-common-features.service';
 import {
   MatCheckboxChange,
   MatCheckboxModule,
@@ -34,7 +33,6 @@ import {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    GoogleLogoComponent,
     RouterLink,
     CustomMatRippleDirective,
     MatProgressSpinnerModule,
@@ -43,7 +41,7 @@ import {
   ],
   selector: 'app-online-login',
   templateUrl: './online-login.component.html',
-  styleUrls: ['../../form.scss'],
+  styleUrls: ['/src/app/reusable/forms/form.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OnlineLoginComponent implements AfterViewInit, OnChanges {

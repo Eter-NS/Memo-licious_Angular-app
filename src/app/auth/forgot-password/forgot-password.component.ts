@@ -22,7 +22,10 @@ import { takeLast } from 'rxjs';
 @Component({
   standalone: true,
   templateUrl: './forgot-password.component.html',
-  styleUrls: ['../form.scss', './forgot-password.component.scss'],
+  styleUrls: [
+    '/src/app/reusable/forms/form.scss',
+    './forgot-password.component.scss',
+  ],
   imports: [
     PreviousPageButtonComponent,
     ReactiveFormsModule,

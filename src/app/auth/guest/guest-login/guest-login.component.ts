@@ -17,17 +17,25 @@ import {
 import {
   FormCommonFeaturesService,
   LocalAuthUserData,
-} from '../../services/form-common-features/form-common-features.service';
+} from '../../../reusable/data-access/form-common-features/form-common-features.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { LocalUsers } from '../../services/Models/UserDataModels';
 import { NgClass } from '@angular/common';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
+import { LocalUsers } from '../../services/Models/LocalAuthModels.interface';
+import { ProfilePictureComponent } from 'src/app/ui/profile-picture/profile-picture.component';
 
 @Component({
   selector: 'app-guest-login',
   standalone: true,
+  templateUrl: './guest-login.component.html',
+  styleUrls: [
+    '/src/app/reusable/forms/form.scss',
+    '../guest-forms.scss',
+    './guest-login.component.scss',
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule,
     MatCheckboxModule,
@@ -35,14 +43,8 @@ import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-
     MatProgressSpinnerModule,
     NgClass,
     CustomMatRippleDirective,
+    ProfilePictureComponent,
   ],
-  templateUrl: './guest-login.component.html',
-  styleUrls: [
-    '../../form.scss',
-    '../guest-forms.scss',
-    './guest-login.component.scss',
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GuestLoginComponent implements AfterViewInit, OnChanges {
   formCommonFeaturesService = inject(FormCommonFeaturesService);
@@ -87,13 +89,6 @@ export class GuestLoginComponent implements AfterViewInit, OnChanges {
     this.pickUser(this.users[index].name);
   }
 
-  private pickUser(user: string) {
-    this.localLoginForm.get('passphrase')?.reset();
-    this.localLoginForm.patchValue({ name: user });
-    this.localLoginForm.setErrors(null);
-    this.rememberMeControl.reset();
-  }
-
   onSubmit() {
     const isTheFormInvalid = () => {
       const { name, passphrase } = this.localLoginForm.controls;
@@ -109,5 +104,12 @@ export class GuestLoginComponent implements AfterViewInit, OnChanges {
       this.localLoginForm,
       this.data
     );
+  }
+
+  private pickUser(user: string) {
+    this.localLoginForm.get('passphrase')?.reset();
+    this.localLoginForm.patchValue({ name: user });
+    this.localLoginForm.setErrors(null);
+    this.rememberMeControl.reset();
   }
 }

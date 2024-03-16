@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OnlineRegisterComponent } from './online-register.component';
-import { FormCommonFeaturesService } from '../../services/form-common-features/form-common-features.service';
+import { FormCommonFeaturesService } from '../../../reusable/data-access/form-common-features/form-common-features.service';
 import { By } from '@angular/platform-browser';
 import { DebugElement, SimpleChange } from '@angular/core';
 

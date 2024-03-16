@@ -22,23 +22,21 @@ import {
 } from '../../../custom-validations/custom-validations';
 import { RouterLink } from '@angular/router';
 
-import { GoogleLogoComponent } from 'src/app/reusable/SVGs/google-logo/google-logo.component';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
 import {
   AuthUserData,
   FormCommonFeaturesService,
-} from '../../services/form-common-features/form-common-features.service';
+} from '../../../reusable/data-access/form-common-features/form-common-features.service';
 
 @Component({
   standalone: true,
   selector: 'app-online-register',
   templateUrl: './online-register.component.html',
-  styleUrls: ['../../form.scss'],
+  styleUrls: ['/src/app/reusable/forms/form.scss'],
   imports: [
     ReactiveFormsModule,
-    GoogleLogoComponent,
     RouterLink,
     MatProgressSpinnerModule,
     MatSpinnerTogglerDirective,
