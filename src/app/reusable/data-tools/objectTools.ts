@@ -27,6 +27,9 @@ interface UTCTimestampBody {
   week_number: number;
 }
 
+/**
+ * @returns In case os using unixtime property, don't forget to multiply the value by 1000!
+ */
 export async function getUTCTimestamp(): Promise<UTCTimestampBody> {
   try {
     const response = await fetch(
