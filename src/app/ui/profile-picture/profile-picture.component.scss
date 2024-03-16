@@ -1,0 +1,27 @@
+@use 'src/scss/utils.scss' as *;
+
+:host {
+  --element-size: 64px;
+  border-radius: var(--custom-border-radius, #{border-radius-implicit('xs')});
+  display: inline-block;
+  width: var(--element-size);
+  height: var(--element-size);
+}
+
+.user-letter-avatar {
+  background-color: var(--user-avatar-color);
+  border-radius: inherit;
+
+  display: grid;
+  place-content: center;
+  width: var(--element-size);
+  height: var(--element-size);
+
+  &__text {
+    font-size: calc(var(--element-size) / 2.5);
+  }
+}
+
+.no-profile-picture {
+  --custom-svg-size: var(--element-size);
+}
