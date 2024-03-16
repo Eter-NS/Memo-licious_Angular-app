@@ -19,7 +19,7 @@
     opacity: 0.75;
   }
 
-  @media (prefers-color-scheme: dark) {
+  .dark & {
     @include inset-box-shadow-with-transition(var(--color-accent-200));
 
     &::placeholder {

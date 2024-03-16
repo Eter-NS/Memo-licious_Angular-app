@@ -1,6 +1,6 @@
-@use "src/scss/utils.scss" as *;
-@use "src/scss/components.scss" as *;
-@use "src/scss/viewport.scss" as *;
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/components.scss' as *;
+@use 'src/scss/viewport.scss' as *;
 
 :host {
   display: block;
@@ -13,7 +13,7 @@
 }
 
 h2 {
-  margin: free-space("sm") free-space("xs");
+  margin: free-space('sm') free-space('xs');
 }
 
 .note-list {
@@ -22,7 +22,7 @@ h2 {
     width: 100%;
     outline: 0;
     font-size: var(--h3);
-    padding: free-space("sm") free-space("sm") free-space("xs");
+    padding: free-space('sm') free-space('sm') free-space('xs');
     border: 0px solid var(--mdc-outlined-text-field-outline-color);
     border-bottom-width: 0.8px;
     color: var(--contrast-color-accent-300);
@@ -37,18 +37,19 @@ h2 {
       border-bottom-width: 2px;
 
       background-color: var(--color-accent-100);
-      border-top-left-radius: border-radius-implicit("xs");
-      border-top-right-radius: border-radius-implicit("xs");
+      border-top-left-radius: border-radius-implicit('xs');
+      border-top-right-radius: border-radius-implicit('xs');
     }
 
     &-wrapper {
       display: block;
-      margin-bottom: free-space("md");
+      margin-bottom: free-space('md');
     }
 
     &::placeholder {
       color: hsl(88, 6%, 54%);
-      @media (prefers-color-scheme: dark) {
+
+      .dark & {
         color: hsl(67, 5%, 63%);
       }
     }
@@ -73,10 +74,14 @@ h2 {
   background-color: var(--color-accent-300) !important;
 }
 
-.input-error {
+.input-error,
+.form-error {
   display: block;
   color: var(--contrast-color-accent-50);
-  margin-top: calc(#{free-space("xs")} / 2);
+}
+
+.input-error {
+  margin-top: calc(#{free-space('xs')} / 2);
 }
 
 .submit-button {

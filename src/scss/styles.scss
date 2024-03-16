@@ -1,10 +1,10 @@
-@use "sass:map";
-@use "@angular/material" as mat;
-@use "src/app/reusable/animations/animations.scss" as anim;
-@use "./themes.scss" as theme;
-@use "./utils.scss" as util;
-@use "./typography.scss";
-@use "./viewport.scss";
+@use 'sass:map';
+@use '@angular/material' as mat;
+@use 'src/app/reusable/animations/animations.scss' as anim;
+@use './themes.scss' as theme;
+@use './utils.scss' as util;
+@use './typography.scss';
+@use './viewport.scss';
 
 @include mat.core();
 
@@ -20,29 +20,15 @@
 @include mat.select-theme(theme.$light-theme);
 @include mat.snack-bar-theme(theme.$light-theme);
 @include mat.radio-theme(theme.$light-theme);
+@include mat.input-theme(theme.$light-theme);
 @include mat.chips-theme(theme.$light-theme);
 @include mat.form-field-theme(theme.$light-theme);
 @include mat.progress-spinner-theme(theme.$progress-spinner-light-theme);
 
 // Default theme
 .light {
-  @include mat.core-color(theme.$light-theme);
-  // @include mat.strong-focus-indicators();
-  @include mat.toolbar-color(theme.$light-theme);
-  @include mat.sidenav-color(theme.$light-theme);
-  @include mat.dialog-color(theme.$light-theme);
-  @include mat.button-color(theme.$light-theme);
-  @include mat.menu-color(theme.$light-theme);
-  @include mat.slide-toggle-color(theme.$light-theme);
-  @include mat.checkbox-color(theme.$light-theme);
-  @include mat.select-color(theme.$light-theme);
-  @include mat.snack-bar-color(theme.$light-theme);
-  @include mat.radio-color(theme.$light-theme);
-  @include mat.chips-color(theme.$light-theme);
-  @include mat.form-field-color(theme.$light-theme);
-  @include mat.progress-spinner-color(theme.$progress-spinner-light-theme);
-
-  @include theme.createCSSVars("light");
+  @include theme.createCSSVars('light');
+  color-scheme: light;
 
   /* Warn colors */
   --color-warn-primary: var(--color-warn-400);
@@ -64,11 +50,13 @@
   @include mat.select-color(theme.$dark-theme);
   @include mat.snack-bar-color(theme.$dark-theme);
   @include mat.radio-color(theme.$dark-theme);
+  @include mat.input-color(theme.$dark-theme);
   @include mat.chips-color(theme.$dark-theme);
   @include mat.form-field-color(theme.$dark-theme);
   @include mat.progress-spinner-color(theme.$progress-spinner-dark-theme);
 
-  @include theme.createCSSVars("dark");
+  @include theme.createCSSVars('dark');
+  color-scheme: dark;
 
   /* Warn colors */
   --color-warn-primary: var(--color-warn-700);
@@ -111,7 +99,7 @@ a:focus-visible,
 button:focus-visible {
   outline: 2px solid rgba(0, 0, 0, 0.5);
 
-  @media (prefers-color-scheme: dark) {
+  .dark & {
     outline-color: rgba(255, 255, 255, 0.5);
   }
 }
