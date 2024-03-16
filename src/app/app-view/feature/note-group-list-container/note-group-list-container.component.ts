@@ -15,13 +15,13 @@ import { combineLatest, filter, map, take } from 'rxjs';
 import { NotesService } from 'src/app/app-view/data-access/notes/notes.service';
 import { NotesListGroupElementComponent } from 'src/app/app-view/ui/notes-list-group-element/notes-list-group-element.component';
 import { NoteListFormEditor } from 'src/app/app-view/utils/models/note-list-form-editor.interface';
-import { NoteGroupModel } from 'src/app/auth/services/Models/UserDataModels';
+import { NoteGroupModel } from 'src/app/auth/services/Models/UserDataModels.interface';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import {
   INoteListFormDialogData,
   NoteListFormDialogEditorComponent,
-} from '../../note-list-form-dialog-editor/note-list-form-dialog-editor.component';
+} from '../note-list-form-dialog-editor/note-list-form-dialog-editor.component';
 
 @Component({
   selector: 'app-note-group-list-container',
@@ -37,9 +37,9 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NoteGroupListContainerComponent {
-  notesService = inject(NotesService);
-  viewportListenersService = inject(ViewportListenersService);
-  viewTransitionService = inject(ViewTransitionService);
+  #viewportListenersService = inject(ViewportListenersService);
+  #viewTransitionService = inject(ViewTransitionService);
+  #notesService = inject(NotesService);
   #dialog = inject(MatDialog);
 
   @Input() markForDelete: boolean = false;
@@ -48,25 +48,25 @@ export class NoteGroupListContainerComponent {
 
   @ViewChild('container') mainElement!: ElementRef<HTMLDivElement>;
 
-  notes$ = this.notesService.notes$.pipe(
+  notes$ = this.#notesService.notes$.pipe(
     map((groups) =>
-      this.markForDelete
-        ? (groups as NoteGroupModel[]).filter(({ deleteAt }) => deleteAt)
-        : (groups as NoteGroupModel[]).filter(({ deleteAt }) => !deleteAt)
+      groups.filter(({ deleteAt }) =>
+        this.markForDelete ? deleteAt : !deleteAt
+      )
     )
   );
 
   handleGroupMarkForDelete(id: string, state: boolean) {
     if (!id) return;
-    this.notesService.markGroupToDelete(id, state);
+    this.#notesService.markGroupToDelete(id, state);
   }
 
   handleClick(id: string) {
-    this.viewportListenersService.isHandset$
+    this.#viewportListenersService.isHandset$
       .pipe(take(1))
       .subscribe((value) => {
         if (value) {
-          this.viewTransitionService.goForward(
+          this.#viewTransitionService.goForward(
             this.mainElement.nativeElement,
             `/app/notes/${id}`
           );
@@ -113,7 +113,7 @@ export class NoteGroupListContainerComponent {
         }
 
         if (dialogState.action === 'close') {
-          this.notesService.fillNotesBuffer([]);
+          this.#notesService.fillNotesBuffer([]);
           return;
         }
 
@@ -134,7 +134,7 @@ export class NoteGroupListContainerComponent {
         }
 
         try {
-          const result = await this.notesService.modifyGroups(updatedGroups);
+          const result = await this.#notesService.modifyGroups(updatedGroups);
 
           dialogRef.disableClose = !result;
         } catch (err) {

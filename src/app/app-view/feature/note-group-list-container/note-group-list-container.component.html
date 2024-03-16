@@ -1,9 +1,9 @@
-<section
+@if (notes$ | async; as notes) {
+<div
   #container
   class="noteList-list"
-  [class.empty]="(notes$ | async) === null"
+  [class.empty]="notes === null || !notes.length"
 >
-  @if (notes$| async; as notes) {
   <!--  -->
   @if (notes.length) {
   <ngx-masonry
@@ -17,7 +17,10 @@
     }"
   >
     @for(note of notes; track note.id){
-    <div class="noteList-list__element-wrapper" ngxMasonryItem>
+    <div
+      class="noteList-list__element-wrapper"
+      ngxMasonryItem
+    >
       @if(markForDelete){
       <app-notes-list-group-element
         [groupName]="note.title"
@@ -42,7 +45,7 @@
   <ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
   }
   <!--  -->
-  } @else {
-  <ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
-  }
-</section>
+</div>
+} @else {
+<ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
+}
