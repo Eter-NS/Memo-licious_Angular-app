@@ -7,13 +7,13 @@ import {
   retry,
   switchMap,
   take,
+  throwError,
 } from 'rxjs';
 import {
   NoteGroupModel,
   NoteModel,
-} from 'src/app/auth/services/Models/UserDataModels';
+} from 'src/app/auth/services/Models/UserDataModels.interface';
 import { AuthLocalUserService } from 'src/app/auth/services/local-user/auth-local-user.service';
-import { AuthStateService } from 'src/app/auth/services/state/auth-state.service';
 import { ErrorHandlerService } from '../error-handler/error-handler.service';
 import {
   getUTCTimestamp,
@@ -23,11 +23,12 @@ import { AuthUserConnectorService } from '../auth-user-connector/auth-user-conne
 import { AuthDatabaseService } from 'src/app/auth/services/database/auth-database.service';
 import { GroupRemovingStrategy } from '../../utils/models/app-settings.interface';
 import { AppConfigService } from '../app-config/app-config.service';
+import { LocalUserAccount } from 'src/app/auth/services/Models/LocalAuthModels.interface';
+import { User } from '@angular/fire/auth';
 
 @Injectable()
 export class NotesService implements OnDestroy {
   #authLocalUserService = inject(AuthLocalUserService);
-  #authStateService = inject(AuthStateService);
   #authDatabaseService = inject(AuthDatabaseService);
   #authUserConnectorService = inject(AuthUserConnectorService);
   #appConfigService = inject(AppConfigService);
@@ -47,40 +48,63 @@ export class NotesService implements OnDestroy {
   get notesBuffer$() {
     return this.#notesBufferSubject.asObservable();
   }
-
   get userType() {
-    return this.#authUserConnectorService.activeUserSig;
+    return this.#authUserConnectorService.activeUserTypeSig();
   }
 
-  get notes$(): Observable<NoteGroupModel[] | null> {
-    return this.#authLocalUserService.localUser$.pipe(
-      switchMap((localUser) => {
-        if (localUser) {
-          this.#authUserConnectorService.updateUser('local');
-          return of(localUser.groups);
+  get notes$(): Observable<NoteGroupModel[]> {
+    return this.#authUserConnectorService.activeUser$.pipe(
+      switchMap((user) => {
+        if (this.userType === 'local') {
+          return of((user as LocalUserAccount).groups);
         }
 
-        return this.#authStateService.user$.pipe(
-          switchMap((onlineUser) => {
-            if (onlineUser) {
-              this.#authUserConnectorService.updateUser('online');
-              return this.#authDatabaseService.getGroups(onlineUser.uid);
-            }
-
-            throw new Error('No user logged in');
-          }),
-          catchError((err) => {
-            this.errorCounter++;
-            throw err;
-          }),
-          retry({
-            count: this.MAX_ERROR_COUNT,
-            delay: 2500,
-            resetOnSuccess: true,
-          })
-        );
+        return this.#authDatabaseService.getGroups((user as User).uid);
+      }),
+      catchError((err) => {
+        // Online user error handling
+        console.error(err);
+        this.errorCounter++;
+        // return EMPTY;
+        return throwError(() => err);
+      }),
+      retry({
+        count: this.MAX_ERROR_COUNT,
+        delay: 2500,
+        resetOnSuccess: true,
       })
     );
+
+    // return this.#authLocalUserService.localUser$.pipe(
+    //   switchMap((localUser) => {
+    //     if (localUser) {
+    //       this.#authUserConnectorService.updateUserType('local');
+    //       return of(localUser.groups);
+    //     }
+
+    //     return this.#authStateService.user$.pipe(
+    //       switchMap((onlineUser) => {
+    //         if (onlineUser) {
+    //           this.#authUserConnectorService.updateUserType('online');
+    //           return this.#authDatabaseService.getGroups(onlineUser.uid);
+    //         }
+
+    //         throw new Error('No user logged in');
+    //       }),
+    //       catchError((err) => {
+    //         console.error(err);
+    //         this.errorCounter++;
+    //         // throw err;
+    //         return EMPTY;
+    //       }),
+    //       retry({
+    //         count: this.MAX_ERROR_COUNT,
+    //         delay: 2500,
+    //         resetOnSuccess: true,
+    //       })
+    //     );
+    //   })
+    // );
   }
 
   constructor() {
@@ -147,9 +171,9 @@ export class NotesService implements OnDestroy {
   }
 
   async modifyGroups(payload: NoteGroupModel[]): Promise<boolean> {
-    if (!this.userType()) return false;
+    if (!this.userType) return false;
 
-    switch (this.userType()) {
+    switch (this.userType) {
       case 'local':
         return this.#authLocalUserService.modifyCurrentUser({
           groups: payload,
@@ -163,7 +187,7 @@ export class NotesService implements OnDestroy {
 
   deleteGroup(id: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      if (!this.userType()) {
+      if (!this.userType) {
         reject(new Error('No user logged in'));
         return;
       }
@@ -174,7 +198,7 @@ export class NotesService implements OnDestroy {
           return;
         }
 
-        switch (this.userType()) {
+        switch (this.userType) {
           case 'local': {
             resolve(this.#authLocalUserService.deleteGroup(id));
             return;
@@ -222,10 +246,8 @@ export class NotesService implements OnDestroy {
           const threeDays = 3 * 24 * 60 * 60 * 1000;
           const threeMinutes = 3 * 60 * 1000;
           const deleteAt =
-            (await this._createTimestamp()) + this.#removingSpeed.value ===
-            'long'
-              ? threeDays
-              : threeMinutes;
+            (await this._createTimestamp()) +
+            (this.#removingSpeed.value === 'slow' ? threeDays : threeMinutes);
 
           updatedGroups = [
             ...groups.slice(0, updatedGroupIndex),
@@ -312,7 +334,7 @@ export class NotesService implements OnDestroy {
     let timestamp: number;
 
     try {
-      timestamp = (await getUTCTimestamp()).unixtime;
+      timestamp = (await getUTCTimestamp()).unixtime * 1000;
     } catch (err) {
       timestamp = Date.now();
     }
