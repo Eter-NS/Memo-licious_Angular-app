@@ -1,25 +1,31 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
+import { hsl } from 'random-color-creator';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
 import {
   LocalUserAccount,
-  LocalUserFormData,
   LocalUsers,
-} from '../Models/UserDataModels';
-import { Router } from '@angular/router';
-import { hsl } from 'random-color-creator';
+  LocalUserFormData,
+  LocalUserAuth,
+} from '../Models/LocalAuthModels.interface';
 
 export interface LocalPersistence {
-  action: boolean;
-  user: LocalUserAccount | undefined;
+  type: 'session' | 'local' | undefined;
+  user: LocalUserAuth | undefined;
+  expires: number;
 }
-
-const REMEMBER_ME_TOKEN = 'localRememberMe';
 
 type ValidateUserError = {
   code: 'no-accounts' | 'invalid-passkey' | 'user-exists';
   message: string;
 };
+
+const USER_PATH = 'userData';
+const REMEMBER_ME_TOKEN = 'localRememberMe';
+
+const EXPIRES_AFTER_30_MINUTES = 1000 * 60 * 30;
+const EXPIRES_AFTER_YEAR = 1000 * 60 * 60 * 24 * 365;
 
 @Injectable({
   providedIn: 'root',
@@ -30,21 +36,22 @@ export class AuthLocalUserService implements OnDestroy {
   private rccHsl = hsl;
 
   #allUsers =
-    this.#localStorageService.loadFromStorage<LocalUserAccount[]>(USER_PATH) ??
+    this.#localStorageService.loadFromStorage<LocalUserAccount[]>(USER_PATH) ||
     [];
 
-  #localUserSubject$ = new BehaviorSubject<LocalUserAccount | null | undefined>(
-    undefined
-  );
+  #localUserSubject$!: BehaviorSubject<LocalUserAccount | null | undefined>;
 
   constructor() {
-    this.readPersistence();
+    this._checkForExpiredPersistence();
+
+    this.#localUserSubject$ = new BehaviorSubject<
+      LocalUserAccount | null | undefined
+    >(this._checkForPersistedUser());
   }
 
   ngOnDestroy(): void {
-    this.removeCurrentUser();
+    this._removeCurrentUser();
     this.#localUserSubject$.complete();
-    this.#localUserSubject$.unsubscribe();
   }
 
   get localUser$() {
@@ -52,16 +59,20 @@ export class AuthLocalUserService implements OnDestroy {
   }
 
   get allUsers(): LocalUsers[] {
-    return this.#allUsers.map(({ auth: { name }, profileColor }) => ({
-      name,
-      profileColor,
-    }));
+    return this.#allUsers.map(
+      ({ auth: { name }, profileColor, profilePictureUrl }) => ({
+        name,
+        profileColor,
+        profilePictureUrl,
+      })
+    );
   }
 
   public get rememberMe(): LocalPersistence {
-    const defaultValue = {
-      action: false,
+    const defaultValue: LocalPersistence = {
+      type: undefined,
       user: undefined,
+      expires: this._setExpiration(undefined),
     };
 
     const storedValue =
@@ -72,59 +83,69 @@ export class AuthLocalUserService implements OnDestroy {
     return storedValue || defaultValue;
   }
 
-  public set rememberMe(actionObj: LocalPersistence) {
-    const defaultValue: LocalPersistence = { action: false, user: undefined };
+  public set rememberMe(newValue: Omit<LocalPersistence, 'expires'>) {
+    if (newValue.type === undefined) {
+      this.#localStorageService.removeFromStorage(REMEMBER_ME_TOKEN);
+      return;
+    }
 
-    this.#localStorageService.saveToStorage(
-      REMEMBER_ME_TOKEN,
-      actionObj.action == false ? defaultValue : actionObj
-    );
+    const payload = {
+      ...newValue,
+      expires: this._setExpiration(newValue.type),
+    };
+
+    this.#localStorageService.saveToStorage(REMEMBER_ME_TOKEN, payload);
   }
 
   createUser(userData: LocalUserFormData): void | ValidateUserError {
-    if (this.doesAccountExist(userData.auth.name)) {
+    if (this._doesAccountExist(userData.auth.name)) {
       return { code: 'user-exists', message: 'Account already exists' };
     }
 
-    const user = this.buildUserAccount(userData);
+    const user = this._buildUserAccount(userData);
 
-    this.saveNewUser(user);
+    this._saveNewUser(user);
   }
 
   logIn(
     name: string,
     passKey: string,
-    persistence?: boolean
+    persistence?: LocalPersistence['type']
   ): void | ValidateUserError {
-    const user = this.validateUser(name, passKey);
+    const result = this._validateUser(name, passKey);
 
-    if ('message' in user) {
-      return user;
+    if ('message' in result) {
+      return result;
     }
 
     if (persistence !== undefined) {
       this.rememberMe = {
-        action: persistence,
-        user,
+        type: persistence,
+        user: result.auth,
       };
     }
 
-    this.loadUserData(user);
+    this._loadUserData(result);
   }
 
   logOut(unsavedUserData?: LocalUserAccount): void {
-    const previousData = this.#localUserSubject$.getValue();
+    const previousData = this.#localUserSubject$.value;
 
     if (!previousData) {
-      return this.noLoggedInUser();
+      return this._noLoggedInUser();
     }
 
     if (unsavedUserData) {
       this.modifyCurrentUser(unsavedUserData);
     }
 
-    this.removeCurrentUser();
-    this.redirectToLoginPage();
+    this.rememberMe = {
+      type: undefined,
+      user: undefined,
+    };
+
+    this._removeCurrentUser();
+    this._redirectToLoginPage();
   }
 
   modifyCurrentUser(modifiedData: Partial<LocalUserAccount>): boolean {
@@ -134,9 +155,8 @@ export class AuthLocalUserService implements OnDestroy {
     }
 
     const previousData = this.#localUserSubject$.value;
-
     if (!previousData) {
-      this.noLoggedInUser();
+      this._noLoggedInUser();
       return false;
     }
 
@@ -150,9 +170,8 @@ export class AuthLocalUserService implements OnDestroy {
       return user;
     });
 
-    this.loadUserData(updatedUser);
-    this.saveUsersData(updatedUserList);
-
+    this._loadUserData(updatedUser);
+    this._saveUsersData(updatedUserList);
     return true;
   }
 
@@ -160,7 +179,7 @@ export class AuthLocalUserService implements OnDestroy {
     const previousData = this.#localUserSubject$.value;
 
     if (!previousData) {
-      this.noLoggedInUser();
+      this._noLoggedInUser();
       return false;
     }
 
@@ -178,27 +197,27 @@ export class AuthLocalUserService implements OnDestroy {
     return true;
   }
 
-  private saveNewUser(data: LocalUserAccount) {
-    this.saveUsersData(
+  private _saveNewUser(data: LocalUserAccount) {
+    this._saveUsersData(
       this.#allUsers.length ? [...this.#allUsers, data] : [data]
     );
 
-    this.loadUserData(data);
+    this._loadUserData(data);
   }
 
   /**
    * It saves the user data changes and keeps the #allUsers up-to-date without re-reading from storage
    */
-  private saveUsersData(data: LocalUserAccount[]): void {
+  private _saveUsersData(data: LocalUserAccount[]): void {
     this.#localStorageService.saveToStorage(USER_PATH, data);
     this.#allUsers = data;
   }
 
-  private noLoggedInUser() {
+  private _noLoggedInUser() {
     console.error('Tried to override data without logged user');
   }
 
-  private validateUser(
+  private _validateUser(
     name: string,
     passKey: string
   ): LocalUserAccount | ValidateUserError {
@@ -213,19 +232,19 @@ export class AuthLocalUserService implements OnDestroy {
     return user || { code: 'invalid-passkey', message: 'Invalid credentials' };
   }
 
-  private doesAccountExist(accountName: string) {
+  private _doesAccountExist(accountName: string) {
     return this.#allUsers.some(({ auth: { name } }) => name === accountName);
   }
 
-  private loadUserData(userCredentials: LocalUserAccount) {
+  private _loadUserData(userCredentials: LocalUserAccount) {
     this.#localUserSubject$.next(userCredentials);
   }
 
-  private removeCurrentUser(): void {
+  private _removeCurrentUser(): void {
     this.#localUserSubject$.next(null);
   }
 
-  private createAvatarColor() {
+  private _createAvatarColor() {
     return this.rccHsl({
       alphaChannel: 1,
       colorParts: ['', '', ''],
@@ -235,24 +254,64 @@ export class AuthLocalUserService implements OnDestroy {
     }) as string;
   }
 
-  private buildUserAccount(formData: LocalUserFormData): LocalUserAccount {
+  private _buildUserAccount(formData: LocalUserFormData): LocalUserAccount {
     const account: LocalUserAccount = {
       ...formData,
-      profileColor: this.createAvatarColor(),
+      profileColor: this._createAvatarColor(),
       groups: [],
     };
     return account;
   }
 
-  redirectToLoginPage() {
+  private _redirectToLoginPage() {
     this.#router.navigateByUrl('/guest/force=login');
   }
 
-  private readPersistence() {
-    const { action, user } = this.rememberMe;
+  private _setExpiration(type: LocalPersistence['type']): number {
+    const date = new Date();
 
-    if (action && user) {
-      this.logIn(user.auth.name, user.auth.value);
+    if (!type) {
+      return date.setTime(0);
     }
+
+    return (
+      date.getTime() +
+      (type === 'session' ? EXPIRES_AFTER_30_MINUTES : EXPIRES_AFTER_YEAR)
+    );
+  }
+
+  private _checkForPersistedUser(): LocalUserAccount | undefined {
+    const savedUser = this.rememberMe.user;
+
+    if (!savedUser) {
+      return undefined;
+    }
+
+    const result = this._validateUser(savedUser.name, savedUser.value);
+
+    if ('message' in result) {
+      return undefined;
+    }
+
+    return result;
+  }
+
+  private _checkForExpiredPersistence(): void {
+    const value =
+      this.#localStorageService.loadFromStorage<LocalPersistence>(
+        REMEMBER_ME_TOKEN
+      );
+
+    if (!value) {
+      return;
+    }
+
+    const date = Date.now();
+
+    if (value.expires > date) {
+      return;
+    }
+
+    this.#localStorageService.removeFromStorage(REMEMBER_ME_TOKEN);
   }
 }
