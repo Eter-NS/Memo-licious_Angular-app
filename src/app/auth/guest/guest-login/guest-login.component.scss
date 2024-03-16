@@ -1,38 +1,38 @@
-@use "src/scss/utils.scss" as *;
-@use "src/scss/viewport.scss" as *;
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/viewport.scss' as *;
 
 .accounts-list {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  gap: free-space("xs");
-  padding: free-space("xs");
+  gap: free-space('xs');
+  padding: free-space('xs');
 
   background-color: var(--color-accent-100);
   color: var(--contrast-color-accent-100);
-  @include border-radius("md");
+  @include border-radius('md');
 }
 
 .account {
-  --size: min(15vmin, 64px);
-  --gap: #{free-space("sm")};
+  --list-size: min(15vmin, 64px);
+  --gap: #{free-space('sm')};
 
   display: grid;
   gap: calc(var(--gap) / 1.5);
   position: relative;
   cursor: pointer;
   width: min(100%, 420px);
-  min-height: calc(var(--size) * 1.75);
-  padding: free-space("xs");
-  @include border-radius("sm");
+  min-height: calc(var(--list-size) * 1.75);
+  padding: free-space('xs');
+  @include border-radius('sm');
   overflow: clip;
   z-index: 1;
 
   &::after {
     position: absolute;
     inset: 0;
-    content: "";
+    content: '';
     color: var(--contrast-color-accent-200);
     background-image: radial-gradient(
       var(--color-accent-200) 60%,
@@ -54,23 +54,13 @@
   }
 
   &__card {
-    --user-avatar-color: #222;
-
     display: flex;
     align-items: center;
     gap: var(--gap);
+  }
 
-    // Avatar
-    &::before {
-      content: attr(data-user-avatar-text);
-      background-color: var(--user-avatar-color);
-      width: var(--size);
-      height: var(--size);
-      font-size: calc(var(--size) / 2.5);
-      display: grid;
-      place-content: center;
-      @include border-radius("xs");
-    }
+  &__profile-picture {
+    --element-size: var(--list-size);
   }
 
   &__name {
@@ -103,7 +93,7 @@
 }
 
 .input-error {
-  margin-top: free-space("xs");
+  margin-top: free-space('xs');
 }
 
 .no-accounts {

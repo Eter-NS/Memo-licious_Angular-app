@@ -7,11 +7,15 @@
     (keyup.enter)="togglePassphraseInput($index)"
     tabindex="0"
   >
-    <div
-      class="account__card"
-      [style.--user-avatar-color]="user.profileColor"
-      [attr.data-user-avatar-text]="user.name[0].toUpperCase()"
-    >
+    <div class="account__card">
+      <app-profile-picture
+        class="account__profile-picture"
+        [photoUrl]="user.profilePictureUrl || ''"
+        [userTextAvatar]="{
+          name: user.name,
+          color: user.profileColor
+        }"
+      />
       <p class="account__name">
         {{
           user.name.length > maxUsernameLength
@@ -39,7 +43,9 @@
         />
         <div class="xyz">
           <div>
-            <mat-checkbox color="primary" [formControl]="rememberMeControl"
+            <mat-checkbox
+              color="primary"
+              [formControl]="rememberMeControl"
               >Remember Me</mat-checkbox
             >
           </div>
@@ -66,8 +72,8 @@
     </div>
   </li>
   } @empty {
-  <div class="no-accounts">
+  <li class="no-accounts">
     <p>Sorry, but there is no account on this device 😥</p>
-  </div>
+  </li>
   }
 </ul>

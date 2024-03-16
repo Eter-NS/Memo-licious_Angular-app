@@ -1,12 +1,12 @@
-@use 'src/scss/utils.scss' as *;
-@use 'src/scss/components.scss' as *;
-@use 'src/scss/viewport.scss' as view;
+@use "src/scss/utils.scss" as *;
+@use "src/scss/components.scss" as *;
+@use "src/scss/viewport.scss" as view;
 
 .form-wrapper {
   background-color: var(--color-accent-100);
   color: var(--contrast-color-accent-100);
-  padding: free-space('md');
-  @include border-radius('md');
+  padding: free-space("md");
+  @include border-radius("md");
   @include inset-box-shadow(var(--color-accent-50));
   overflow: hidden;
   display: grid;
