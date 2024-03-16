@@ -1,21 +1,17 @@
-@use "src/scss/utils.scss" as *;
-
-:host {
-  --container-min-size: 300px;
-}
+@use 'src/scss/utils.scss' as *;
 
 .note-edit {
-  &__action-buttons {
+  &__actions {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
   }
 
-  &__action-button-content {
+  &__action-button {
     font-weight: 600;
     display: flex;
     justify-content: space-between;
-    gap: free-space("xs");
+    gap: free-space('xs');
     align-items: center;
   }
 }
@@ -23,8 +19,12 @@
 ::ng-deep
   .mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled)
   .mdc-evolution-chip__text-label {
-  max-width: var(--container-min-size);
+  max-width: var(--container-max-size);
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+}
+
+::ng-deep:has(.form-error) .note-edit__actions {
+  margin-top: free-space('sm');
 }

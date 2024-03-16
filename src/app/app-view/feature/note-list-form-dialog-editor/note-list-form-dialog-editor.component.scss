@@ -1,8 +1,16 @@
-@use "src/scss/utils.scss" as *;
-@use "../note-list-form-editor-common-styles/note-list-form-editor.scss";
+@use 'src/scss/utils.scss' as *;
+@use '../note-list-form-editor-common-styles/note-list-form-editor.scss';
 
 :host {
   display: block;
   background-color: var(--color-accent-100);
   color: var(--contrast-color-accent-100);
+  --container-max-size: 400px;
+}
+
+::ng-deep
+  .mat-mdc-dialog-container
+  .mat-mdc-dialog-title
+  + .mat-mdc-dialog-content {
+  padding-bottom: 0;
 }
