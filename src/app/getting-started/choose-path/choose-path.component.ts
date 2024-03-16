@@ -1,4 +1,3 @@
-import { NgOptimizedImage } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -27,7 +26,6 @@ import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-
   imports: [
     ShoppingThreeComponent,
     SvgElementsDirective,
-    NgOptimizedImage,
     CustomMatRippleDirective,
   ],
   selector: 'app-choose-path',

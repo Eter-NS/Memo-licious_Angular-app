@@ -1,4 +1,3 @@
-import { NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -14,14 +13,15 @@ import {
 } from 'src/app/reusable/animations/animation-tools';
 import { runAnimations } from 'src/app/reusable/animations/animation-triggers';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
+import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 
 @Component({
   standalone: true,
-  imports: [NgOptimizedImage],
   selector: 'app-first-view',
   templateUrl: './first-view.component.html',
   styleUrls: ['./first-view.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CustomMatRippleDirective],
 })
 export class FirstViewComponent implements OnInit {
   #router = inject(Router);
