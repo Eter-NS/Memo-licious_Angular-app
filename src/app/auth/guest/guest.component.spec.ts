@@ -9,7 +9,7 @@ import { GuestComponent } from './guest.component';
 import { By } from '@angular/platform-browser';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
 import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
-import { LocalUserFormData } from '../services/Models/UserDataModels';
+import { LocalUserFormData } from '../services/Models/LocalAuthModels.interface';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { DebugElement } from '@angular/core';
@@ -242,8 +242,7 @@ describe('GuestComponent', () => {
 
       expect(authLocalUserServiceMock.logIn).toHaveBeenCalledWith(
         `test`,
-        password,
-        false
+        password
       );
     });
 

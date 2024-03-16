@@ -8,18 +8,18 @@ import {
   inject,
 } from '@angular/core';
 import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
-import { LocalUserFormData } from '../services/Models/UserDataModels';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { PreviousPageButtonComponent } from '../../ui/previous-page-button/previous-page-button.component';
 import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers';
-import { LocalAuthUserData } from '../services/form-common-features/form-common-features.service';
+import { LocalAuthUserData } from '../../reusable/data-access/form-common-features/form-common-features.service';
 import { GuestRegisterComponent } from './guest-register/guest-register.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { GuestLoginComponent } from './guest-login/guest-login.component';
 import { AuthCommonFeaturesService } from '../services/auth-common-features/auth-common-features.service';
 import { ActivatedRoute } from '@angular/router';
+import { LocalUserFormData } from '../services/Models/LocalAuthModels.interface';
 
 @Component({
   standalone: true,
@@ -113,7 +113,7 @@ export class GuestComponent implements OnInit, AfterViewInit {
     const result = this.authLocalUserService.logIn(
       name,
       passphrase,
-      this.rememberMe
+      this.rememberMe ? 'local' : 'session'
     );
 
     if (result?.message) {

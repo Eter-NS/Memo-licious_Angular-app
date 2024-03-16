@@ -11,15 +11,18 @@
         "
       />
     </div>
-    <div #viewContainer class="content">
-      <div class="login-register-content" aria-label="Guest account form">
+    <div
+      #viewContainer
+      class="content"
+    >
+      <div
+        class="login-register-content"
+        aria-label="Guest account form"
+      >
         @if (register) {
         <!--  -->
         @defer (on immediate; prefetch on immediate) {
-        <app-guest-register
-          [emailAlreadyInUse]="alreadyInUseError"
-          (data)="handleRegister($event)"
-        />
+        <app-guest-register (data)="handleRegister($event)" />
         } @loading ( minimum 250ms) {
         <mat-spinner
           class="loading-defer-spinner loading-state-register"
