@@ -1,10 +1,10 @@
-<main #mainTagRef>
-  <section class="container">
-    <div
-      #viewContainer
-      class="content"
-      aria-label="you can edit your notes here"
-    >
+<main>
+  <section
+    #viewContainer
+    aria-label="you can edit your notes here"
+    class="note-edit"
+  >
+    <div class="form-wrapper">
       <app-note-list-form
         #form
         environment="note-edit"
@@ -14,32 +14,32 @@
         (editNote)="onEditNote($event)"
         (removeNote)="onRemoveNote($event)"
       />
+    </div>
 
-      <div class="note-edit__action-buttons">
-        <app-button
-          ripple
-          [styleConfiguration]="{ look: 'extended-fab', color: 'primary-less' }"
-          (clicked)="closeEditor('close')"
-        >
-          <ng-template #content>
-            <div class="note-edit__action-button-content">
-              <mat-icon>cancel</mat-icon> Close
-            </div>
-          </ng-template>
-        </app-button>
+    <div class="note-edit__actions">
+      <app-button
+        ripple
+        [styleConfiguration]="{ look: 'extended-fab', color: 'primary-less' }"
+        (clicked)="closeEditor('close')"
+      >
+        <ng-template #content>
+          <div class="note-edit__action-button">
+            <mat-icon>cancel</mat-icon> Close
+          </div>
+        </ng-template>
+      </app-button>
 
-        <app-button
-          ripple
-          [styleConfiguration]="{ look: 'extended-fab', color: 'primary' }"
-          (clicked)="closeEditor('save')"
-        >
-          <ng-template #content>
-            <div class="note-edit__action-button-content">
-              <mat-icon>save</mat-icon> Save
-            </div>
-          </ng-template>
-        </app-button>
-      </div>
+      <app-button
+        ripple
+        [styleConfiguration]="{ look: 'extended-fab', color: 'primary' }"
+        (clicked)="closeEditor('save')"
+      >
+        <ng-template #content>
+          <div class="note-edit__action-button">
+            <mat-icon>save</mat-icon> Save
+          </div>
+        </ng-template>
+      </app-button>
     </div>
   </section>
 </main>

@@ -1,7 +1,17 @@
-@use "src/scss/utils.scss" as *;
-@use "../note-list-form-editor-common-styles/note-list-form-editor.scss";
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/viewport.scss' as view;
+@use '../note-list-form-editor-common-styles/note-list-form-editor.scss';
+
+:host {
+  --container-max-size: 215px;
+}
 
 main {
-  padding: free-space("xs");
+  padding: free-space('xs');
   overflow: hidden;
+}
+
+.form-wrapper {
+  display: grid;
+  justify-items: center;
 }
