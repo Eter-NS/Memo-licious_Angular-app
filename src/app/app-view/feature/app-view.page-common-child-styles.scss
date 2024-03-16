@@ -1,6 +1,13 @@
+@use 'src/scss/utils.scss' as *;
+
 %main {
   min-height: calc(100vh - var(--mat-toolbar-standard-height));
   min-height: calc(100dvh - var(--mat-toolbar-standard-height));
+  width: calc(100% - #{free-space('sm')} * 2);
+  margin: {
+    left: auto;
+    right: auto;
+  }
 
   @media (max-width: 599px) {
     min-height: calc(100vh - var(--mat-toolbar-mobile-height));

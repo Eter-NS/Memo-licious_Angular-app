@@ -1,4 +1,3 @@
-import { NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -20,7 +19,6 @@ import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-
   standalone: true,
   imports: [
     NavbarComponent,
-    NgOptimizedImage,
     RouterLink,
     MatIconModule,
     RouterOutlet,
