@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
-import { NoteModel } from 'src/app/auth/services/Models/UserDataModels';
+import { NoteModel } from 'src/app/auth/services/Models/UserDataModels.interface';
 import {
   finishAnimation,
   removeAnimations,
@@ -30,8 +30,9 @@ import { EntriesPipe } from '../../utils/pipes/entries/entries.pipe';
 import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NoteGroupListContainerComponent } from '../note-group-list-container/note-group-list-container/note-group-list-container.component';
+import { NoteGroupListContainerComponent } from '../note-group-list-container/note-group-list-container.component';
 import { GrinningFaceWithSweatEmojiComponent } from '../../../reusable/SVGs/grinning-face-with-sweat-emoji/grinning-face-with-sweat-emoji.component';
+import { combineLatest } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -54,8 +55,8 @@ import { GrinningFaceWithSweatEmojiComponent } from '../../../reusable/SVGs/grin
 })
 export class AppViewListComponent {
   viewTransitionService = inject(ViewTransitionService);
-  notesService = inject(NotesService);
-  viewportListenersService = inject(ViewportListenersService);
+  #notesService = inject(NotesService);
+  #viewportListenersService = inject(ViewportListenersService);
   #noteRestService = inject(NoteRestService);
   #cd = inject(ChangeDetectorRef);
   #zone = inject(NgZone);
@@ -69,11 +70,13 @@ export class AppViewListComponent {
 
   mobileFormVisible = false;
 
-  notes$ = this.notesService.notes$;
-  notesBuffer$ = this.notesService.notesBuffer$;
+  data$ = combineLatest({
+    notesBuffer: this.#notesService.notesBuffer$,
+    isHandset: this.#viewportListenersService.isHandset$,
+  });
 
   constructor() {
-    this.viewportListenersService.isHandset$
+    this.#viewportListenersService.isHandset$
       .pipe(takeUntilDestroyed())
       .subscribe((isMobile) => !isMobile && (this.mobileFormVisible = false));
   }
@@ -139,13 +142,13 @@ export class AppViewListComponent {
   }
 
   handleGroupCreation({ groupName }: NewNoteGroupForm) {
-    if (!this.notesService.isNewGroupValid(groupName)) return;
+    if (!this.#notesService.isNewGroupValid(groupName)) return;
 
-    this.notesService.createGroup(groupName);
+    this.#notesService.createGroup(groupName);
   }
 
   handleGroupMarkForDelete(id: string, state: boolean) {
     if (!id) return;
-    this.notesService.markGroupToDelete(id, state);
+    this.#notesService.markGroupToDelete(id, state);
   }
 }

@@ -1,9 +1,10 @@
+@if (data$ | async; as data) {
 <main #container>
-  @if(!(viewportListenersService.isHandset$ | async)){
+  @if(!data.isHandset){
   <section class="create-new-noteList">
     <app-note-list-form
       environment="note-creator"
-      [notes]="notesBuffer$ | async"
+      [notes]="data.notesBuffer"
       (createNote)="onCreateNote($event)"
       (editNote)="onEditNote($event)"
       (removeNote)="onRemoveNote($event)"
@@ -11,21 +12,21 @@
     />
   </section>
   }
-  <!--  -->
-  @defer{
-  <app-note-group-list-container>
-    <ng-template #noElementsInfo>
-      <div class="empty">
-        <span> Whoops... It looks like you have no lists for now </span>
-        <app-grinning-face-with-sweat-emoji class="emoji" />
-      </div>
-    </ng-template>
-  </app-note-group-list-container>
-  } @loading (minimum 500ms){
-  <mat-spinner class="note-group-loading"></mat-spinner>
-  }
-  <!--  -->
-  @if(viewportListenersService.isHandset$ | async){
+  <section>
+    @defer{
+    <app-note-group-list-container>
+      <ng-template #noElementsInfo>
+        <div class="empty">
+          <span> Whoops... It looks like you have no lists for now </span>
+          <app-grinning-face-with-sweat-emoji class="emoji" />
+        </div>
+      </ng-template>
+    </app-note-group-list-container>
+    } @loading (minimum 500ms){
+    <mat-spinner class="note-group-loading"></mat-spinner>
+    }
+  </section>
+  @if(data.isHandset){
   <section class="add-new-noteList">
     <div
       #mobileAddNoteGroupButton
@@ -51,7 +52,7 @@
       <ng-template #content>
         <app-note-list-form
           environment="note-creator"
-          [notes]="notesBuffer$ | async"
+          [notes]="data.notesBuffer"
           (createNote)="onCreateNote($event)"
           (editNote)="onEditNote($event)"
           (removeNote)="onRemoveNote($event)"
@@ -63,3 +64,4 @@
   </section>
   }
 </main>
+}
