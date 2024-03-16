@@ -1,18 +1,20 @@
+@if (data$ | async; as data) {
 <mat-sidenav-container
   class="sidenav-container"
-  [hasBackdrop]="viewportListenersService.isHandset$ | async"
+  [hasBackdrop]="data.isHandset"
 >
   <mat-sidenav
     #drawer
     class="sidenav"
-    [attr.role]="
-      (viewportListenersService.isHandset$ | async) ? 'dialog' : 'navigation'
-    "
-    [mode]="(viewportListenersService.isHandset$ | async) ? 'over' : 'side'"
-    [opened]="(viewportListenersService.isHandset$ | async) === false"
+    [attr.role]="data.isHandset ? 'dialog' : 'navigation'"
+    [mode]="data.isHandset ? 'over' : 'side'"
+    [opened]="!data.isHandset"
   >
-    <mat-toolbar [color]="color" class="toolbar">
-      @if (viewportListenersService.isHandset$ | async) {
+    <mat-toolbar
+      [color]="color"
+      class="toolbar"
+    >
+      @if (data.isHandset) {
       <button
         type="button"
         class="hamburger-button"
@@ -38,8 +40,11 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
-    <mat-toolbar [color]="color" class="toolbar">
-      @if (viewportListenersService.isHandset$ | async) {
+    <mat-toolbar
+      [color]="color"
+      class="toolbar"
+    >
+      @if (data.isHandset) {
       <button
         type="button"
         class="hamburger-button"
@@ -61,3 +66,4 @@
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </mat-sidenav-content>
 </mat-sidenav-container>
+}@else { Hello there }

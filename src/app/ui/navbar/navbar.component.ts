@@ -13,6 +13,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe, NgStyle, NgTemplateOutlet } from '@angular/common';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -31,7 +32,7 @@ import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-
   ],
 })
 export class NavbarComponent {
-  viewportListenersService = inject(ViewportListenersService);
+  #viewportListenersService = inject(ViewportListenersService);
 
   @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
   @Input() sidenavColor: string = '';
@@ -42,4 +43,8 @@ export class NavbarComponent {
   @ContentChild('content') content!: TemplateRef<unknown>;
 
   @ViewChild('drawer') drawer!: MatSidenav;
+
+  data$ = combineLatest({
+    isHandset: this.#viewportListenersService.isHandset$,
+  });
 }
