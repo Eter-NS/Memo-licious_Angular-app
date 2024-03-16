@@ -1,0 +1,105 @@
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/components.scss' as *;
+@use 'src/scss/viewport.scss' as view;
+@use '../app-view.page-common-child-styles.scss' as defaults;
+
+main {
+  @extend %main;
+}
+
+h1 {
+  padding-top: free-space('xs');
+  text-align: center;
+}
+
+.user-image {
+  display: flex;
+  justify-content: center;
+  padding-top: free-space('sm');
+}
+
+.app-profile-picture {
+  --element-size: 118px;
+  --custom-border-radius: #{border-radius-implicit('lg')};
+}
+
+%common-block {
+  border: none;
+  margin: free-space('sm') auto 0;
+  padding: {
+    top: free-space('sm');
+    bottom: free-space('sm');
+  }
+}
+
+.form-section {
+  @extend %common-block;
+  display: grid;
+  gap: free-space('lg');
+  width: min(100%, view.$view-xs);
+
+  & > legend {
+    opacity: 75%;
+  }
+
+  &__element {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: free-space('sm');
+
+    @media (min-width: 363px) {
+      justify-content: space-between;
+    }
+
+    &-header {
+      width: min(100%, 180px);
+
+      @media (min-width: view.$view-xs) {
+        width: 65%;
+      }
+    }
+
+    &-input {
+      width: min(50%, 135px);
+    }
+  }
+}
+
+.switch-wrapper,
+.arrow-wrapper {
+  display: grid;
+  place-content: end;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  & > *:first-child {
+    margin-right: free-space('xs');
+  }
+}
+
+.settings-sections {
+  list-style: none;
+
+  &__link {
+    @extend .form-section__element, %common-block;
+    width: min(100%, view.$view-xs);
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    background-color: transparent;
+    cursor: pointer;
+  }
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper,
+.mat-mdc-form-field-bottom-align::before {
+  display: none !important;
+}
+
+::ng-deep .mat-mdc-select {
+  display: flex !important;
+}
