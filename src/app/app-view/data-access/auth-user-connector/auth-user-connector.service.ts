@@ -102,8 +102,6 @@ export class AuthUserConnectorService {
       return;
     }
 
-    this._updateUserType(null);
-
     switch (this.activeUserTypeSig()) {
       case 'local':
         this.#authLocalUserService.logOut();
@@ -114,5 +112,7 @@ export class AuthUserConnectorService {
       default:
         throw new Error('Unknown value of activeUserTypeSig');
     }
+
+    this._updateUserType(null);
   }
 }
