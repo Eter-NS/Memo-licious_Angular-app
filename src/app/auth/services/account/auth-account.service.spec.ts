@@ -7,7 +7,10 @@ import { AuthDatabaseService } from '../database/auth-database.service';
 import { Router } from '@angular/router';
 import { Auth, User, UserCredential } from '@angular/fire/auth';
 import { signal } from '@angular/core';
-import { FirebaseAuthError, UnknownError } from '../Models/authModels';
+import {
+  FirebaseAuthError,
+  UnknownError,
+} from '../Models/OnlineAuthModels.interface';
 
 fdescribe('AuthAccountService', () => {
   const routerMock = {

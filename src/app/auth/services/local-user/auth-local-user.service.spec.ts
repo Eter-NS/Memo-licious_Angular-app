@@ -3,7 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { AuthLocalUserService } from './auth-local-user.service';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
 import { Router } from '@angular/router';
-import { LocalUserAccount, LocalUserFormData } from '../Models/UserDataModels';
+import {
+  LocalUserFormData,
+  LocalUserAccount,
+} from '../Models/LocalAuthModels.interface';
 import { Observer } from 'rxjs';
 
 describe('AuthLocalUserService', () => {
@@ -151,14 +154,14 @@ describe('AuthLocalUserService', () => {
       });
 
       it('should return false if there is a token saved in storage', () => {
-        service.rememberMe = { action: false, user: undefined };
+        service.rememberMe = { type: false, user: undefined };
         const value = service.rememberMe;
 
         expect(value).toBeFalse();
       });
 
       it('should return true if there is a token saved in storage', () => {
-        service.rememberMe = { action: false, user: {} as LocalUserAccount };
+        service.rememberMe = { type: false, user: {} as LocalUserAccount };
         const value = service.rememberMe;
 
         expect(value).toBeTrue();
