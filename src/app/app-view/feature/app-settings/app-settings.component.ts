@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   inject,
 } from '@angular/core';
@@ -13,13 +14,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
 import { ThemeOptions } from '../../utils/models/app-settings.interface';
-import { AuthUserConnectorService } from '../../data-access/auth-user-connector/auth-user-connector.service';
 import { AsyncPipe } from '@angular/common';
 import { ProfilePictureComponent } from 'src/app/ui/profile-picture/profile-picture.component';
 import { MatInputModule } from '@angular/material/input';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import { APP_SETTINGS_FORM_TOKEN } from '../../utils/tokens/app-settings.tokens';
+import { UserProfileService } from '../../data-access/user-profile/user-profile.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SparklesEmojiComponent } from '../../../reusable/SVGs/sparkles-emoji/sparkles-emoji.component';
 
 interface SettingsFormModelI {
   theme: ThemeOptions;
@@ -27,7 +30,7 @@ interface SettingsFormModelI {
 }
 
 @Component({
-  selector: 'app-app-settings',
+  selector: 'app-settings',
   standalone: true,
   templateUrl: './app-settings.component.html',
   styleUrl: './app-settings.component.scss',
@@ -41,55 +44,49 @@ interface SettingsFormModelI {
     AsyncPipe,
     SwitchComponent,
     ProfilePictureComponent,
+    MatProgressSpinnerModule,
+    SparklesEmojiComponent,
   ],
 })
 export class AppSettingsComponent implements OnInit {
   viewTransitionService = inject(ViewTransitionService);
-  #authUserConnectorService = inject(AuthUserConnectorService);
+  #userProfileService = inject(UserProfileService);
   #viewportListenersService = inject(ViewportListenersService);
   #localStorageService = inject(LocalStorageService);
   #notesService = inject(NotesService);
   #fb = inject(NonNullableFormBuilder);
+  #destroyRef = inject(DestroyRef);
 
   appSettingsForm = this.#fb.group({
     theme: this.#fb.control<ThemeOptions>('auto'),
     fastDeletingMode: this.#fb.control(false),
   });
 
-  existingUser$ = this.#authUserConnectorService.userProfile$.pipe(
-    takeUntilDestroyed()
-  );
+  existingUser$ = this.#userProfileService.userProfile$;
 
-  #savedFormState!: SettingsFormModelI;
-
-  constructor() {
-    this._listenForAppSettingsChanges();
-  }
+  #savedFormState: SettingsFormModelI | null =
+    this.#localStorageService.loadFromStorage<SettingsFormModelI>(
+      APP_SETTINGS_FORM_TOKEN
+    );
 
   ngOnInit(): void {
     this._loadAppState();
+    this._listenForAppSettingsChanges();
   }
 
   private _listenForAppSettingsChanges() {
     this.appSettingsForm.valueChanges
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe(() => {
         this._saveAppChanges();
       });
   }
 
   private _loadAppState() {
-    const previousState =
-      this.#localStorageService.loadFromStorage<SettingsFormModelI>(
-        APP_SETTINGS_FORM_TOKEN
-      );
-
-    if (!previousState) {
+    if (!this.#savedFormState) {
       return;
     }
-
-    this.#savedFormState = previousState;
-    this.appSettingsForm.setValue(previousState);
+    this.appSettingsForm.setValue(this.#savedFormState);
   }
 
   private _saveAppChanges() {
@@ -97,12 +94,12 @@ export class AppSettingsComponent implements OnInit {
       this.appSettingsForm.getRawValue();
 
     // App modules change
-    if (this.#savedFormState.theme !== currentFormState.theme) {
+    if (this.#savedFormState?.theme !== currentFormState.theme) {
       this.#viewportListenersService.changeTheme(currentFormState.theme);
     }
 
     if (
-      this.#savedFormState.fastDeletingMode !==
+      this.#savedFormState?.fastDeletingMode !==
       currentFormState.fastDeletingMode
     ) {
       this.#notesService.changeRemovingStrategy(

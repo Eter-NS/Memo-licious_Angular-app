@@ -55,6 +55,7 @@ h1 {
     }
 
     &-header {
+      --custom-svg-size: var(--svg-in-paragraph);
       width: min(100%, 180px);
 
       @media (min-width: view.$view-xs) {
@@ -69,7 +70,7 @@ h1 {
 }
 
 .switch-wrapper,
-.arrow-wrapper {
+.arrow-icon {
   display: grid;
   place-content: end;
 }
@@ -83,15 +84,30 @@ h1 {
 }
 
 .settings-sections {
+  width: min(100%, view.$view-xs);
+  margin: free-space('sm') auto 0;
+  padding: {
+    top: free-space('xs');
+    bottom: free-space('xs');
+  }
   list-style: none;
 
   &__link {
-    @extend .form-section__element, %common-block;
-    width: min(100%, view.$view-xs);
-    flex-wrap: nowrap;
+    @extend .form-section__element;
+    @include border-radius('sm');
+    padding: free-space('sm');
+    margin: auto 0;
+    border: none;
     justify-content: space-between;
-    background-color: transparent;
+    flex-wrap: nowrap;
     cursor: pointer;
+    background-color: transparent;
+    transition: background-color 300ms ease-in-out;
+
+    &:is(:hover, :focus-visible) {
+      background-color: var(--color-accent-100);
+      color: var(--contrast-color-accent-100);
+    }
   }
 }
 
