@@ -43,9 +43,7 @@ export class ProfilePictureComponent implements OnChanges {
 
   #viewOption = signal<'photoUrl' | 'singleCharacter' | 'default'>('default');
 
-  get viewOptionSig() {
-    return this.#viewOption.asReadonly();
-  }
+  viewOptionSig = this.#viewOption.asReadonly();
 
   get userTextData() {
     return this.#userTextData;

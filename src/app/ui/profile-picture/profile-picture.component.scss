@@ -10,6 +10,7 @@
 
 .user-letter-avatar {
   background-color: var(--user-avatar-color);
+  color: #e8e8e8;
   border-radius: inherit;
 
   display: grid;
@@ -24,4 +25,8 @@
 
 .no-profile-picture {
   --custom-svg-size: var(--element-size);
+}
+
+img {
+  border-radius: 50%;
 }
