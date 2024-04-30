@@ -65,10 +65,8 @@ main {
   justify-items: center;
 }
 
-.go-back-button {
-  &-wrapper {
-    padding: free-space('xs') 0;
-  }
+.go-back-button-wrapper {
+  @extend %previous-page-button-wrapper;
 }
 
 %loading-state {

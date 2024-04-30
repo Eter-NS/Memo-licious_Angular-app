@@ -19,13 +19,8 @@ main {
   width: min(calc(100vw - (var(--free-space-around-view) * 2)), 420px);
 }
 
-.go-back-button {
-  &-wrapper {
-    padding: {
-      top: free-space('xs');
-      bottom: free-space('xs');
-    }
-  }
+.go-back-button-wrapper {
+  @extend %previous-page-button-wrapper;
 }
 
 .content {
