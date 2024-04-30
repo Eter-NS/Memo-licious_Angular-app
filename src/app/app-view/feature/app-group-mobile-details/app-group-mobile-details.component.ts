@@ -1,10 +1,8 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
-  OnInit,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -35,23 +33,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
+import { environment } from 'src/environments/environment.dev';
+import { FetchErrorComponent } from '../../../ui/fetch-error/fetch-error.component';
 
 const NOTES_ROUTE = '/app/notes';
 
 @Component({
-  selector: 'app-app-group-details',
+  selector: 'app-group-details',
   standalone: true,
-  templateUrl: './app-group-details.component.html',
-  styleUrl: './app-group-details.component.scss',
+  templateUrl: './app-group-mobile-details.component.html',
+  styleUrl: './app-group-mobile-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NoteListFormComponent,
     AsyncPipe,
     AdaptiveButtonComponent,
     MatIconModule,
+    FetchErrorComponent,
   ],
 })
-export class AppGroupDetailsComponent implements OnInit, AfterViewInit {
+export class GroupMobileDetailsComponent {
   viewTransitionService = inject(ViewTransitionService);
   #title = inject(Title);
   #notesService = inject(NotesService);
@@ -64,7 +65,7 @@ export class AppGroupDetailsComponent implements OnInit, AfterViewInit {
   @ViewChild('form') formElement!: NoteListFormComponent;
 
   groupNotes$: Observable<NoteModel[]> = this.#notesService.notesBuffer$;
-  noteGroup$ = this.#route.data.pipe(
+  #noteGroup$ = this.#route.data.pipe(
     filter((data) => data['groupNotes']),
     map((data) => data['groupNotes'] as NoteGroupModel[]),
     combineLatestWith(this.#route.paramMap),
@@ -77,10 +78,9 @@ export class AppGroupDetailsComponent implements OnInit, AfterViewInit {
       }
       return group;
     }),
-    tap({
-      next: (group) => {
-        this.#title.setTitle(group.title);
-      },
+    tap((group) => {
+      this.#title.setTitle(group.title);
+      this.#notesService.fillNotesBuffer(group.notes);
     }),
     catchError(() => {
       this.viewTransitionService.goBack(
@@ -90,23 +90,15 @@ export class AppGroupDetailsComponent implements OnInit, AfterViewInit {
       return EMPTY;
     })
   );
+  noteGroupTitle$ = this.#noteGroup$.pipe(map((note) => note.title));
+
+  data$ = combineLatest({
+    groupNotes: this.groupNotes$,
+    noteGroupTitle: this.noteGroupTitle$,
+  });
 
   constructor() {
     this._listenForRouteChange();
-  }
-
-  ngOnInit(): void {
-    this._fetchNoteGroup();
-  }
-
-  ngAfterViewInit(): void {
-    this.viewTransitionService.viewFadeIn(this.viewContainer.nativeElement);
-  }
-
-  private _fetchNoteGroup() {
-    this.noteGroup$.pipe(take(1)).subscribe((group) => {
-      this.#notesService.fillNotesBuffer(group.notes);
-    });
   }
 
   private _listenForRouteChange() {
@@ -152,13 +144,13 @@ export class AppGroupDetailsComponent implements OnInit, AfterViewInit {
 
   private _updateGroup() {
     const element = this.viewContainer.nativeElement;
-    const newNoteGroupTitle: string =
+    const newNoteGroupTitle =
       this.formElement.newNoteGroupForm.controls.groupName.value;
 
     combineLatest([
       this.#notesService.notes$,
       this.groupNotes$,
-      this.noteGroup$,
+      this.#noteGroup$,
     ])
       .pipe(
         take(1),
@@ -174,24 +166,26 @@ export class AppGroupDetailsComponent implements OnInit, AfterViewInit {
       .subscribe(async ([groups, noteBuffer, group]) => {
         if (!noteBuffer.length) {
           await this.#notesService.deleteGroup(group.id);
-          this.viewTransitionService.goBack(element, NOTES_ROUTE);
+          await this.viewTransitionService.goBack(element, NOTES_ROUTE);
           return;
         }
 
-        const updatedGroups: NoteGroupModel[] = groups.map((storedGroup) => {
-          return storedGroup.id === group.id
+        const updatedGroups: NoteGroupModel[] = groups.map((storedGroup) =>
+          storedGroup.id === group.id
             ? { ...group, notes: noteBuffer, title: newNoteGroupTitle }
-            : storedGroup;
-        });
+            : storedGroup
+        );
 
         try {
           const result = await this.#notesService.modifyGroups(updatedGroups);
 
           if (result) {
-            this.viewTransitionService.goBack(element, NOTES_ROUTE);
+            await this.viewTransitionService.goBack(element, NOTES_ROUTE);
           }
         } catch (err) {
-          console.error(err);
+          if (!environment.production) {
+            console.error(err);
+          }
         }
       });
   }

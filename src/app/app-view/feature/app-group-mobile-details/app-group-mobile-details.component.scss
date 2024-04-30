@@ -1,5 +1,5 @@
 @use 'src/scss/utils.scss' as *;
-@use 'src/scss/viewport.scss' as view;
+@use '../app-view.page-common-child-styles.scss' as *;
 @use '../note-list-form-editor-common-styles/note-list-form-editor.scss';
 
 :host {
@@ -7,7 +7,7 @@
 }
 
 main {
-  padding: free-space('xs');
+  @extend %main;
   overflow: hidden;
 }
 

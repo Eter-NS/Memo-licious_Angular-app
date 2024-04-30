@@ -4,12 +4,14 @@
     aria-label="you can edit your notes here"
     class="note-edit"
   >
+    @if (data$ | async; as data){
+
     <div class="form-wrapper">
       <app-note-list-form
         #form
         environment="note-edit"
-        [noteListTitle]="(noteGroup$ | async)?.title || ''"
-        [notes]="groupNotes$ | async"
+        [noteListTitle]="data.noteGroupTitle"
+        [notes]="data.groupNotes"
         (createNote)="onCreateNote($event)"
         (editNote)="onEditNote($event)"
         (removeNote)="onRemoveNote($event)"
@@ -41,5 +43,13 @@
         </ng-template>
       </app-button>
     </div>
+
+    } @else {
+
+    <app-fetch-error (clicked)="viewTransitionService.hardPageReload()">
+      Unable to download note data.
+    </app-fetch-error>
+
+    }
   </section>
 </main>
