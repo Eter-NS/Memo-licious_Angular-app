@@ -1,11 +1,11 @@
-@if (notes$ | async; as notes) {
+@if (filteredNotes$ | async; as filteredNotes) {
 <div
   #container
   class="noteList-list"
-  [class.empty]="notes === null || !notes.length"
+  [class.empty]="filteredNotes === null || !filteredNotes.length"
 >
   <!--  -->
-  @if (notes.length) {
+  @if (filteredNotes.length) {
   <ngx-masonry
     class="noteList-list__grid"
     [ordered]="true"
@@ -16,7 +16,7 @@
       horizontalOrder: true
     }"
   >
-    @for(note of notes; track note.id){
+    @for(note of filteredNotes; track note.id){
     <div
       class="noteList-list__element-wrapper"
       ngxMasonryItem

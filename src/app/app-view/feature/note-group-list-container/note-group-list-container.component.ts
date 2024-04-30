@@ -22,6 +22,7 @@ import {
   INoteListFormDialogData,
   NoteListFormDialogEditorComponent,
 } from '../note-list-form-dialog-editor/note-list-form-dialog-editor.component';
+import { environment } from 'src/environments/environment.dev';
 
 @Component({
   selector: 'app-note-group-list-container',
@@ -48,7 +49,7 @@ export class NoteGroupListContainerComponent {
 
   @ViewChild('container') mainElement!: ElementRef<HTMLDivElement>;
 
-  notes$ = this.#notesService.notes$.pipe(
+  filteredNotes$ = this.#notesService.notes$.pipe(
     map((groups) =>
       groups.filter(({ deleteAt }) =>
         this.markForDelete ? deleteAt : !deleteAt
@@ -93,7 +94,7 @@ export class NoteGroupListContainerComponent {
       NoteListFormEditor
     >(NoteListFormDialogEditorComponent, config);
 
-    combineLatest([dialogRef.beforeClosed(), this.notes$])
+    combineLatest([dialogRef.beforeClosed(), this.filteredNotes$])
       .pipe(
         take(1),
         filter(
@@ -138,7 +139,9 @@ export class NoteGroupListContainerComponent {
 
           dialogRef.disableClose = !result;
         } catch (err) {
-          console.error(err);
+          if (!environment.production) {
+            console.error(err);
+          }
         }
       });
   }
