@@ -23,7 +23,6 @@ describe('ChoosePathComponent', () => {
   let component: ChoosePathComponent;
   let fixture: ComponentFixture<ChoosePathComponent>;
   let viewTransitionServiceMock: ViewTransitionService;
-  let localStorageServiceMock: LocalStorageService;
   let routerMock: Router;
 
   beforeEach(() => {
@@ -79,8 +78,6 @@ describe('ChoosePathComponent', () => {
     viewTransitionServiceMock = fixture.debugElement.injector.get(
       ViewTransitionService
     );
-    localStorageServiceMock =
-      fixture.debugElement.injector.get(LocalStorageService);
     routerMock = fixture.debugElement.injector.get(Router);
   });
 
@@ -164,14 +161,6 @@ describe('ChoosePathComponent', () => {
       component.runTransition(suffix1);
 
       expect(spy).toHaveBeenCalledWith(suffix1);
-    });
-
-    it('should call #localStorageService.saveToStorage with values ("finishedTutorial", true)', () => {
-      const spy = localStorageServiceMock.saveToStorage;
-
-      component.runTransition(suffix1);
-
-      expect(spy).toHaveBeenCalledWith('finishedTutorial', true);
     });
 
     it('should call removeAnimations with values (element, "fadeIn-vol-2-animation", true)', () => {

@@ -18,8 +18,8 @@ import {
   runWithDelay,
 } from 'src/app/reusable/animations/animation-triggers';
 import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
-import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
+import { environment } from 'src/environments/environment.dev';
 
 @Component({
   standalone: true,
@@ -36,7 +36,6 @@ import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-
 export class ChoosePathComponent implements AfterViewInit {
   #router = inject(Router);
   viewTransitionService = inject(ViewTransitionService);
-  #localStorageService = inject(LocalStorageService);
   @ViewChild('container') hostElement!: ElementRef<HTMLElement>;
   removeAnimations = removeAnimations;
   addAnimations = addAnimations;
@@ -53,7 +52,6 @@ export class ChoosePathComponent implements AfterViewInit {
   }
 
   runTransition(suffix: string) {
-    this.#localStorageService.saveToStorage('finishedTutorial', true);
     const element = this.hostElement.nativeElement;
 
     this.removeAnimations(element, 'fadeIn-vol-2-animation', true);
@@ -68,7 +66,9 @@ export class ChoosePathComponent implements AfterViewInit {
         this.#router.navigateByUrl(suffix);
       })
       .catch((err) => {
-        console.error(err);
+        if (!environment.production) {
+          console.error(err);
+        }
       });
   }
 }
