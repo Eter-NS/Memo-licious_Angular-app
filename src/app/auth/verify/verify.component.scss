@@ -21,10 +21,8 @@ main {
   }
 }
 
-.go-back-button {
-  &-wrapper {
-    padding: free-space('xs') 0;
-  }
+.go-back-button-wrapper {
+  @extend %previous-page-button-wrapper;
 }
 
 .content {

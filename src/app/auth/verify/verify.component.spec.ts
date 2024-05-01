@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { VerifyComponent } from './verify.component';
@@ -82,7 +83,7 @@ describe('VerifyComponent', () => {
 
     describe('sendingState$ switch elements', () => {
       it('should render mat-spinner if sendingState$ equals "sending"', () => {
-        component.sendingSubject.next('sending');
+        (component as any)._sendingSubject.next('sending');
         fixture.detectChanges();
 
         const sending = fixture.debugElement.query(
@@ -93,7 +94,7 @@ describe('VerifyComponent', () => {
       });
 
       it('should render success block if sendingState$ equals "success"', () => {
-        component.sendingSubject.next('success');
+        (component as any)._sendingSubject.next('success');
         fixture.detectChanges();
 
         const success = fixture.debugElement.query(
@@ -104,7 +105,7 @@ describe('VerifyComponent', () => {
       });
 
       it('should render failure block if sendingState$ equals "failure"', () => {
-        component.sendingSubject.next('failure');
+        (component as any)._sendingSubject.next('failure');
         fixture.detectChanges();
 
         const failure = fixture.debugElement.query(
@@ -116,7 +117,7 @@ describe('VerifyComponent', () => {
 
       it('should render a paragraph if sendingState$ equals "failure" and userMail is falsy', () => {
         component.userEmail = '';
-        component.sendingSubject.next('failure');
+        (component as any)._sendingSubject.next('failure');
         fixture.detectChanges();
 
         const pElement = fixture.debugElement.query(
@@ -152,20 +153,20 @@ describe('VerifyComponent', () => {
     describe('checkEmail()', () => {
       it('should NOT call next() method on sendingSubject property when userMail is truthy', () => {
         component.userEmail = 'example@example.com';
-        spyOn(component.sendingSubject, 'next');
+        spyOn((component as any)._sendingSubject, 'next');
 
         component.isValidEmail();
 
-        expect(component.sendingSubject.next).not.toHaveBeenCalled();
+        expect((component as any)._sendingSubject.next).not.toHaveBeenCalled();
       });
 
       it('should call next() method on sendingSubject property when userEmail is falsy', () => {
         component.userEmail = 'XXXXXXXXXXXXX';
-        spyOn(component.sendingSubject, 'next');
+        spyOn((component as any)._sendingSubject, 'next');
 
         component.isValidEmail();
 
-        expect(component.sendingSubject.next).toHaveBeenCalled();
+        expect((component as any)._sendingSubject.next).toHaveBeenCalled();
       });
     });
 
@@ -189,7 +190,10 @@ describe('VerifyComponent', () => {
 
       it('should call authEmailService.sendVerificationEmail() method and resolve the promise', async () => {
         component.userEmail = 'example@example.com';
-        const spy = spyOn(component.sendingSubject, 'next').and.callThrough();
+        const spy = spyOn(
+          (component as any)._sendingSubject,
+          'next'
+        ).and.callThrough();
 
         await component.sendEmail();
 
@@ -197,7 +201,10 @@ describe('VerifyComponent', () => {
       });
 
       it('should call authEmailService.sendVerificationEmail() method and reject the promise', async () => {
-        const spy = spyOn(component.sendingSubject, 'next').and.callThrough();
+        const spy = spyOn(
+          (component as any)._sendingSubject,
+          'next'
+        ).and.callThrough();
         authEmailServiceMock.sendVerificationEmail.and.rejectWith(
           new Error('No Internet connection')
         );

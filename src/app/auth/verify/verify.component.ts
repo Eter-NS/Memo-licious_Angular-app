@@ -3,10 +3,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  OnDestroy,
   OnInit,
   ViewChild,
   inject,
+  computed,
 } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
@@ -40,12 +40,20 @@ const SENDING_STATE = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VerifyComponent implements OnInit, AfterViewInit, OnDestroy {
+export class VerifyComponent implements OnInit, AfterViewInit {
   #authStateService = inject(AuthStateService);
   #authEmailService = inject(AuthEmailService);
   viewTransitionService = inject(ViewTransitionService);
-  sendingSubject = new BehaviorSubject<string>(SENDING_STATE.Sending);
-  sendingState$ = this.sendingSubject.asObservable();
+
+  private _sendingSubject = new BehaviorSubject<string>(SENDING_STATE.Sending);
+  get sendingState$() {
+    return this._sendingSubject.asObservable();
+  }
+
+  hasBeenVerified = computed(
+    () => this.#authStateService.sessionSig()?.emailVerified
+  );
+
   userEmail = this.#authStateService.checkUserSession();
   @ViewChild('content') contentRef!: ElementRef<HTMLElement>;
 
@@ -57,14 +65,9 @@ export class VerifyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.viewTransitionService.viewFadeIn(this.contentRef.nativeElement);
   }
 
-  ngOnDestroy(): void {
-    this.sendingSubject.complete();
-    this.sendingSubject.unsubscribe();
-  }
-
   isValidEmail() {
     if (!this.userEmail || checkEmail(this.userEmail)) {
-      this.sendingSubject.next(SENDING_STATE.Failure);
+      this._sendingSubject.next(SENDING_STATE.Failure);
       return false;
     }
     return true;
@@ -75,9 +78,9 @@ export class VerifyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       await this.#authEmailService.sendVerificationEmail();
-      this.sendingSubject.next(SENDING_STATE.Success);
+      this._sendingSubject.next(SENDING_STATE.Success);
     } catch (err) {
-      this.sendingSubject.next(SENDING_STATE.Failure);
+      this._sendingSubject.next(SENDING_STATE.Failure);
       if (err instanceof Error && 'message' in err) console.error(err.message);
     }
   }
