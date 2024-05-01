@@ -1,6 +1,6 @@
 import { ComponentHarness } from '@angular/cdk/testing';
 
-export class FetchErrorComponentHarness extends ComponentHarness {
+export class FetchErrorHarness extends ComponentHarness {
   static hostSelector = 'app-fetch-error';
 
   private userMessage = this.locatorFor('[data-test=fetch-error-message]');
