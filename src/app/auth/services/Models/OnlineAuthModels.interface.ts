@@ -1,5 +1,15 @@
 import { NoteGroupModel } from './UserDataModels.interface';
 
+/**
+ * How to use:
+ * - code - camelCase syntax,
+ * - message - Potential message to the user,
+ * @Example
+ *  {
+ *    code: 'sendingPostToDB',
+ *    message: 'Sending post to DB failed'
+ *  }
+ */
 export interface UnknownError {
   code: string;
   message: string;
