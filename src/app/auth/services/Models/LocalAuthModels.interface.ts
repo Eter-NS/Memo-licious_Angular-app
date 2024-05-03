@@ -1,8 +1,10 @@
 import { NoteGroupModel } from './UserDataModels.interface';
 
+export type AuthOptions = 'password' | 'pin';
+
 export interface LocalUserAuth {
   name: string;
-  authOption: 'password' | 'pin';
+  authOption: AuthOptions;
   value: string;
 }
 export interface LocalUserFormData {
@@ -10,6 +12,7 @@ export interface LocalUserFormData {
 }
 export interface LocalUserAccount extends LocalUserFormData {
   profileColor: string;
+  profilePictureFile?: File;
   profilePictureUrl?: string;
   groups: NoteGroupModel[];
 }
