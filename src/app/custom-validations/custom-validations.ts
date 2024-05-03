@@ -8,7 +8,8 @@ export const checkConfirmPassword = (
   const secondPassword = control.get('confirmPassword');
 
   if (!firstPassword || !secondPassword) {
-    return { InvalidPasswordConfig: true };
+    console.warn("The input 'password' or 'confirmPassword' was not found");
+    return null;
   }
   const firstValue = firstPassword.value as string | null | undefined;
   if (firstPassword.valid && firstValue === secondPassword.value) {
@@ -116,4 +117,51 @@ export const checkConfirmPin = (
 
   pin2.setErrors({ unmatchedPins: true });
   return { unmatchedPins: true };
+};
+
+export const areInputsDifferent = (
+  input1: string | string[],
+  input2: string | string[],
+  errorName: string
+) => {
+  return (group: AbstractControl): ValidationErrors | null => {
+    const firstInput = group.get(input1);
+    const secondInput = group.get(input2);
+
+    if (!firstInput) {
+      showError(input1);
+    }
+    if (!secondInput) {
+      showError(input2);
+    }
+
+    if (!firstInput || !secondInput) {
+      return null;
+    }
+    if (firstInput.disabled && secondInput.disabled) {
+      return null;
+    }
+    if (firstInput.pristine && secondInput.pristine) {
+      return null;
+    }
+    if (firstInput.value == null && secondInput.value == null) {
+      return null;
+    }
+
+    if (!firstInput.value?.length || !secondInput.value?.length) {
+      return null;
+    }
+
+    return firstInput.value === secondInput.value
+      ? { [errorName]: true }
+      : null;
+
+    function showError(inputName: string | string[]) {
+      console.error(
+        `No input has been found with name ${
+          Array.isArray(inputName) ? inputName.join(', ') : inputName
+        }`
+      );
+    }
+  };
 };
