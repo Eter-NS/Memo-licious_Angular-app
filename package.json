@@ -1,6 +1,10 @@
 {
   "name": "memo-licious",
   "version": "0.0.0",
+  "author": {
+    "email": "norbert.sosnowski.front@gmail.com",
+    "name": "eterNS"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve --hmr",
@@ -9,8 +13,8 @@
     "build": "ng build -c production && npm run prefix",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "firebase": "firebase emulators:start --only auth,database --config firebase.json --import=./export-firebase --export-on-exit",
-    "firebase:net": "firebase emulators:start --only auth,database --config firebase.dev-localnet.json --import=./export-firebase --export-on-exit",
+    "firebase": "firebase emulators:start --only auth,database,storage --config firebase.json --import=./export-firebase --export-on-exit",
+    "firebase:net": "firebase emulators:start --only auth,database,storage --config firebase.dev-localnet.json --import=./export-firebase --export-on-exit",
     "lint": "ng lint"
   },
   "private": true,
@@ -29,6 +33,7 @@
     "@angular/service-worker": "^17.2.3",
     "masonry-layout": "^4.2.2",
     "ngx-masonry": "^14.0.1",
+    "npm-check-updates": "^16.14.18",
     "random-color-creator": "^1.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

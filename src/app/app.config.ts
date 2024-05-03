@@ -14,6 +14,11 @@ import {
   getDatabase,
   connectDatabaseEmulator,
 } from '@angular/fire/database';
+import {
+  connectStorageEmulator,
+  getStorage,
+  provideStorage,
+} from '@angular/fire/storage';
 import { environment } from 'src/environments/environment.dev';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
@@ -44,6 +49,13 @@ export const appConfig: ApplicationConfig = {
           connectDatabaseEmulator(database, 'localhost', 9000);
         }
         return database;
+      }),
+      provideStorage(() => {
+        const storage = getStorage();
+        if (!environment.production) {
+          connectStorageEmulator(storage, 'localhost', 9199);
+        }
+        return storage;
       })
     ),
   ],
