@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { AppViewComponent } from '../app-view.page.component';
 import {
   redirectUnauthorizedToGettingStartedChoosePath,
   redirectUnverifiedToVerifyEmail,
@@ -17,7 +16,8 @@ export const appViewRoutes: Routes = [
   {
     title: 'App',
     path: '',
-    component: AppViewComponent,
+    loadComponent: () =>
+      import('../app-view.page.component').then((m) => m.AppViewComponent),
     providers: [NotesService, NoteRestService],
     canActivate: [
       redirectUnauthorizedToGettingStartedChoosePath,
@@ -31,9 +31,9 @@ export const appViewRoutes: Routes = [
           {
             path: ':groupDetails',
             loadComponent: () =>
-              import('../app-group-details/app-group-details.component').then(
-                (m) => m.AppGroupDetailsComponent
-              ),
+              import(
+                '../app-group-mobile-details/app-group-mobile-details.component'
+              ).then((m) => m.GroupMobileDetailsComponent),
             canActivate: [redirectNotFoundNoteListToAppNotes],
             resolve: {
               groupNotes: groupNotesResolver,
@@ -52,7 +52,7 @@ export const appViewRoutes: Routes = [
         title: 'Recycle-bin',
         path: 'recycle-bin',
         loadComponent: () =>
-          import('../app-recycle-bin/app-recycle-bin.component').then(
+          import('../app-recycle-bin/app-recycle-bin.page.component').then(
             (m) => m.AppRecycleBinComponent
           ),
       },
@@ -62,6 +62,14 @@ export const appViewRoutes: Routes = [
         loadComponent: () =>
           import('../app-settings/app-settings.component').then(
             (m) => m.AppSettingsComponent
+          ),
+      },
+      {
+        title: 'Settings - account',
+        path: 'account',
+        loadComponent: () =>
+          import('../account-settings/account-settings.component').then(
+            (m) => m.AccountSettingsComponent
           ),
       },
 
