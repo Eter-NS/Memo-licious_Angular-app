@@ -1,3 +1,12 @@
+interface UTCTimestampBody {
+  day_of_week: number;
+  day_of_year: number;
+  dst_offset: number;
+  raw_offset: number;
+  unixtime: number;
+  week_number: number;
+}
+
 export function hasNestedKey<T extends object>(obj: T, key: string): boolean {
   for (const objectKey in obj) {
     if (objectKey === key) {
@@ -16,15 +25,6 @@ export function hasNestedKey<T extends object>(obj: T, key: string): boolean {
 
 export function objectKeys<T extends object>(obj: T): Array<keyof T> {
   return Object.keys(obj) as Array<keyof T>;
-}
-
-interface UTCTimestampBody {
-  day_of_week: number;
-  day_of_year: number;
-  dst_offset: number;
-  raw_offset: number;
-  unixtime: number;
-  week_number: number;
 }
 
 /**
@@ -46,7 +46,9 @@ export async function getUTCTimestamp(): Promise<UTCTimestampBody> {
   }
 }
 
-/* a function which returns a random id containing upper and lower letters and number, with 27 length */
+/**
+ * @param {Number} length Number indicating the length of produced random ID
+ * */
 export function randomId(length: number): string {
   let result = '';
   const characters =
@@ -56,4 +58,13 @@ export function randomId(length: number): string {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
+}
+
+export async function base64ToFileObj(
+  dataUrl: string,
+  filename: string
+): Promise<File> {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return new File([blob], filename, { type: blob.type });
 }
