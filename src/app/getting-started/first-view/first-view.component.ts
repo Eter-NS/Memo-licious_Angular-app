@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  OnInit,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -23,17 +22,13 @@ import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CustomMatRippleDirective],
 })
-export class FirstViewComponent implements OnInit {
+export class FirstViewComponent {
   #router = inject(Router);
   localStorageService = inject(LocalStorageService);
   @ViewChild('container') sectionContainer!: ElementRef<HTMLDivElement>;
   startAnimation = startAnimation;
   runAnimations = runAnimations;
   addAnimations = addAnimations;
-
-  ngOnInit(): void {
-    this.localStorageService.saveToStorage('finishedTutorial', false);
-  }
 
   fillView() {
     const element = this.sectionContainer.nativeElement;
