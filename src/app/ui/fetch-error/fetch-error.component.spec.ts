@@ -1,16 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FetchErrorComponent } from './fetch-error.component';
-import { FetchErrorWrapperComponent } from './fetch-error-wrapper.mock.component';
-import { HarnessLoader } from '@angular/cdk/testing';
+import { Component, Input } from '@angular/core';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { FetchErrorHarness } from './fetch-error.harness';
 
 describe('FetchErrorComponent', () => {
-  let component: FetchErrorComponent;
-  let loader: HarnessLoader;
+  @Component({
+    selector: 'app-fetch-error-wrapper',
+    standalone: true,
+    imports: [FetchErrorComponent],
+    template: ` <app-fetch-error>
+      @if(errorMessage){
+      {{ errorMessage }}
+      }
+    </app-fetch-error>`,
+  })
+  class FetchErrorWrapperComponent {
+    @Input() errorMessage?: string;
+  }
+
   let fixture: ComponentFixture<FetchErrorComponent>;
-  let mockFixture: ComponentFixture<FetchErrorWrapperComponent>;
+  let wrapperFixture: ComponentFixture<FetchErrorWrapperComponent>;
+  let component: FetchErrorComponent;
   let harness: FetchErrorHarness;
 
   beforeEach(async () => {
@@ -19,9 +31,9 @@ describe('FetchErrorComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(FetchErrorComponent);
-    mockFixture = TestBed.createComponent(FetchErrorWrapperComponent);
+    wrapperFixture = TestBed.createComponent(FetchErrorWrapperComponent);
     component = fixture.componentInstance;
-    loader = TestbedHarnessEnvironment.loader(mockFixture);
+    const loader = TestbedHarnessEnvironment.loader(wrapperFixture);
     harness = await loader.getHarness(FetchErrorHarness);
   });
 
