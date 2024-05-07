@@ -5,6 +5,7 @@ import {
   removeAnimations,
 } from 'src/app/reusable/animations/animation-tools';
 import { runWithDelay } from 'src/app/reusable/animations/animation-triggers';
+import { environment } from 'src/environments/environment.dev';
 
 export type AuthUserData = {
   name?: string;
@@ -59,7 +60,9 @@ export class FormCommonFeaturesService {
         this.removeAnimations(submitButton, ['fadeIn-from-right-animation']);
       })
       .catch((err: PromiseRejectedResult) => {
-        console.error(err.reason);
+        if (!environment.production) {
+          console.error(err.reason);
+        }
       });
   }
 
@@ -93,4 +96,40 @@ export class FormCommonFeaturesService {
   onFailure = <T extends FormGroup>(formGroup: T): void => {
     formGroup.setErrors({ invalidForm: true });
   };
+
+  isErrorAndTouched = <T extends FormGroup>(
+    formGroup: T,
+    element: string | string[],
+    validation: string
+  ) => {
+    return this._formFieldConditionalCheck(
+      formGroup,
+      element,
+      validation,
+      'touched'
+    );
+  };
+
+  isErrorAndDirty = <T extends FormGroup>(
+    formGroup: T,
+    element: string | string[],
+    validation: string
+  ) => {
+    return this._formFieldConditionalCheck(
+      formGroup,
+      element,
+      validation,
+      'dirty'
+    );
+  };
+
+  private _formFieldConditionalCheck<T extends FormGroup>(
+    formGroup: T,
+    element: string | string[],
+    validation: string,
+    prop: 'dirty' | 'touched'
+  ) {
+    const el = formGroup.get(element);
+    return this.getError(formGroup, element, validation) && el?.[prop];
+  }
 }
