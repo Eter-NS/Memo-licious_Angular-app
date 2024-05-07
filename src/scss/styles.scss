@@ -23,17 +23,19 @@
 @include mat.input-theme(theme.$light-theme);
 @include mat.chips-theme(theme.$light-theme);
 @include mat.form-field-theme(theme.$light-theme);
+@include mat.expansion-theme(theme.$light-theme);
 @include mat.progress-spinner-theme(theme.$progress-spinner-light-theme);
 
 // Default theme
 .light {
   @include theme.createCSSVars('light');
+  --color-warn-900: hsl(3, 77%, 29%);
   color-scheme: light;
 
   /* Warn colors */
   --color-warn-primary: var(--color-warn-400);
   --contrast-color-warn: #000000de;
-  --color-warn-accent: var(--color-warn-200);
+  --color-warn-accent: var(--color-warn-100);
   --color-warn-input: var(--color-warn-900);
 }
 
@@ -53,6 +55,7 @@
   @include mat.input-color(theme.$dark-theme);
   @include mat.chips-color(theme.$dark-theme);
   @include mat.form-field-color(theme.$dark-theme);
+  @include mat.expansion-color(theme.$dark-theme);
   @include mat.progress-spinner-color(theme.$progress-spinner-dark-theme);
 
   @include theme.createCSSVars('dark');
@@ -102,4 +105,8 @@ button:focus-visible {
   .dark & {
     outline-color: rgba(255, 255, 255, 0.5);
   }
+}
+
+input {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
