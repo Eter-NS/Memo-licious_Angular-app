@@ -1,4 +1,4 @@
-@use "./viewport.scss" as view;
+@use './viewport.scss' as view;
 
 :root {
   /* font sizes*/
@@ -7,6 +7,7 @@
   --h3: 1.25rem;
   --p: 1rem;
   --form-input: 0.95rem;
+  --svg-in-paragraph: 1.125rem;
 
   @media (min-width: view.$view-xs) and (max-width: view.$view-md) {
     --h2: 1.6rem;
@@ -21,7 +22,7 @@
 }
 
 body {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 *,
