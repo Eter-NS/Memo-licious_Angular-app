@@ -12,7 +12,6 @@ export interface LocalUserFormData {
 }
 export interface LocalUserAccount extends LocalUserFormData {
   profileColor: string;
-  profilePictureFile?: File;
   profilePictureUrl?: string;
   groups: NoteGroupModel[];
 }
