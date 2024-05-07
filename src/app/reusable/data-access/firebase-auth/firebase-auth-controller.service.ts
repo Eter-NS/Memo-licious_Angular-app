@@ -3,6 +3,8 @@ import {
   createUserWithEmailAndPassword,
   getRedirectResult,
   reauthenticateWithCredential,
+  sendEmailVerification,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signInWithRedirect,
@@ -28,4 +30,6 @@ export class FirebaseAuthControllerService {
   updateEmail = updateEmail;
   reauthenticateWithCredential = reauthenticateWithCredential;
   user = user;
+  sendEmailVerification = sendEmailVerification;
+  sendPasswordResetEmail = sendPasswordResetEmail;
 }

@@ -1,12 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Database,
-  get,
-  listVal,
-  ref,
-  set,
-  update,
-} from '@angular/fire/database';
+import { Database } from '@angular/fire/database';
 import { AuthStateService } from '../state/auth-state.service';
 import { UserCredential } from '@angular/fire/auth';
 import {
@@ -16,6 +9,8 @@ import {
 import { isAuthError } from 'src/app/reusable/Models/isAuthError';
 import { NoteGroupModel } from '../Models/UserDataModels.interface';
 import { Observable } from 'rxjs';
+import { FirebaseDatabaseControllerService } from 'src/app/reusable/data-access/firebase-database/firebase-database-controller.service';
+import { environment } from 'src/environments/environment.dev';
 
 @Injectable({
   providedIn: 'root',
@@ -23,12 +18,7 @@ import { Observable } from 'rxjs';
 export class AuthDatabaseService {
   #authState = inject(AuthStateService);
   #db = inject(Database);
-
-  private _ref = ref;
-  private _set = set;
-  private _get = get;
-  private _listVal = listVal;
-  private _update = update;
+  #fireDBController = inject(FirebaseDatabaseControllerService);
 
   async databaseRegisterHandler({
     user: { email, uid, photoURL },
@@ -62,13 +52,15 @@ export class AuthDatabaseService {
 
   async isUserInDatabase(uid: string): Promise<boolean | undefined> {
     try {
-      const userRef = this._ref(this.#db, `users/${uid}`);
-      const userSnapshot = await this._get(userRef);
+      const userRef = this.#fireDBController.ref(this.#db, `users/${uid}`);
+      const userSnapshot = await this.#fireDBController.get(userRef);
 
       return userSnapshot.exists();
     } catch (err) {
       if (isAuthError(err)) {
-        console.error(`Error when checking if user exists: ${err.message}`);
+        if (!environment.production) {
+          console.error(`Error when checking if user exists: ${err.message}`);
+        }
       }
       return undefined;
     }
@@ -84,38 +76,48 @@ export class AuthDatabaseService {
       groups: [],
     };
 
-    const userRef = this._ref(
+    const userRef = this.#fireDBController.ref(
       this.#db,
       `users/${this.#authState.auth.currentUser?.uid}`
     );
 
     try {
-      await this._set(userRef, payload);
+      await this.#fireDBController.set(userRef, payload);
       return true;
     } catch (error: unknown) {
-      console.error(
-        'Error when saving user data: ',
-        (error as { message: string }).message
-      );
+      if (!environment.production) {
+        console.error(
+          'Error when saving user data: ',
+          (error as { message: string }).message
+        );
+      }
       return false;
     }
   }
 
   getGroups(uid: string): Observable<NoteGroupModel[]> {
-    const notesRef = this._ref(this.#db, `users/${uid}/groups`);
+    const notesRef = this.#fireDBController.ref(
+      this.#db,
+      `users/${uid}/groups`
+    );
 
-    return this._listVal<NoteGroupModel>(notesRef);
+    return this.#fireDBController.listVal<NoteGroupModel>(notesRef);
   }
 
   async updateGroups(payload: NoteGroupModel[]) {
-    const uid = this.#authState.session()?.uid;
+    const uid = this.#authState.sessionSig()?.uid;
     const path = `users/${uid}`;
 
     try {
-      await this._update(this._ref(this.#db, path), { groups: payload });
+      await this.#fireDBController.update(
+        this.#fireDBController.ref(this.#db, path),
+        { groups: payload }
+      );
       return true;
     } catch (err) {
-      console.error(err);
+      if (!environment.production) {
+        console.error(err);
+      }
       return false;
     }
   }
@@ -124,7 +126,9 @@ export class AuthDatabaseService {
     try {
       return await this.updateGroups(payload);
     } catch (err) {
-      console.error(err);
+      if (!environment.production) {
+        console.error(err);
+      }
       return false;
     }
   }

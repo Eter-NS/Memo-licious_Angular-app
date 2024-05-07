@@ -1,31 +1,31 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  sendEmailVerification,
-  sendPasswordResetEmail,
-} from '@angular/fire/auth';
 import { checkEmail } from 'src/app/custom-validations/custom-validations';
 import { AuthStateService } from '../state/auth-state.service';
 import { isAuthError } from 'src/app/reusable/Models/isAuthError';
+import { environment } from 'src/environments/environment.dev';
+import { FirebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthEmailService {
   #authState = inject(AuthStateService);
-
-  private sendEmailVerification = sendEmailVerification;
-  private sendPasswordResetEmail = sendPasswordResetEmail;
+  #fireAuthController = inject(FirebaseAuthControllerService);
 
   async sendVerificationEmail() {
-    if (!this.#authState.session()) return null;
+    if (!this.#authState.sessionSig()) return null;
 
     try {
-      return await this.sendEmailVerification(this.#authState.session()!);
+      return await this.#fireAuthController.sendEmailVerification(
+        this.#authState.sessionSig()!
+      );
     } catch (err) {
-      if (isAuthError(err)) {
-        console.error(`Error when sending email message: ${err.message}`);
-      } else {
-        console.error(err);
+      if (!environment.production) {
+        if (isAuthError(err)) {
+          console.error(`Error when sending email message: ${err.message}`);
+        } else {
+          console.error(err);
+        }
       }
     }
   }
@@ -33,15 +33,21 @@ export class AuthEmailService {
   async sendResetEmail(email: string) {
     if (checkEmail(email) === null) {
       try {
-        await this.sendPasswordResetEmail(this.#authState.auth, email, {
-          url: 'http://127.0.0.1:4200/online/force=login',
-        });
+        await this.#fireAuthController.sendPasswordResetEmail(
+          this.#authState.auth,
+          email,
+          {
+            url: `${location.host}/online/force=login`,
+          }
+        );
         return true;
       } catch (err) {
-        if (isAuthError(err)) {
-          console.error(err.message);
-        } else {
-          console.error(err);
+        if (!environment.production) {
+          if (isAuthError(err)) {
+            console.error(err.message);
+          } else {
+            console.error(err);
+          }
         }
         return false;
       }
