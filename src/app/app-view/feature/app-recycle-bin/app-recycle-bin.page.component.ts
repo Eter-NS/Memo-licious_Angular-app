@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { NoteGroupListContainerComponent } from '../note-group-list-container/note-group-list-container.component';
-import { SmilingFaceEmojiComponent } from '../../../reusable/SVGs/smiling-face-emoji/smiling-face-emoji.component';
+import { SmilingFaceEmojiComponent } from '../../../reusable/ui/SVGs/smiling-face-emoji/smiling-face-emoji.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({

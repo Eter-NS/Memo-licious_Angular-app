@@ -10,21 +10,21 @@ import {
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { NotesService } from '../../data-access/notes/notes.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { SwitchComponent } from 'src/app/ui/switch/switch.component';
+import { SwitchComponent } from 'src/app/reusable/ui/switch/switch.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
+import { LocalStorageService } from 'src/app/reusable/data-access/localStorage/local-storage.service';
 import { ThemeOptions } from '../../utils/models/app-settings.interface';
 import { AsyncPipe } from '@angular/common';
-import { ProfilePictureComponent } from 'src/app/ui/profile-picture/profile-picture.component';
+import { ProfilePictureComponent } from 'src/app/reusable/ui/profile-picture/profile-picture.component';
 import { MatInputModule } from '@angular/material/input';
-import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
+import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import { APP_SETTINGS_FORM_TOKEN } from '../../utils/tokens/app-settings.tokens';
 import { UserProfileService } from '../../data-access/user-profile/user-profile.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { SparklesEmojiComponent } from '../../../reusable/SVGs/sparkles-emoji/sparkles-emoji.component';
+import { SparklesEmojiComponent } from '../../../reusable/ui/SVGs/sparkles-emoji/sparkles-emoji.component';
 
 interface SettingsFormModelI {
   theme: ThemeOptions;

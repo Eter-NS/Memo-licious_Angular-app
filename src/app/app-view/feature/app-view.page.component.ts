@@ -9,8 +9,8 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
-import { NavbarComponent } from 'src/app/ui/navbar/navbar.component';
+import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-color-checker.directive';
+import { NavbarComponent } from 'src/app/reusable/ui/navbar/navbar.component';
 import { ErrorHandlerService } from '../data-access/error-handler/error-handler.service';
 import { take, timer } from 'rxjs';
 import { AuthUserConnectorService } from '../data-access/auth-user-connector/auth-user-connector.service';

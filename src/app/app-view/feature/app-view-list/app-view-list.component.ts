@@ -10,17 +10,17 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
-import { NoteModel } from 'src/app/auth/services/Models/UserDataModels.interface';
+import { NoteModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import {
   finishAnimation,
   removeAnimations,
-} from 'src/app/reusable/animations/animation-tools';
-import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers';
-import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
-import { AdaptiveButtonComponent } from 'src/app/ui/adaptive-button/adaptive-button.component';
+} from 'src/app/reusable/utils/animations/animation-tools';
+import { runAnimationOnce } from 'src/app/reusable/utils/animations/animation-triggers';
+import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
+import { AdaptiveButtonComponent } from 'src/app/reusable/ui/adaptive-button/adaptive-button.component';
 import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { NotesService } from '../../data-access/notes/notes.service';
-import { BottomSheetComponent } from '../../../ui/bottom-sheet/bottom-sheet.component';
+import { BottomSheetComponent } from '../../../reusable/ui/bottom-sheet/bottom-sheet.component';
 import {
   NoteListFormComponent,
   NewNoteGroupForm,
@@ -31,7 +31,7 @@ import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoteGroupListContainerComponent } from '../note-group-list-container/note-group-list-container.component';
-import { GrinningFaceWithSweatEmojiComponent } from '../../../reusable/SVGs/grinning-face-with-sweat-emoji/grinning-face-with-sweat-emoji.component';
+import { GrinningFaceWithSweatEmojiComponent } from '../../../reusable/ui/SVGs/grinning-face-with-sweat-emoji/grinning-face-with-sweat-emoji.component';
 import { combineLatest } from 'rxjs';
 
 @Component({

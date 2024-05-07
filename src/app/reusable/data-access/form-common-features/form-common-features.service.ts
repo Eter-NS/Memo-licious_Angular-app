@@ -3,8 +3,8 @@ import { FormControl, FormGroup } from '@angular/forms';
 import {
   addAnimations,
   removeAnimations,
-} from 'src/app/reusable/animations/animation-tools';
-import { runWithDelay } from 'src/app/reusable/animations/animation-triggers';
+} from 'src/app/reusable/utils/animations/animation-tools';
+import { runWithDelay } from 'src/app/reusable/utils/animations/animation-triggers';
 import { environment } from 'src/environments/environment.dev';
 
 export type AuthUserData = {

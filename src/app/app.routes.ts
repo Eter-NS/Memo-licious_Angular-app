@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { redirectLoggedInToGuard } from './auth/guards/redirect-logged-in-to.guard';
-import { redirectUnauthorizedToGuard } from './auth/guards/redirect-unauthorized-to.guard';
+import { redirectLoggedInToGuard } from './auth/utils/guards/redirect-logged-in-to.guard';
+import { redirectUnauthorizedToGuard } from './auth/utils/guards/redirect-unauthorized-to.guard';
 import { LandingPageComponent } from './landing-page/landing-page.component';
-import { redirectUnverifiedToGuard } from './auth/guards/online-only/redirect-unverified-to.guard';
+import { redirectUnverifiedToGuard } from './auth/utils/guards/online-only/redirect-unverified-to.guard';
 
 export const redirectUnauthorizedToGettingStartedChoosePath =
   redirectUnauthorizedToGuard('/getting-started/choose-path');
@@ -23,7 +23,7 @@ export const appRoutes: Routes = [
   {
     path: 'getting-started',
     loadChildren: () =>
-      import('./getting-started/getting-started.routes').then(
+      import('./getting-started/feature/getting-started.routes').then(
         (r) => r.gettingStartedRoutes
       ),
   },
@@ -39,12 +39,16 @@ export const appRoutes: Routes = [
         */
         path: ':siteAction',
         loadComponent: () =>
-          import('./auth/guest/guest.component').then((m) => m.GuestComponent),
+          import('./auth/feature/guest/guest.component').then(
+            (m) => m.GuestComponent
+          ),
       },
       {
         path: '',
         loadComponent: () =>
-          import('./auth/guest/guest.component').then((m) => m.GuestComponent),
+          import('./auth/feature/guest/guest.component').then(
+            (m) => m.GuestComponent
+          ),
       },
     ],
   },
@@ -60,14 +64,14 @@ export const appRoutes: Routes = [
         */
         path: ':siteAction',
         loadComponent: () =>
-          import('./auth/online/online.component').then(
+          import('./auth/feature/online/online.component').then(
             (m) => m.OnlineComponent
           ),
       },
       {
         path: '',
         loadComponent: () =>
-          import('./auth/online/online.component').then(
+          import('./auth/feature/online/online.component').then(
             (m) => m.OnlineComponent
           ),
       },
@@ -78,13 +82,15 @@ export const appRoutes: Routes = [
     path: 'verify-email',
     canActivate: [redirectUnauthorizedToOnline],
     loadComponent: () =>
-      import('./auth/verify/verify.component').then((m) => m.VerifyComponent),
+      import('./auth/feature/verify/verify.component').then(
+        (m) => m.VerifyComponent
+      ),
   },
   {
     title: 'Forgot password',
     path: 'forgot-password',
     loadComponent: () =>
-      import('./auth/forgot-password/forgot-password.component').then(
+      import('./auth/feature/forgot-password/forgot-password.component').then(
         (m) => m.ForgotPasswordComponent
       ),
   },

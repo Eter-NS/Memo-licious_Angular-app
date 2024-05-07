@@ -6,13 +6,13 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
-import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
+import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
 import { NoteListFormComponent } from '../../ui/note-list-form/note-list-form.component';
 import { NotesService } from '../../data-access/notes/notes.service';
 import {
   NoteGroupModel,
   NoteModel,
-} from 'src/app/auth/services/Models/UserDataModels.interface';
+} from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { ActivatedRoute, ResolveEnd, Router } from '@angular/router';
 import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { MatChipInputEvent, MatChipEditedEvent } from '@angular/material/chips';
@@ -28,13 +28,13 @@ import {
   tap,
 } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { AdaptiveButtonComponent } from '../../../ui/adaptive-button/adaptive-button.component';
+import { AdaptiveButtonComponent } from '../../../reusable/ui/adaptive-button/adaptive-button.component';
 import { MatIconModule } from '@angular/material/icon';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { environment } from 'src/environments/environment.dev';
-import { FetchErrorComponent } from '../../../ui/fetch-error/fetch-error.component';
+import { FetchErrorComponent } from '../../../reusable/ui/fetch-error/fetch-error.component';
 
 const NOTES_ROUTE = '/app/notes';
 

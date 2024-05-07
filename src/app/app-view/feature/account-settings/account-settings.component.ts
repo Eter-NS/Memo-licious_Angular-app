@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthUserConnectorService } from '../../data-access/auth-user-connector/auth-user-connector.service';
-import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
-import { ProfilePictureComponent } from 'src/app/ui/profile-picture/profile-picture.component';
+import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
+import { ProfilePictureComponent } from 'src/app/reusable/ui/profile-picture/profile-picture.component';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import {
   BehaviorSubject,
@@ -17,8 +17,8 @@ import {
   take,
   tap,
 } from 'rxjs';
-import { PreviousPageButtonComponent } from '../../../ui/previous-page-button/previous-page-button.component';
-import { LocalUserAccount } from 'src/app/auth/services/Models/LocalAuthModels.interface';
+import { PreviousPageButtonComponent } from '../../../reusable/ui/previous-page-button/previous-page-button.component';
+import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ErrorHandlerService } from '../../data-access/error-handler/error-handler.service';
 import { AccountSettingsLocalComponent } from '../../ui/account-settings-local/account-settings-local.component';
@@ -27,7 +27,7 @@ import {
   PhotoBlob,
   UserProfileChangesI,
 } from '../../utils/models/user-profile.interface';
-import { AuthLocalUserService } from 'src/app/auth/services/local-user/auth-local-user.service';
+import { AuthLocalUserService } from 'src/app/auth/data-access/local-user/auth-local-user.service';
 import { User } from '@angular/fire/auth';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -35,8 +35,8 @@ import {
   UserProfileService,
 } from '../../data-access/user-profile/user-profile.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { base64ToFileObj } from 'src/app/reusable/data-tools/objectTools';
-import { FetchErrorComponent } from '../../../ui/fetch-error/fetch-error.component';
+import { base64ToFileObj } from 'src/app/reusable/utils/data-tools/objectTools';
+import { FetchErrorComponent } from '../../../reusable/ui/fetch-error/fetch-error.component';
 import { FileToUrlPipe } from '../../../reusable/utils/file-to-url/file-to-url.pipe';
 
 const errorDictionary = {

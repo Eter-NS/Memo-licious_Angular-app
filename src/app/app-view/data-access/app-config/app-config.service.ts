@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { LocalStorageService } from 'src/app/reusable/localStorage/local-storage.service';
+import { LocalStorageService } from 'src/app/reusable/data-access/localStorage/local-storage.service';
 import { AppSettingsToken } from '../../utils/models/app-settings.interface';
 import { APP_SETTINGS_TOKEN } from '../../utils/tokens/app-settings.tokens';
 

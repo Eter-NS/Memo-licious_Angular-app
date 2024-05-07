@@ -15,8 +15,8 @@ import { combineLatest, filter, map, take } from 'rxjs';
 import { NotesService } from 'src/app/app-view/data-access/notes/notes.service';
 import { NotesListGroupElementComponent } from 'src/app/app-view/ui/notes-list-group-element/notes-list-group-element.component';
 import { NoteListFormEditor } from 'src/app/app-view/utils/models/note-list-form-editor.interface';
-import { NoteGroupModel } from 'src/app/auth/services/Models/UserDataModels.interface';
-import { ViewTransitionService } from 'src/app/reusable/animations/view-transition.service';
+import { NoteGroupModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
+import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import {
   INoteListFormDialogData,

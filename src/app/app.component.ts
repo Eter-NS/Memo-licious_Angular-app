@@ -4,7 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { ViewportListenersService } from './reusable/data-access/viewport-listeners/viewport-listeners.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DOCUMENT } from '@angular/common';
-import { DarkModeSubscription } from './reusable/data-tools/listenerMethods';
+import { DarkModeSubscription } from './reusable/utils/data-tools/listenerMethods';
 import { ThemeOptions } from './app-view/utils/models/app-settings.interface';
 
 @Component({

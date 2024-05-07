@@ -1,7 +1,10 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, map, shareReplay } from 'rxjs';
-import { darkModeListener, throttle } from '../../data-tools/listenerMethods';
+import {
+  darkModeListener,
+  throttle,
+} from '../../utils/data-tools/listenerMethods';
 import { ThemeOptions } from 'src/app/app-view/utils/models/app-settings.interface';
 import { AppConfigService } from 'src/app/app-view/data-access/app-config/app-config.service';
 

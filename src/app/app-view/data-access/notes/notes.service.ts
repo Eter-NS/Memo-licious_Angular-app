@@ -13,18 +13,18 @@ import {
 import {
   NoteGroupModel,
   NoteModel,
-} from 'src/app/auth/services/Models/UserDataModels.interface';
-import { AuthLocalUserService } from 'src/app/auth/services/local-user/auth-local-user.service';
+} from 'src/app/auth/utils/Models/UserDataModels.interface';
+import { AuthLocalUserService } from 'src/app/auth/data-access/local-user/auth-local-user.service';
 import { ErrorHandlerService } from '../error-handler/error-handler.service';
 import {
   getUTCTimestamp,
   randomId,
-} from 'src/app/reusable/data-tools/objectTools';
+} from 'src/app/reusable/utils/data-tools/objectTools';
 import { AuthUserConnectorService } from '../auth-user-connector/auth-user-connector.service';
-import { AuthDatabaseService } from 'src/app/auth/services/database/auth-database.service';
+import { AuthDatabaseService } from 'src/app/auth/data-access/database/auth-database.service';
 import { GroupRemovingStrategy } from '../../utils/models/app-settings.interface';
 import { AppConfigService } from '../app-config/app-config.service';
-import { LocalUserAccount } from 'src/app/auth/services/Models/LocalAuthModels.interface';
+import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 import { User } from '@angular/fire/auth';
 import { environment } from 'src/environments/environment.dev';
 

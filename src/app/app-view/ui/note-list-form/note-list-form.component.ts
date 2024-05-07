@@ -20,12 +20,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { NoteModel } from 'src/app/auth/services/Models/UserDataModels.interface';
+import { NoteModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { ENTER, COMMA } from '@angular/cdk/keycodes';
 import { MatInputModule } from '@angular/material/input';
 import { FormCommonFeaturesService } from 'src/app/reusable/data-access/form-common-features/form-common-features.service';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { AdaptiveButtonComponent } from '../../../ui/adaptive-button/adaptive-button.component';
+import { AdaptiveButtonComponent } from '../../../reusable/ui/adaptive-button/adaptive-button.component';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment.dev';
 

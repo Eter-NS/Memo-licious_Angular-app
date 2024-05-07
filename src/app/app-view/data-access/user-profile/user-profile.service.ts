@@ -16,7 +16,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { User } from '@angular/fire/auth';
-import { LocalUserAccount } from 'src/app/auth/services/Models/LocalAuthModels.interface';
+import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 
 export interface UserProfileUpdateResultI {
   state: 'pending' | 'success' | 'failure' | 'idle';

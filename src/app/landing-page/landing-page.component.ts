@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { SocialMediaListComponent } from '../ui/social-media-list/social-media-list.component';
-import { ShoppingBagsEmojiComponent } from '../reusable/SVGs/shopping-bags-emoji/shopping-bags-emoji.component';
+import { SocialMediaListComponent } from '../reusable/ui/social-media-list/social-media-list.component';
+import { ShoppingBagsEmojiComponent } from '../reusable/ui/SVGs/shopping-bags-emoji/shopping-bags-emoji.component';
 import { RouterLink } from '@angular/router';
 
 @Component({

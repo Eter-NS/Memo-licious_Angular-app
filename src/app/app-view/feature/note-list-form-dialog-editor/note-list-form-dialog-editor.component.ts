@@ -23,13 +23,13 @@ import { MatChipInputEvent, MatChipEditedEvent } from '@angular/material/chips';
 import {
   NoteGroupModel,
   NoteModel,
-} from 'src/app/auth/services/Models/UserDataModels.interface';
+} from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { EMPTY, filter, map, of, switchMap, take } from 'rxjs';
-import { AdaptiveButtonComponent } from 'src/app/ui/adaptive-button/adaptive-button.component';
+import { AdaptiveButtonComponent } from 'src/app/reusable/ui/adaptive-button/adaptive-button.component';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
-import { runAnimationOnce } from 'src/app/reusable/animations/animation-triggers';
+import { runAnimationOnce } from 'src/app/reusable/utils/animations/animation-triggers';
 
 export interface INoteListFormDialogData {
   id: string;

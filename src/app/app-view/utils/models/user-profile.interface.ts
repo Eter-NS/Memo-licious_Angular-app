@@ -1,4 +1,4 @@
-import { AuthOptions } from 'src/app/auth/services/Models/LocalAuthModels.interface';
+import { AuthOptions } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 
 export interface PhotoBlob {
   extension: string;

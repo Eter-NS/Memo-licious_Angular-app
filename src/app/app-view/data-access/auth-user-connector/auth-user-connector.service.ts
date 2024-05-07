@@ -7,15 +7,15 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { LocalUserAccount } from 'src/app/auth/services/Models/LocalAuthModels.interface';
-import { AuthAccountService } from 'src/app/auth/services/account/auth-account.service';
-import { AuthLocalUserService } from 'src/app/auth/services/local-user/auth-local-user.service';
-import { AuthStateService } from 'src/app/auth/services/state/auth-state.service';
+import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
+import { AuthAccountService } from 'src/app/auth/data-access/account/auth-account.service';
+import { AuthLocalUserService } from 'src/app/auth/data-access/local-user/auth-local-user.service';
+import { AuthStateService } from 'src/app/auth/data-access/state/auth-state.service';
 import { ErrorHandlerService } from '../error-handler/error-handler.service';
 import { User } from '@angular/fire/auth';
 import { UserProfileChangesI } from '../../utils/models/user-profile.interface';
 import { environment } from 'src/environments/environment.dev';
-import { RegisterCustomOptions } from 'src/app/auth/services/Models/OnlineAuthModels.interface';
+import { RegisterCustomOptions } from 'src/app/auth/utils/Models/OnlineAuthModels.interface';
 import { StorageService } from 'src/app/reusable/data-access/firebase-storage/storage.service';
 import { FILE_TO_BASE64_TOKEN } from 'src/app/reusable/utils/file-to-base64/file-to-base64.pipe.injector';
 

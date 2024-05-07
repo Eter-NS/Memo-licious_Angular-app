@@ -21,7 +21,7 @@ import {
   checkPassword,
   checkConfirmPassword,
   areInputsDifferent,
-} from 'src/app/custom-validations/custom-validations';
+} from 'src/app/reusable/utils/custom-validations/custom-validations';
 import { FormCommonFeaturesService } from 'src/app/reusable/data-access/form-common-features/form-common-features.service';
 import {
   UserProfile,
@@ -30,8 +30,8 @@ import {
 import { AsyncPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSpinnerTogglerDirective } from 'src/app/reusable/mat-spinner-toggler/mat-spinner-toggler.directive';
-import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
+import { MatSpinnerTogglerDirective } from 'src/app/reusable/utils/mat-spinner-toggler/mat-spinner-toggler.directive';
+import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-color-checker.directive';
 import { BehaviorSubject } from 'rxjs';
 import { UserProfileUpdateResultI } from '../../data-access/user-profile/user-profile.service';
 
@@ -62,8 +62,8 @@ export interface OnlineProfileFormI {
   ],
   templateUrl: './account-settings-online.component.html',
   styleUrls: [
-    '/src/app/reusable/forms/form.scss',
-    '/src/app/auth/guest/guest-forms.scss',
+    '/src/app/reusable/utils/forms/form.scss',
+    '/src/app/auth/feature/guest/guest-forms.scss',
     './account-settings-online.component.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
