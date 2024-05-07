@@ -27,6 +27,7 @@ import { FormCommonFeaturesService } from 'src/app/reusable/data-access/form-com
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { AdaptiveButtonComponent } from '../../../ui/adaptive-button/adaptive-button.component';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from 'src/environments/environment.dev';
 
 export type NewNoteGroupForm = ReturnType<
   typeof NoteListFormComponent.prototype.newNoteGroupForm.getRawValue
@@ -118,7 +119,11 @@ export class NoteListFormComponent {
   /** For creating and modifying notes only */
   handleNoteEvent(e: MatChipInputEvent | EditNoteI) {
     if (!('event' in e) && !('value' in e)) {
-      console.error('The parameter is neither MatChipInputEvent nor EditNoteI');
+      if (!environment.production) {
+        console.error(
+          'The parameter is neither MatChipInputEvent nor EditNoteI'
+        );
+      }
       return;
     }
 
