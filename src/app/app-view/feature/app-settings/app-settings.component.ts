@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   OnInit,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
@@ -69,9 +71,13 @@ export class AppSettingsComponent implements OnInit {
       APP_SETTINGS_FORM_TOKEN
     );
 
+  @ViewChild('container', { static: true })
+  container!: ElementRef<HTMLDivElement>;
+
   ngOnInit(): void {
     this._loadAppState();
     this._listenForAppSettingsChanges();
+    this.viewTransitionService.viewFadeIn(this.container.nativeElement);
   }
 
   private _listenForAppSettingsChanges() {
