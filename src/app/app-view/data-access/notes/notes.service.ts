@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import {
   BehaviorSubject,
+  EMPTY,
   Observable,
   catchError,
   of,
@@ -25,6 +26,7 @@ import { GroupRemovingStrategy } from '../../utils/models/app-settings.interface
 import { AppConfigService } from '../app-config/app-config.service';
 import { LocalUserAccount } from 'src/app/auth/services/Models/LocalAuthModels.interface';
 import { User } from '@angular/fire/auth';
+import { environment } from 'src/environments/environment.dev';
 
 @Injectable()
 export class NotesService implements OnDestroy {
@@ -36,8 +38,8 @@ export class NotesService implements OnDestroy {
 
   private _randomId = randomId;
 
-  errorCounter = 0;
-  MAX_ERROR_COUNT = 3;
+  readonly MAX_ERROR_COUNT = 3;
+  readonly RECONNECT_DELAY = 2500;
 
   #removingSpeed = new BehaviorSubject<GroupRemovingStrategy>(
     this.#appConfigService.appConfigState.deletingMode
@@ -48,68 +50,33 @@ export class NotesService implements OnDestroy {
   get notesBuffer$() {
     return this.#notesBufferSubject.asObservable();
   }
-  get userType() {
-    return this.#authUserConnectorService.activeUserTypeSig();
-  }
 
-  get notes$(): Observable<NoteGroupModel[]> {
-    return this.#authUserConnectorService.activeUser$.pipe(
+  #userType = this.#authUserConnectorService.activeUserTypeSig;
+
+  notes$: Observable<NoteGroupModel[]> =
+    this.#authUserConnectorService.activeUser$.pipe(
       switchMap((user) => {
-        if (this.userType === 'local') {
+        if (this.#userType() === 'local') {
           return of((user as LocalUserAccount).groups);
+        } else if (this.#userType() === 'online') {
+          return this.#authDatabaseService.getGroups((user as User).uid).pipe(
+            catchError((err) => {
+              if (!environment.production) {
+                console.error(err);
+              }
+              return throwError(() => err);
+            }),
+            retry({
+              count: this.MAX_ERROR_COUNT,
+              delay: this.RECONNECT_DELAY,
+              resetOnSuccess: true,
+            })
+          );
+        } else {
+          return EMPTY;
         }
-
-        return this.#authDatabaseService.getGroups((user as User).uid);
-      }),
-      catchError((err) => {
-        // Online user error handling
-        console.error(err);
-        this.errorCounter++;
-        // return EMPTY;
-        return throwError(() => err);
-      }),
-      retry({
-        count: this.MAX_ERROR_COUNT,
-        delay: 2500,
-        resetOnSuccess: true,
       })
     );
-
-    // return this.#authLocalUserService.localUser$.pipe(
-    //   switchMap((localUser) => {
-    //     if (localUser) {
-    //       this.#authUserConnectorService.updateUserType('local');
-    //       return of(localUser.groups);
-    //     }
-
-    //     return this.#authStateService.user$.pipe(
-    //       switchMap((onlineUser) => {
-    //         if (onlineUser) {
-    //           this.#authUserConnectorService.updateUserType('online');
-    //           return this.#authDatabaseService.getGroups(onlineUser.uid);
-    //         }
-
-    //         throw new Error('No user logged in');
-    //       }),
-    //       catchError((err) => {
-    //         console.error(err);
-    //         this.errorCounter++;
-    //         // throw err;
-    //         return EMPTY;
-    //       }),
-    //       retry({
-    //         count: this.MAX_ERROR_COUNT,
-    //         delay: 2500,
-    //         resetOnSuccess: true,
-    //       })
-    //     );
-    //   })
-    // );
-  }
-
-  constructor() {
-    this.clearNoteGroups();
-  }
 
   ngOnDestroy(): void {
     this.fillNotesBuffer([]);
@@ -171,9 +138,9 @@ export class NotesService implements OnDestroy {
   }
 
   async modifyGroups(payload: NoteGroupModel[]): Promise<boolean> {
-    if (!this.userType) return false;
+    if (!this.#userType()) return false;
 
-    switch (this.userType) {
+    switch (this.#userType()) {
       case 'local':
         return this.#authLocalUserService.modifyCurrentUser({
           groups: payload,
@@ -187,7 +154,7 @@ export class NotesService implements OnDestroy {
 
   deleteGroup(id: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      if (!this.userType) {
+      if (!this.#userType()) {
         reject(new Error('No user logged in'));
         return;
       }
@@ -198,7 +165,7 @@ export class NotesService implements OnDestroy {
           return;
         }
 
-        switch (this.userType) {
+        switch (this.#userType()) {
           case 'local': {
             resolve(this.#authLocalUserService.deleteGroup(id));
             return;
