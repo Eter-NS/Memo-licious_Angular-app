@@ -1,15 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithRedirect,
-  signInWithPopup,
-  getRedirectResult,
-  signOut,
-  updateProfile,
   UserCredential,
-  updatePassword,
+  User,
+  EmailAuthProvider,
+  AuthCredential,
+  OAuthCredential,
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { isAuthError } from 'src/app/reusable/Models/isAuthError';
@@ -17,13 +13,13 @@ import {
   RegisterCustomOptions,
   AuthReturnCredits,
   UnknownError,
+  Errors,
 } from '../Models/OnlineAuthModels.interface';
 import { AuthDatabaseService } from '../database/auth-database.service';
 import { AuthStateService } from '../state/auth-state.service';
-
-type CustomNavigator = Navigator & {
-  msMaxTouchPoints: number;
-};
+import { isMobileDevice } from 'src/app/reusable/data-tools/isMobileDevice';
+import { FirebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service';
+import { environment } from 'src/environments/environment.dev';
 
 @Injectable({
   providedIn: 'root',
@@ -32,17 +28,16 @@ export class AuthAccountService {
   #router = inject(Router);
   #authState = inject(AuthStateService);
   #authDatabase = inject(AuthDatabaseService);
+  #fireAuthController = inject(FirebaseAuthControllerService);
+
+  readonly #authErrorDictionary: Record<string, Errors> = {
+    'auth/email-already-in-use': { alreadyInUseError: true },
+    'auth/user-not-found': { emailDoesNotExist: true },
+    'auth/wrong-password': { wrongEmailOrPassword: true },
+  };
 
   checkUserSession = this.#authState.checkUserSession;
-
-  private _createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-  private _signInWithEmailAndPassword = signInWithEmailAndPassword;
-  private _signInWithRedirect = signInWithRedirect;
-  private _signInWithPopup = signInWithPopup;
-  private _getRedirectResult = getRedirectResult;
-  private _signOut = signOut;
-  private _updateProfile = updateProfile;
-  private _updatePassword = updatePassword;
+  _isMobileDevice = isMobileDevice;
 
   async signupWithEmail(
     email: string,
@@ -53,8 +48,9 @@ export class AuthAccountService {
       if (!options.displayName) {
         const noProfileNameError: UnknownError = {
           code: 'noDisplayNameProvided',
-          message: 'options parameter is defined without displayName property',
+          message: 'Options parameter is defined without displayName property.',
         };
+
         return {
           errors: {
             unknownError: noProfileNameError,
@@ -62,24 +58,29 @@ export class AuthAccountService {
         };
       }
 
-      const result = await this._createUserWithEmailAndPassword(
-        this.#authState.auth,
-        email,
-        password
-      );
+      const result =
+        await this.#fireAuthController.createUserWithEmailAndPassword(
+          this.#authState.auth,
+          email,
+          password
+        );
 
-      this.#authState.session.set(result.user);
+      this.#authState.updateSession(result.user);
+
       const returnObj = await this.#authDatabase.databaseRegisterHandler(
         result
       );
+
       await this.changeUserProfileData(options);
+
       return returnObj;
     } catch (error) {
-      if (isAuthError(error)) {
-        if (error.code === 'auth/email-already-in-use') {
-          return { errors: { alreadyInUseError: true } };
-        }
+      const errorOutput = this._handleAuthError(error);
+
+      if (errorOutput) {
+        return errorOutput;
       }
+
       return {
         errors: { unknownError: error as UnknownError },
       };
@@ -91,24 +92,26 @@ export class AuthAccountService {
     password: string
   ): Promise<AuthReturnCredits> {
     try {
-      const result = await this._signInWithEmailAndPassword(
+      const result = await this.#fireAuthController.signInWithEmailAndPassword(
         this.#authState.auth,
         email,
         password
       );
-      this.#authState.session.set(result.user);
-      return this.#authState.session()?.emailVerified
-        ? { passed: true }
-        : { errors: { unverifiedEmail: true } };
-    } catch (error) {
-      if (isAuthError(error)) {
-        if (error.code === 'auth/user-not-found') {
-          return { errors: { emailDoesNotExist: true } };
-        }
-        if (error.code === 'auth/wrong-password') {
-          return { errors: { wrongEmailOrPassword: true } };
-        }
+
+      this.#authState.updateSession(result.user);
+
+      if (this.#authState.sessionSig()?.emailVerified) {
+        return { passed: true };
       }
+
+      return { errors: { unverifiedEmail: true } };
+    } catch (error) {
+      const errorOutput = this._handleAuthError(error);
+
+      if (errorOutput) {
+        return errorOutput;
+      }
+
       return {
         errors: { unknownError: error as UnknownError },
       };
@@ -120,24 +123,29 @@ export class AuthAccountService {
    * Beside this method you must apply getDataFromRedirect() in your component to get data from redirect.
    */
   async continueWithGoogle(): Promise<AuthReturnCredits> {
-    const provider = new GoogleAuthProvider();
-    provider.addScope('email');
-    provider.addScope('profile');
+    const provider = this._createGoogleProvider();
 
     let result: UserCredential;
     try {
-      if (this.isTheDeviceMobile()) {
-        await this._signInWithRedirect(this.#authState.auth, provider);
+      if (this._isMobileDevice()) {
+        await this.#fireAuthController.signInWithRedirect(
+          this.#authState.auth,
+          provider
+        );
       } else {
-        result = await this._signInWithPopup(this.#authState.auth, provider);
-        this.#authState.session.set(result.user);
+        result = await this.#fireAuthController.signInWithPopup(
+          this.#authState.auth,
+          provider
+        );
+        this.#authState.updateSession(result.user);
       }
 
       return await this.#authDatabase.databaseRegisterHandler(result!);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      this._devErrorLog(err);
+
       return {
-        errors: { unknownError: error as UnknownError },
+        errors: { unknownError: err as UnknownError },
       };
     }
   }
@@ -147,90 +155,200 @@ export class AuthAccountService {
    */
   async getDataFromRedirect(): Promise<AuthReturnCredits | null> {
     try {
-      const result = await this._getRedirectResult(this.#authState.auth);
-      if (result) {
-        this.#authState.session.set(result.user);
-        return await this.#authDatabase.databaseRegisterHandler(result);
-      } else {
+      const result = await this.#fireAuthController.getRedirectResult(
+        this.#authState.auth
+      );
+      if (!result) {
         // Normal component etc. run
         return null;
       }
-    } catch (error) {
-      console.error(error);
-      return {
-        errors: { unknownError: error as UnknownError },
-      };
-    }
-  }
 
-  async signOutUser() {
-    if (!this.#authState.session()) return;
-
-    await this._signOut(this.#authState.auth);
-    await this.#router.navigateByUrl('/online/force=login');
-  }
-
-  async changeUserProfileData(options: RegisterCustomOptions): Promise<void> {
-    if (!this.#authState.auth.currentUser) {
-      console.error('No user registered/logged in');
-      return;
-    }
-
-    if (!Object.keys(options).length) {
-      console.error('No options provided');
-      return;
-    }
-
-    await this._updateProfile(this.#authState.auth.currentUser, options);
-  }
-
-  async updatePassword(newPassword: string): Promise<AuthReturnCredits> {
-    try {
-      const session = this.#authState.session();
-
-      if (!session) {
-        return {
-          errors: {
-            unknownError: {
-              code: 'NoUser',
-              message: 'No user is currently logged in.',
-            },
-          },
-        };
-      }
-      await this._updatePassword(session, newPassword);
-
-      return { passed: true };
+      this.#authState.updateSession(result.user);
+      return await this.#authDatabase.databaseRegisterHandler(result);
     } catch (err) {
-      console.error(err);
+      this._devErrorLog(err);
+
       return {
         errors: { unknownError: err as UnknownError },
       };
     }
   }
 
-  private isTheDeviceMobile(): boolean {
-    let hasTouchScreen = false;
+  async signOutUser() {
+    if (!this.#authState.sessionSig()) return;
 
-    if ('maxTouchPoints' in navigator) {
-      hasTouchScreen = navigator.maxTouchPoints > 0;
-    } else if ('msMaxTouchPoints' in navigator) {
-      hasTouchScreen = (navigator as CustomNavigator).msMaxTouchPoints > 0;
-    } else if (
-      screen.orientation.type !== 'landscape-primary' ||
-      screen.orientation.angle !== 0
-    ) {
-      hasTouchScreen = true;
-    } else if ('orientation' in window) {
-      hasTouchScreen = true;
-    } else {
-      const userAgent = (navigator as Navigator).userAgent;
-      hasTouchScreen =
-        /\b(BlackBerry|webOS|iPhone|IEMobile|Android|Windows Phone|iPad|iPod)\b/i.test(
-          userAgent
-        );
+    await this.#fireAuthController.signOut(this.#authState.auth);
+    await this.#router.navigateByUrl('/online/force=login');
+  }
+
+  async changeUserProfileData(options: RegisterCustomOptions): Promise<void> {
+    try {
+      const user = this._getUser();
+      if (!user) {
+        this._devErrorLog('No user registered/logged in.');
+
+        return;
+      }
+
+      if (!Object.keys(options).length) {
+        this._devErrorLog('No options provided.');
+
+        return;
+      }
+
+      await this.#fireAuthController.updateProfile(user, options);
+    } catch (err) {
+      console.error('changeUserProfileData', err);
+      return;
+    }
+  }
+
+  async updateEmail(
+    existingPassword: string,
+    existingEmail: string,
+    newEmail: string
+  ): Promise<AuthReturnCredits> {
+    try {
+      const user = this._getUser();
+
+      try {
+        await user.getIdToken();
+        await this.#fireAuthController.updateEmail(user, newEmail);
+      } catch (err) {
+        if (isAuthError(err) && err.code === 'auth/requires-recent-login') {
+          await this._reauthenticateUser(user, existingEmail, existingPassword);
+          await this.#fireAuthController.updateEmail(user, newEmail);
+        }
+      }
+
+      return { passed: true };
+    } catch (err) {
+      this._devErrorLog(err);
+
+      return {
+        errors: { unknownError: err as UnknownError },
+      };
+    }
+  }
+
+  async updatePassword(
+    existingPassword: string,
+    newPassword: string
+  ): Promise<AuthReturnCredits> {
+    try {
+      const user = this._getUser();
+
+      try {
+        await user.getIdToken();
+        await this.#fireAuthController.updatePassword(user, newPassword);
+      } catch (err) {
+        if (isAuthError(err) && err.code === 'auth/requires-recent-login') {
+          await this._reauthenticateUser(
+            user,
+            existingPassword,
+            this.#authState.sessionSig()?.email as string
+          );
+
+          await this.#fireAuthController.updatePassword(user, newPassword);
+        }
+      }
+
+      return { passed: true };
+    } catch (err) {
+      this._devErrorLog(err);
+
+      return {
+        errors: { unknownError: err as UnknownError },
+      };
+    }
+  }
+
+  private _getUser() {
+    const user = this.#authState.sessionSig();
+
+    if (!user) {
+      throw { code: 'noUser', message: 'No user logged in.' };
     }
 
-    return hasTouchScreen;
+    return user;
+  }
+
+  private async _reauthenticateUser(
+    user: User,
+    password: string,
+    email?: string
+  ): Promise<void> {
+    let credentials: AuthCredential;
+
+    if (user.providerId === 'google') {
+      // Handle Google sign-in
+      credentials = await this._googleReauthenticate();
+    } else {
+      // Handle email sign-in
+      credentials = this._emailReauthenticate(email, password);
+    }
+
+    this.#fireAuthController.reauthenticateWithCredential(user, credentials);
+  }
+
+  private async _googleReauthenticate(): Promise<OAuthCredential> {
+    const provider = this._createGoogleProvider();
+    const result = await this.#fireAuthController.signInWithPopup(
+      this.#authState.auth,
+      provider
+    );
+    const googleCredential = GoogleAuthProvider.credentialFromResult(result);
+
+    if (!googleCredential) {
+      throw {
+        code: 'noDataFromPopup',
+        message:
+          'The popup has been closed without authenticating, or an error occurred during validation.',
+      };
+    }
+
+    return GoogleAuthProvider.credential(
+      googleCredential.idToken,
+      googleCredential.accessToken
+    );
+  }
+
+  private _emailReauthenticate(
+    existingEmail: string | undefined,
+    existingPassword: string
+  ) {
+    if (!existingEmail) {
+      throw { noEmailProvided: true };
+    }
+
+    if (!existingPassword) {
+      throw {
+        code: 'noPassword',
+        message: 'No password provided.',
+      };
+    }
+
+    return EmailAuthProvider.credential(existingEmail, existingPassword);
+  }
+
+  private _createGoogleProvider() {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    return provider;
+  }
+
+  private _handleAuthError(error: unknown): { errors: Errors } | null {
+    return isAuthError(error)
+      ? {
+          errors: this.#authErrorDictionary[error.code] || error,
+        }
+      : null;
+  }
+
+  private _devErrorLog(message: string | unknown) {
+    if (!environment.production) {
+      console.error(message);
+    }
   }
 }
