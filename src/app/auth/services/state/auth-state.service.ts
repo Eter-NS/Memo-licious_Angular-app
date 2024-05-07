@@ -1,37 +1,30 @@
-import { Injectable, OnDestroy, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import {
   Auth,
   User,
   browserLocalPersistence,
   browserSessionPersistence,
-  user,
 } from '@angular/fire/auth';
-import { Subscription } from 'rxjs';
+import { FirebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthStateService implements OnDestroy {
+export class AuthStateService {
   auth = inject(Auth);
-  session = signal<User | null | undefined>(undefined);
-  #subscription!: Subscription;
+  #firebaseAuthControllerService = inject(FirebaseAuthControllerService);
+  #session = signal<User | null | undefined>(undefined);
 
-  private _user = user;
-
-  get user$() {
-    return this._user(this.auth);
+  get sessionSig() {
+    return this.#session.asReadonly();
   }
+
+  readonly user$ = this.#firebaseAuthControllerService.user(this.auth);
 
   constructor() {
-    this.#subscription = this.user$.subscribe((user) => {
-      if (user) {
-        this.session.set(user);
-      }
+    this.user$.subscribe((state) => {
+      this.updateSession(state);
     });
-  }
-
-  ngOnDestroy(): void {
-    this.#subscription.unsubscribe();
   }
 
   async rememberMe(action: boolean) {
@@ -41,7 +34,11 @@ export class AuthStateService implements OnDestroy {
   }
 
   checkUserSession() {
-    const email = this.session()?.email;
+    const email = this.sessionSig()?.email;
     return email ?? null;
+  }
+
+  updateSession(state: User | null | undefined) {
+    this.#session.set(state);
   }
 }

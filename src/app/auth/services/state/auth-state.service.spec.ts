@@ -60,7 +60,7 @@ describe('AuthStateService', () => {
   describe('checkUserSession()', () => {
     it('should return the user email if it exists', () => {
       const user = { email: 'test@example.com' } as User;
-      service.session.set(user);
+      service.#session.set(user);
       expect(service.checkUserSession()).toBe('test@example.com');
     });
 

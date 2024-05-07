@@ -10,6 +10,7 @@ import {
   updateEmail,
   updatePassword,
   updateProfile,
+  user,
 } from '@angular/fire/auth';
 
 @Injectable({
@@ -26,4 +27,5 @@ export class FirebaseAuthControllerService {
   updatePassword = updatePassword;
   updateEmail = updateEmail;
   reauthenticateWithCredential = reauthenticateWithCredential;
+  user = user;
 }
