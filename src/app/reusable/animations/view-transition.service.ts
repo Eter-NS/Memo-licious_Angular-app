@@ -1,4 +1,4 @@
-import { Injectable, NgZone, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { runAnimationOnce } from './animation-triggers';
 import { BehaviorSubject } from 'rxjs';
@@ -11,14 +11,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class ViewTransitionService {
   #router = inject(Router);
   #location = inject(Location);
-  #zone = inject(NgZone);
   #history: Array<string> = [];
   #pageSubject = new BehaviorSubject<'start' | 'end' | 'idle'>('idle');
 
   private _runAnimationOnce = runAnimationOnce;
   goBackClicked = false;
 
-  get page$() {
+  get pageState$() {
     return this.#pageSubject.asObservable();
   }
 
@@ -70,10 +69,14 @@ export class ViewTransitionService {
     }
   }
 
-  reloadPage() {
+  pageReload() {
     this.#router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
       this.#router.navigateByUrl(this.#router.url);
     });
+  }
+
+  hardPageReload() {
+    location.replace(this.#router.url);
   }
 
   private async _runTransition(

@@ -84,7 +84,7 @@ describe('ViewTransitionService', () => {
         )
       );
 
-      service.page$.subscribe((page) => {
+      service.pageState$.subscribe((page) => {
         expect(page).toBe('end');
         done();
       });
