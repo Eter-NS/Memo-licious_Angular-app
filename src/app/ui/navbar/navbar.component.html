@@ -1,8 +1,5 @@
 @if (data$ | async; as data) {
-<mat-sidenav-container
-  class="sidenav-container"
-  [hasBackdrop]="data.isHandset"
->
+<mat-sidenav-container class="sidenav-container" [hasBackdrop]="data.isHandset">
   <mat-sidenav
     #drawer
     class="sidenav"
@@ -10,10 +7,7 @@
     [mode]="data.isHandset ? 'over' : 'side'"
     [opened]="!data.isHandset"
   >
-    <mat-toolbar
-      [color]="color"
-      class="toolbar"
-    >
+    <mat-toolbar [color]="color" class="toolbar">
       @if (data.isHandset) {
       <button
         type="button"
@@ -21,7 +15,6 @@
         aria-label="Close sidenav"
         mat-icon-button
         (click)="drawer.close()"
-        (keyup.enter)="drawer.close()"
         tabindex="0"
       >
         <mat-icon aria-label="Side nav close icon">close</mat-icon>
@@ -40,18 +33,14 @@
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
-    <mat-toolbar
-      [color]="color"
-      class="toolbar"
-    >
+    <mat-toolbar [color]="color" class="toolbar">
       @if (data.isHandset) {
       <button
         type="button"
         class="hamburger-button"
         aria-label="Toggle sidenav"
         mat-icon-button
-        (click)="drawer.toggle()"
-        (keyup.enter)="drawer.toggle()"
+        (click)="drawer.open()"
         tabindex="0"
       >
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
