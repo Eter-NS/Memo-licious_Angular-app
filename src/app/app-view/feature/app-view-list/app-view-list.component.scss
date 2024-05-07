@@ -4,6 +4,14 @@
 
 main {
   @extend %main;
+  padding: {
+    top: free-space('sm');
+    bottom: free-space('sm');
+  }
+}
+
+h1 {
+  text-align: center;
 }
 
 .create-new-noteList {
