@@ -1,8 +1,6 @@
-/* @use "../node_modules/@angular/material/theming" as *;*/
-
-@use "@angular/material" as mat;
-@use "sass:map" as map;
-@use "sass:meta" as meta;
+@use '@angular/material' as mat;
+@use 'sass:map' as map;
+@use 'sass:meta' as meta;
 
 /* background-color: var(--color-primary-300); */
 /* color: var(--contrast-color-accent-300); */
@@ -164,15 +162,15 @@ Depending on how many colors you create, add them all to the dedicated color the
 */
 
 @mixin createCSSVars($theme) {
-  @if ($theme == "light") {
-    @include formatPaletteToCSSVar("primary", $my-light-palette-primary);
-    @include formatPaletteToCSSVar("accent", $my-light-palette-accent);
-    @include formatPaletteToCSSVar("warn", $my-palette-warn);
+  @if ($theme == 'light') {
+    @include formatPaletteToCSSVar('primary', $my-light-palette-primary);
+    @include formatPaletteToCSSVar('accent', $my-light-palette-accent);
+    @include formatPaletteToCSSVar('warn', $my-palette-warn);
   }
-  @if ($theme == "dark") {
-    @include formatPaletteToCSSVar("primary", $my-dark-palette-primary);
-    @include formatPaletteToCSSVar("accent", $my-dark-palette-accent);
-    @include formatPaletteToCSSVar("warn", $my-palette-warn);
+  @if ($theme == 'dark') {
+    @include formatPaletteToCSSVar('primary', $my-dark-palette-primary);
+    @include formatPaletteToCSSVar('accent', $my-dark-palette-accent);
+    @include formatPaletteToCSSVar('warn', $my-palette-warn);
   }
 }
 
