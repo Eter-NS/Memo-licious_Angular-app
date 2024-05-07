@@ -1,0 +1,168 @@
+@if(authOption$ | async; as authOption){
+<div class="form-wrapper">
+  <form class="form" [formGroup]="localProfileForm" (ngSubmit)="onSubmit()">
+    <fieldset class="form-element">
+      <label>
+        <p class="form-label">Username</p>
+        <input type="text" formControlName="name" />
+      </label>
+      @if (isErrorAndTouched('name', 'required')) {
+      <p class="input-error">This field is required!</p>
+      } @if (getError('name', 'minlength')) {
+      <p class="input-error">Your name is too short</p>
+      } @if (getError('name', 'maxlength')) {
+      <p class="input-error">Your name is too long</p>
+      }
+    </fieldset>
+    <mat-accordion class="form-element accordion">
+      <mat-expansion-panel
+        class="expansion-panel"
+        (opened)="enablePassphrasePanel()"
+        (closed)="disablePassphrasePanel()"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title> PIN & Password </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <fieldset class="form-element current-passphrase">
+          <label>
+            <p class="form-label">Current {{ user.authOption }}</p>
+            <input type="password" formControlName="currentPassphrase" />
+          </label>
+          @if (isErrorAndTouched('currentPassphrase', 'required')) {
+          <p class="input-error">This field is required!</p>
+          }
+          <!--  -->
+          @if(localProfileForm.controls.currentPassphrase.hasError('invalidCurrentPassphrase'))
+          {
+          <p class="input-error">
+            Please provide the current {{ authOption }} in order to update your
+            authentication
+          </p>
+          }
+        </fieldset>
+
+        <fieldset class="form-element">
+          <h2 class="auth-header">Type of authentication</h2>
+          <mat-radio-group
+            class="radio-options"
+            aria-label="Select the authentication method"
+            formControlName="authOption"
+          >
+            <mat-radio-button
+              value="password"
+              color="primary"
+              data-test="radio-password"
+            >
+              Password
+            </mat-radio-button>
+            <mat-radio-button value="pin" color="primary" data-test="radio-pin">
+              PIN
+            </mat-radio-button>
+          </mat-radio-group>
+        </fieldset>
+        @if ((authOption)==='password') {
+        <div formGroupName="passwordGroup" data-test="password-group">
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">New password</p>
+              <input type="password" formControlName="password" />
+            </label>
+            @if (isErrorAndTouched(['passwordGroup', 'password'], 'required')) {
+            <p class="input-error">This field is required!</p>
+            }
+            <!--  -->
+            @if (isErrorAndDirty(['passwordGroup', 'password'],
+            'passwordError')) {
+            <p class="input-error">
+              The password must have 8 characters, numbers, and special
+              characters
+            </p>
+            }
+          </fieldset>
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">Confirm new Password</p>
+              <input type="password" formControlName="confirmPassword" />
+            </label>
+            @if (isErrorAndTouched(['passwordGroup', 'confirmPassword'],
+            'required')) {
+            <p class="input-error">This field is required!</p>
+            }
+            <!--  -->
+            @if (isErrorAndDirty(['passwordGroup', 'confirmPassword'],
+            'passwordMatch')) {
+            <p class="input-error">The passwords are not the same</p>
+            }
+          </fieldset>
+        </div>
+        } @else {
+        <div formGroupName="pinGroup" data-test="pin-group">
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">New PIN</p>
+              <input
+                type="password"
+                inputmode="numeric"
+                formControlName="pin"
+              />
+            </label>
+            @if (isErrorAndTouched(['pinGroup', 'pin'], 'required')) {
+            <p class="input-error">This field is required!</p>
+            }
+            <!--  -->
+            @if (isErrorAndDirty(['pinGroup', 'pin'], 'pinError')) {
+            <p class="input-error">Invalid PIN. Use from 4 to 8 digits.</p>
+            }
+          </fieldset>
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">Confirm new PIN</p>
+              <input
+                type="password"
+                inputmode="numeric"
+                formControlName="confirmPin"
+              />
+            </label>
+            @if (isErrorAndTouched(['pinGroup', 'confirmPin'], 'required')) {
+            <p class="input-error">This field is required!</p>
+            }
+            <!--  -->
+            @if (isErrorAndDirty(['pinGroup', 'confirmPin'], 'unmatchedPins')) {
+            <p class="input-error">Your PINs are not the same</p>
+            }@else if (localProfileForm.hasError('invalidNewPassphrase')) {
+            <p class="input-error">
+              Please provide a new pin or password in order to update your
+              authentication
+            </p>
+            }
+          </fieldset>
+        </div>
+        }
+        <!--  -->
+
+        <!--  -->
+        @if (localProfileForm.dirty &&
+        localProfileForm.hasError('samePassphrase')) {
+        <p class="input-error">
+          Please provide a different new
+          {{ authOption ? 'password' : 'pin' }}
+        </p>
+        }
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <button
+      type="submit"
+      class="submit-button"
+      appCustomMatRipple
+      [appMatSpinnerToggler]="localProfileForm.valid"
+    >
+      @if (isDataSending$ | async ) {
+      <mat-spinner class="sending-spinner"></mat-spinner>
+      } @else { Save changes }
+    </button>
+  </form>
+</div>
+
+}

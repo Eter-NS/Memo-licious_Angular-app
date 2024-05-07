@@ -1,0 +1,51 @@
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/components.scss' as *;
+@use 'src/scss/viewport.scss' as *;
+@use '../app-view.page-common-child-styles.scss' as defaults;
+
+main {
+  @extend %main;
+  width: calc(100% - #{free-space('xs')} * 2);
+  padding-bottom: free-space('sm');
+}
+
+.go-back-button-wrapper {
+  @extend %previous-page-button-wrapper;
+  width: var(--dynamic-width);
+  margin: 0 auto;
+}
+
+.content {
+  display: grid;
+  gap: free-space('md');
+}
+
+h1 {
+  text-align: center;
+}
+
+.user-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  & button {
+    border: none;
+    background-color: transparent;
+    margin-top: free-space('xs');
+    cursor: pointer;
+  }
+}
+
+.app-profile-picture {
+  --element-size: 118px;
+  --custom-border-radius: #{border-radius-implicit('lg')};
+}
+
+.invisible-input {
+  display: none;
+}
+
+.loading-spinner {
+  @extend %absolute-center, %spinner-defaults;
+}

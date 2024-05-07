@@ -1,0 +1,27 @@
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/viewport.scss' as view;
+
+:host {
+  width: min(100%, 500px);
+  margin: 0 auto;
+}
+
+.form-wrapper {
+  padding: free-space('sm');
+
+  @media (min-width: view.$view-xs) {
+    padding: free-space('lg') free-space('xs');
+  }
+}
+
+.expansion-panel {
+  --mat-expansion-container-background-color: var(--color-accent-200);
+}
+
+.submit-button {
+  margin-top: free-space('sm');
+}
+
+::ng-deep .mat-expansion-panel-body {
+  padding: 0 16px 16px !important;
+}
