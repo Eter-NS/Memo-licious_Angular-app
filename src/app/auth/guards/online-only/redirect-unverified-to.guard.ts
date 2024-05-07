@@ -1,8 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { Observable, combineLatestWith, map } from 'rxjs';
-import { AuthStateService } from '../../services/state/auth-state.service';
-import { AuthLocalUserService } from '../../services/local-user/auth-local-user.service';
+import { Observable, map } from 'rxjs';
+import { AuthUserConnectorService } from 'src/app/app-view/data-access/auth-user-connector/auth-user-connector.service';
 
 export const redirectUnverifiedToGuard = (
   unverifiedFallback: string
@@ -11,14 +10,17 @@ export const redirectUnverifiedToGuard = (
     | boolean
     | Promise<boolean>
     | Observable<boolean> {
-    const authStateService = inject(AuthStateService),
-      authLocalUserService = inject(AuthLocalUserService),
+    const authUserConnectorService = inject(AuthUserConnectorService),
       router = inject(Router);
 
-    return authStateService.user$.pipe(
-      combineLatestWith(authLocalUserService.localUser$),
-      map(([onlineUser, localUser]) => {
-        if (onlineUser?.emailVerified || localUser) {
+    return authUserConnectorService.activeUser$.pipe(
+      map((user) => {
+        if (!user) {
+          router.navigateByUrl(unverifiedFallback);
+          return false;
+        }
+
+        if ('groups' in user || 'emailVerified' in user) {
           return true;
         }
 

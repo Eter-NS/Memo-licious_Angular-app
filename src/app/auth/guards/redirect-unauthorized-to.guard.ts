@@ -1,9 +1,7 @@
 import { inject } from '@angular/core';
-import { AuthStateService } from '../services/state/auth-state.service';
-import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
 import { CanActivateFn, Router } from '@angular/router';
-import { Observable, combineLatestWith, map } from 'rxjs';
-import { AuthAccountService } from '../services/account/auth-account.service';
+import { Observable, map } from 'rxjs';
+import { AuthUserConnectorService } from 'src/app/app-view/data-access/auth-user-connector/auth-user-connector.service';
 
 export const redirectUnauthorizedToGuard = (
   denyFallback: string
@@ -12,23 +10,12 @@ export const redirectUnauthorizedToGuard = (
     | boolean
     | Promise<boolean>
     | Observable<boolean> {
-    const authStateService = inject(AuthStateService),
-      authAccountService = inject(AuthAccountService),
-      authLocalUserService = inject(AuthLocalUserService),
+    const authUserConnectorService = inject(AuthUserConnectorService),
       router = inject(Router);
 
-    return authLocalUserService.localUser$.pipe(
-      combineLatestWith(authStateService.user$),
-      map(([offlineUser, onlineUser]) => {
-        if (offlineUser && onlineUser) {
-          authAccountService.signOutUser();
-          authLocalUserService.logOut();
-
-          router.navigateByUrl(denyFallback);
-          return false;
-        }
-
-        if (offlineUser || onlineUser) {
+    return authUserConnectorService.activeUser$.pipe(
+      map((user) => {
+        if (user) {
           return true;
         }
 

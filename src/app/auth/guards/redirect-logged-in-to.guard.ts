@@ -1,9 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthLocalUserService } from '../services/local-user/auth-local-user.service';
-import { AuthStateService } from '../services/state/auth-state.service';
-import { Observable, combineLatestWith, map } from 'rxjs';
-import { AuthAccountService } from '../services/account/auth-account.service';
+import { Observable, map } from 'rxjs';
+import { AuthUserConnectorService } from 'src/app/app-view/data-access/auth-user-connector/auth-user-connector.service';
 
 export const redirectLoggedInToGuard = (
   loggedInFallback: string
@@ -12,22 +10,16 @@ export const redirectLoggedInToGuard = (
     | boolean
     | Promise<boolean>
     | Observable<boolean> {
-    const authStateService = inject(AuthStateService),
-      authAccountService = inject(AuthAccountService),
-      authLocalUserService = inject(AuthLocalUserService),
+    const authUserConnectorService = inject(AuthUserConnectorService),
       router = inject(Router);
 
-    return authLocalUserService.localUser$.pipe(
-      combineLatestWith(authStateService.user$),
-      map(([offlineUser, onlineUser]) => {
-        if (offlineUser && onlineUser?.emailVerified) {
-          authAccountService.signOutUser();
-          authLocalUserService.logOut();
-
+    return authUserConnectorService.activeUser$.pipe(
+      map((user) => {
+        if (!user) {
           return true;
         }
 
-        if (offlineUser || onlineUser?.emailVerified) {
+        if ('groups' in user || 'emailVerified' in user) {
           router.navigateByUrl(loggedInFallback);
           return false;
         }
