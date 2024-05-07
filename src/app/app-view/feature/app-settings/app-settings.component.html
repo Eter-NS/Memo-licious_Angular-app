@@ -1,7 +1,8 @@
 <main>
-  @if (existingUser$ | async; as existingUser) {
   <section #container>
     <h1>Settings</h1>
+
+    @if (existingUser$ | async; as existingUser) {
 
     <div class="user-image">
       <app-profile-picture
@@ -103,8 +104,8 @@
         </a>
       </li>
     </ul>
+    }@else {
+    <mat-spinner title="content loading" class="note-group-loading" />
+    }
   </section>
-  }@else {
-  <mat-spinner class="note-group-loading"></mat-spinner>
-  }
 </main>

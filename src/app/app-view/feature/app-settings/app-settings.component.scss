@@ -119,3 +119,7 @@ h1 {
 ::ng-deep .mat-mdc-select {
   display: flex !important;
 }
+
+.note-group-loading {
+  @extend %spinner-defaults, %absolute-center;
+}
