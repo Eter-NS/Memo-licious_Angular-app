@@ -1,9 +1,9 @@
-@use "./utils.scss" as *;
+@use './utils.scss' as *;
 
 %input-default {
   border: none;
   @include inset-box-shadow-with-transition(var(--color-accent-600));
-  @include border-radius("xs");
+  @include border-radius('xs');
   background-color: var(--color-accent-300);
   color: var(--contrast-color-accent-300);
   padding: 0.4em 0.5em;
@@ -59,7 +59,7 @@
 }
 
 %common-button {
-  @include border-radius("pill");
+  @include border-radius('pill');
   font-size: clamp(var(--p), 2vmax, 1.05rem);
   border: none;
 
@@ -78,13 +78,13 @@
 
 %floating-action-button {
   @extend %common-button;
-  @include border-radius("sm");
+  @include border-radius('sm');
   padding: 1.5em 1.5em;
 }
 
 %extended-fab {
   @extend %floating-action-button;
-  @include border-radius("md");
+  @include border-radius('md');
   padding: 0.75em 1.25em;
 }
 
@@ -92,4 +92,8 @@
   --size: max(var(--h1) * 1.5, 7.5vmin);
   width: var(--size) !important;
   height: var(--size) !important;
+}
+
+%previous-page-button-wrapper {
+  padding: free-space('xs') 0;
 }
