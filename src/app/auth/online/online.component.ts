@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -42,7 +41,7 @@ import { ActivatedRoute } from '@angular/router';
     MatProgressSpinnerModule,
   ],
 })
-export class OnlineComponent implements OnInit, AfterViewInit {
+export class OnlineComponent implements OnInit {
   #authAccountService = inject(AuthAccountService);
   #authStateService = inject(AuthStateService);
   #authCommonFeaturesService = inject(AuthCommonFeaturesService);
@@ -50,8 +49,10 @@ export class OnlineComponent implements OnInit, AfterViewInit {
   #snackBar = inject(MatSnackBar);
   viewTransitionService = inject(ViewTransitionService);
   #cd = inject(ChangeDetectorRef);
-  @ViewChild('mainTagRef') mainTagRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('viewContainer') viewContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('mainTagRef', { static: true })
+  mainTagRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('viewContainer', { static: true })
+  viewContainer!: ElementRef<HTMLDivElement>;
 
   register!: boolean;
   redirect?: string;
@@ -62,9 +63,6 @@ export class OnlineComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this._checkParams();
-  }
-
-  ngAfterViewInit(): void {
     this.checkTransitionDirection();
     this.googleAuth('getDataFromRedirect');
   }
@@ -99,6 +97,14 @@ export class OnlineComponent implements OnInit, AfterViewInit {
     this._authErrorGuard(response);
   }
 
+  toggleRegister(): void {
+    this.register = !this.register;
+  }
+
+  updateRememberMe(action: boolean) {
+    this.#authStateService.rememberMe(action);
+  }
+
   private _authErrorGuard(response: AuthReturnCredits): void {
     if (response.errors) {
       this._handleAuthErrors(response.errors);
@@ -112,6 +118,12 @@ export class OnlineComponent implements OnInit, AfterViewInit {
   }
 
   private _handleAuthErrors(errors: Errors) {
+    // Flags reset
+    this.alreadyInUseError = false;
+    this.wrongEmailOrPassword = false;
+    this.emailDoesNotExist = false;
+    this.#cd.detectChanges();
+
     const duration = 5000;
     for (const key of objectKeys(errors)) {
       switch (key) {
@@ -134,7 +146,7 @@ export class OnlineComponent implements OnInit, AfterViewInit {
           this.#snackBar.open(
             'Something went wrong when creating your account, try again',
             'close',
-            { duration: duration }
+            { duration }
           );
           break;
 
@@ -149,17 +161,22 @@ export class OnlineComponent implements OnInit, AfterViewInit {
           this.#snackBar.open(
             'It looks like someone has forgotten to write an email 😉',
             'close',
-            { duration: duration }
+            { duration }
           );
           break;
 
-        case 'unknownError':
+        case 'unknownError': {
+          if (errors.unknownError?.code === 'auth/popup-closed-by-user') {
+            return;
+          }
+
           this.#snackBar.open(
             `${errors.unknownError?.code}, ${errors.unknownError?.message}`,
             'close',
-            { duration: duration }
+            { duration }
           );
           break;
+        }
 
         default:
           if (!environment.production) {
@@ -174,7 +191,7 @@ export class OnlineComponent implements OnInit, AfterViewInit {
    * @return An url suffix based on the result registered flag and whether this.redirect is set or not. Only for navigateByUrl() usage.
    */
   private _redirectUser({ registered }: AuthReturnCredits): string {
-    const sessionValue = this.#authStateService.session();
+    const sessionValue = this.#authStateService.sessionSig();
 
     if (registered || (sessionValue && !sessionValue.emailVerified)) {
       return '/verify-email';
@@ -188,13 +205,5 @@ export class OnlineComponent implements OnInit, AfterViewInit {
       this.#authCommonFeaturesService.checkParamMap(this.#route, 'siteAction');
     this.register = register;
     this.redirect = redirect;
-  }
-
-  toggleRegister(): void {
-    this.register = !this.register;
-  }
-
-  updateRememberMe(action: boolean) {
-    this.#authStateService.rememberMe(action);
   }
 }
