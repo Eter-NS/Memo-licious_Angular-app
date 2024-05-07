@@ -1,26 +1,24 @@
-<app-navbar
-  #navbar
-  color="accent"
-  sidenavColor="var(--color-accent-100)"
->
+<app-navbar #navbar color="accent" sidenavColor="var(--color-accent-100)">
   <ng-template #logo>
-    <img
-      src="assets/shared/logo.webp"
-      alt="Memo-licious logo"
-      height="56"
-      width="56"
-    />
+    <a routerLink="/app/notes" class="logo-link">
+      <img src="assets/shared/logo.webp" alt="Memo-licious logo" />
+    </a>
   </ng-template>
 
   <ng-template #sidenavLinks>
     <div class="sidenav">
-      <div class="sidenav__links">
+      <div
+        class="sidenav__links"
+        (click)="closeNavbar()"
+        (keyup.enter)="closeNavbar()"
+        tabindex="-1"
+      >
         <a
           appCustomMatRipple
           routerLink="/app/notes"
           class="sidenav__link"
           routerLinkActive="sidenav__link--active"
-          (click)="closeNavbar()"
+          tabindex="0"
         >
           <mat-icon>home</mat-icon> Home
         </a>
@@ -29,7 +27,7 @@
           routerLink="/app/recycle-bin"
           class="sidenav__link"
           routerLinkActive="sidenav__link--active"
-          (click)="closeNavbar()"
+          tabindex="0"
         >
           <mat-icon>delete</mat-icon> Recycle bin
         </a>
@@ -38,7 +36,7 @@
           routerLink="/app/settings"
           class="sidenav__link"
           routerLinkActive="sidenav__link--active"
-          (click)="closeNavbar()"
+          tabindex="0"
         >
           <mat-icon>settings</mat-icon> Settings
         </a>

@@ -1,20 +1,20 @@
-@use "src/scss/utils.scss" as *;
+@use 'src/scss/utils.scss' as *;
 
 %sidenavLinkActionStyles {
   background-color: var(--color-primary-200);
   color: var(--contrast-color-primary-200);
-  @include border-radius("md");
+  @include border-radius('md');
 }
 
 .sidenav {
   display: grid;
   align-content: space-between;
-  padding: free-space("sm");
+  padding: free-space('sm');
   min-height: 85vh;
 
   &__links {
     display: grid;
-    gap: free-space("sm");
+    gap: free-space('sm');
     font-size: var(--p);
   }
 
@@ -24,14 +24,14 @@
     text-decoration: none;
     background-color: var(--color-primary-100);
     color: var(--contrast-color-primary-100);
-    padding: free-space("xs");
+    padding: free-space('xs');
     cursor: pointer;
-    @include border-radius("xs");
+    @include border-radius('xs');
     transition: border-radius 200ms ease-in-out,
       background-color 200ms ease-in-out;
 
     & > *:first-child {
-      margin-right: free-space("xs");
+      margin-right: free-space('xs');
     }
 
     &:is(:hover, :focus-visible) {
@@ -42,5 +42,17 @@
       @extend %sidenavLinkActionStyles;
       text-decoration: underline;
     }
+  }
+}
+
+.logo-link {
+  --size: 56px;
+  width: var(--size);
+  height: var(--size);
+  display: grid;
+
+  & img {
+    width: 100%;
+    height: 100%;
   }
 }
