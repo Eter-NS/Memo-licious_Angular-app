@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  DestroyRef,
   OnInit,
   ViewChild,
   inject,
@@ -12,9 +12,12 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { CustomMatRippleDirective } from 'src/app/reusable/ripples/ripple-color-checker.directive';
 import { NavbarComponent } from 'src/app/ui/navbar/navbar.component';
 import { ErrorHandlerService } from '../data-access/error-handler/error-handler.service';
-import { Subject, take, takeUntil } from 'rxjs';
+import { take, timer } from 'rxjs';
 import { AuthUserConnectorService } from '../data-access/auth-user-connector/auth-user-connector.service';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
+import { NotesService } from '../data-access/notes/notes.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 @Component({
   standalone: true,
   imports: [
@@ -29,28 +32,32 @@ import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-
   styleUrls: ['./app-view.page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppViewComponent implements OnInit, OnDestroy {
-  snackbar = inject(MatSnackBar);
+export class AppViewComponent implements OnInit {
+  #snackbar = inject(MatSnackBar);
   #viewportListenersService = inject(ViewportListenersService);
   #errorHandlerService = inject(ErrorHandlerService);
   #authUserConnectorService = inject(AuthUserConnectorService);
+  #notesService = inject(NotesService);
+  #destroyRef = inject(DestroyRef);
 
   @ViewChild('navbar') navbarComponent!: NavbarComponent;
 
-  destroy$ = new Subject();
-
   ngOnInit(): void {
     this.#errorHandlerService.error$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe((error) => {
-        this.snackbar.dismiss();
-        this.snackbar.open(error, 'close', { duration: 5_000 });
+        this.#snackbar.dismiss();
+        this.#snackbar.open(error, 'close', { duration: 5_000 });
       });
-  }
 
-  ngOnDestroy(): void {
-    this.destroy$.next(null);
-    this.destroy$.complete();
+    const MINIMUM_EXECUTION_TIME = 0;
+    const INTERVAL_PERIOD = 1000 * 60;
+
+    timer(MINIMUM_EXECUTION_TIME, INTERVAL_PERIOD)
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe(() => {
+        this.#notesService.clearNoteGroups();
+      });
   }
 
   closeNavbar() {
