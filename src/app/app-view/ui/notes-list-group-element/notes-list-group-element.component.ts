@@ -37,7 +37,7 @@ export class NotesListGroupElementComponent {
     this.cardClick.emit();
   }
 
-  onCardDetailsClick(event: Event) {
+  onCardOptionsClick(event: Event) {
     event.preventDefault();
     event.stopPropagation();
 
