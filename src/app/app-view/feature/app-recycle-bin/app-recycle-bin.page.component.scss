@@ -11,6 +11,10 @@ main {
   }
 }
 
+h1 {
+  text-align: center;
+}
+
 .empty {
   @extend %absolute-center;
   @include border-radius('sm');
