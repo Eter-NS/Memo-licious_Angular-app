@@ -13,25 +13,23 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="note-edit__actions">
-  <app-button
-    ripple
+  <button
+    type="button"
+    class="note-edit__action-button"
+    (click)="closeDialog('close')"
+    appAdaptiveButton
     [styleConfiguration]="{ look: 'extended-fab', color: 'primary-less' }"
-    (clicked)="closeDialog('close')"
   >
-    <ng-template #content>
-      <div class="note-edit__action-button">
-        <mat-icon>cancel</mat-icon> Close
-      </div>
-    </ng-template>
-  </app-button>
+    <mat-icon>cancel</mat-icon> Close
+  </button>
 
-  <app-button
-    ripple
+  <button
+    type="button"
+    class="note-edit__action-button"
+    (click)="closeDialog('save')"
+    appAdaptiveButton
     [styleConfiguration]="{ look: 'extended-fab', color: 'primary' }"
-    (clicked)="closeDialog('save')"
   >
-    <ng-template #content>
-      <div class="note-edit__action-button"><mat-icon>save</mat-icon> Save</div>
-    </ng-template>
-  </app-button>
+    <mat-icon>save</mat-icon> Save
+  </button>
 </mat-dialog-actions>

@@ -5,6 +5,7 @@
 @use './utils.scss' as util;
 @use './typography.scss';
 @use './viewport.scss';
+@use '../app/reusable/utils/adaptive-button/adaptive-button.directive.scss';
 
 @include mat.core();
 

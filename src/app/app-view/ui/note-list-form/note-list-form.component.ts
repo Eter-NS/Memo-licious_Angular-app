@@ -25,7 +25,6 @@ import { ENTER, COMMA } from '@angular/cdk/keycodes';
 import { MatInputModule } from '@angular/material/input';
 import { FormCommonFeaturesService } from 'src/app/reusable/data-access/form-common-features/form-common-features.service';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { AdaptiveButtonComponent } from '../../../reusable/ui/adaptive-button/adaptive-button.component';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment.dev';
 
@@ -56,7 +55,6 @@ export interface ValidationErrorI {
     ReactiveFormsModule,
     NgTemplateOutlet,
     AsyncPipe,
-    AdaptiveButtonComponent,
   ],
 })
 export class NoteListFormComponent {

@@ -17,7 +17,6 @@ import {
 } from 'src/app/reusable/utils/animations/animation-tools';
 import { runAnimationOnce } from 'src/app/reusable/utils/animations/animation-triggers';
 import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
-import { AdaptiveButtonComponent } from 'src/app/reusable/ui/adaptive-button/adaptive-button.component';
 import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { NotesService } from '../../data-access/notes/notes.service';
 import { BottomSheetComponent } from '../../../reusable/ui/bottom-sheet/bottom-sheet.component';
@@ -33,6 +32,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoteGroupListContainerComponent } from '../note-group-list-container/note-group-list-container.component';
 import { GrinningFaceWithSweatEmojiComponent } from '../../../reusable/ui/SVGs/grinning-face-with-sweat-emoji/grinning-face-with-sweat-emoji.component';
 import { combineLatest } from 'rxjs';
+import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/adaptive-button.directive';
 
 @Component({
   standalone: true,
@@ -46,7 +46,7 @@ import { combineLatest } from 'rxjs';
     NgTemplateOutlet,
     BottomSheetComponent,
     NoteListFormComponent,
-    AdaptiveButtonComponent,
+    AdaptiveButtonDirective,
     MatProgressSpinnerModule,
     NotesListGroupElementComponent,
     NoteGroupListContainerComponent,

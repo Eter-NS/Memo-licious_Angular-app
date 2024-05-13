@@ -28,13 +28,13 @@ import {
   tap,
 } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
-import { AdaptiveButtonComponent } from '../../../reusable/ui/adaptive-button/adaptive-button.component';
 import { MatIconModule } from '@angular/material/icon';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
 import { environment } from 'src/environments/environment.dev';
 import { FetchErrorComponent } from '../../../reusable/ui/fetch-error/fetch-error.component';
+import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/adaptive-button.directive';
 
 const NOTES_ROUTE = '/app/notes';
 
@@ -47,9 +47,9 @@ const NOTES_ROUTE = '/app/notes';
   imports: [
     NoteListFormComponent,
     AsyncPipe,
-    AdaptiveButtonComponent,
     MatIconModule,
     FetchErrorComponent,
+    AdaptiveButtonDirective,
   ],
 })
 export class GroupMobileDetailsComponent {

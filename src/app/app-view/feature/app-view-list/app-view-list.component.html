@@ -38,16 +38,15 @@
       class="add-new-noteList__open-button"
       [class.add-new-noteList__open-button--toggled]="mobileFormVisible"
     >
-      <app-button
-        ripple
-        [styleConfiguration]="{ shape: 'circle' }"
+      <button
+        type="button"
         title="Add new note list"
-        (clicked)="toggleNoteListForm('open')"
+        (click)="toggleNoteListForm('open')"
+        appAdaptiveButton
+        [styleConfiguration]="{ shape: 'circle' }"
       >
-        <ng-template #content>
-          <mat-icon>add</mat-icon>
-        </ng-template>
-      </app-button>
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
     @defer {
     <app-bottom-sheet

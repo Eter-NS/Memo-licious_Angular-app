@@ -23,10 +23,10 @@ import {
   NoteModel,
 } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { EMPTY, filter, map, of, switchMap, take } from 'rxjs';
-import { AdaptiveButtonComponent } from 'src/app/reusable/ui/adaptive-button/adaptive-button.component';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
+import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/adaptive-button.directive';
 
 export interface INoteListFormDialogData {
   id: string;
@@ -44,8 +44,8 @@ export interface INoteListFormDialogData {
     MatDialogClose,
     MatDialogTitle,
     MatDialogContent,
-    AdaptiveButtonComponent,
     MatIconModule,
+    AdaptiveButtonDirective,
   ],
   providers: [NotesService, NoteRestService],
 })
