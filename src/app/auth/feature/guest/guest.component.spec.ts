@@ -123,7 +123,7 @@ describe('GuestComponent', () => {
     });
 
     xit('should call the toggleRegister() when "to-register-button" has had an interaction with user', () => {
-      component.register = false;
+      component.register$ = false;
       fixture.detectChanges();
       const spy = spyOn(component, 'toggleRegister');
       const button = fixture.debugElement.query(
@@ -139,12 +139,12 @@ describe('GuestComponent', () => {
 
   describe(`toggleRegister()`, () => {
     it(`should toggle register`, () => {
-      component.register = false;
+      component.register$ = false;
       fixture.detectChanges();
 
       component.toggleRegister();
 
-      expect(component.register).toBeTrue();
+      expect(component.register$).toBeTrue();
     });
   });
 
@@ -212,7 +212,7 @@ describe('GuestComponent', () => {
 
   describe(`handleLogin()`, () => {
     beforeEach(() => {
-      component.register = false;
+      component.register$ = false;
       fixture.detectChanges();
     });
 

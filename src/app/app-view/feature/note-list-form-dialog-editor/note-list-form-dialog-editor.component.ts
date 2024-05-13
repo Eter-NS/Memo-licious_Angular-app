@@ -1,9 +1,7 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef,
   OnInit,
   ViewChild,
   inject,
@@ -29,7 +27,6 @@ import { AdaptiveButtonComponent } from 'src/app/reusable/ui/adaptive-button/ada
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
-import { runAnimationOnce } from 'src/app/reusable/utils/animations/animation-triggers';
 
 export interface INoteListFormDialogData {
   id: string;
@@ -52,11 +49,7 @@ export interface INoteListFormDialogData {
   ],
   providers: [NotesService, NoteRestService],
 })
-export class NoteListFormDialogEditorComponent
-  implements OnInit, AfterViewInit
-{
-  private _runAnimationOnce = runAnimationOnce;
-
+export class NoteListFormDialogEditorComponent implements OnInit {
   #dialogRef =
     inject<MatDialogRef<NoteListFormDialogEditorComponent, NoteListFormEditor>>(
       MatDialogRef
@@ -67,7 +60,6 @@ export class NoteListFormDialogEditorComponent
   #cd = inject(ChangeDetectorRef);
 
   @ViewChild('form') formElement!: NoteListFormComponent;
-  @ViewChild('content') content!: ElementRef<HTMLDivElement>;
 
   #noteGroupId = this.#dialogData.id;
   noteGroup$ = this.#notesService.notes$.pipe(
@@ -91,12 +83,6 @@ export class NoteListFormDialogEditorComponent
   ngOnInit(): void {
     this.noteGroup$.pipe(take(1)).subscribe((noteGroup) => {
       this.#notesService.fillNotesBuffer(noteGroup.notes);
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this._runAnimationOnce(this.content.nativeElement, 'fadeInOnLoad', {
-      removeClassOnFinish: true,
     });
   }
 

@@ -1,5 +1,5 @@
 @if (data$ | async; as data) {
-<main #container>
+<main>
   @if(!data.isHandset){
   <section class="create-new-noteList">
     <app-note-list-form
@@ -25,7 +25,10 @@
       </ng-template>
     </app-note-group-list-container>
     } @loading (minimum 500ms){
-    <mat-spinner class="note-group-loading"></mat-spinner>
+    <mat-spinner
+      title="content loading"
+      class="note-group-loading"
+    ></mat-spinner>
     }
   </section>
   @if(data.isHandset){

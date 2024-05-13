@@ -140,7 +140,7 @@
       [appMatSpinnerToggler]="onlineProfileForm.valid"
     >
       @if (isDataSending$ | async) {
-      <mat-spinner class="sending-spinner"></mat-spinner>
+      <mat-spinner title="Saving changes" class="sending-spinner"></mat-spinner>
       } @else { Save changes }
     </button>
   </form>

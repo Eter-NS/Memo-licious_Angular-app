@@ -1,8 +1,8 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  OnInit,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -17,7 +17,7 @@ import { AsyncPipe } from '@angular/common';
 import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-color-checker.directive';
 import { PreviousPageButtonComponent } from 'src/app/reusable/ui/previous-page-button/previous-page-button.component';
 import { AuthEmailService } from '../../data-access/email/auth-email.service';
-import { takeLast } from 'rxjs';
+import { Subject, filter, from, switchMap } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -34,28 +34,32 @@ import { takeLast } from 'rxjs';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ForgotPasswordComponent implements AfterViewInit {
+export class ForgotPasswordComponent implements OnInit {
   viewTransitionService = inject(ViewTransitionService);
-  authEmailService = inject(AuthEmailService);
+  private _authEmailService = inject(AuthEmailService);
   fb = inject(NonNullableFormBuilder);
-  @ViewChild('content') content!: ElementRef<HTMLElement>;
-  emailSent = false;
+
+  @ViewChild('content', { static: true }) content!: ElementRef<HTMLElement>;
+
+  private _sendEmailSubject = new Subject<string>();
+  readonly sendEmail$ = this._sendEmailSubject.asObservable().pipe(
+    filter((email) => this.emailAddress.invalid && !email),
+    switchMap((email) => from(this._authEmailService.sendResetEmail(email)))
+  );
+
   emailAddress = this.fb.control('', {
     validators: [Validators.required, checkEmail],
     updateOn: 'blur',
   });
 
-  emailAddress$ = this.emailAddress.valueChanges.pipe(takeLast(1));
+  readonly emailAddress$ = this.emailAddress.valueChanges;
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.viewTransitionService.viewFadeIn(this.content.nativeElement);
   }
 
-  async checkEmail(e: Event) {
+  sendEmail(e: Event) {
     e.preventDefault();
-    if (this.emailAddress.invalid && !this.emailAddress.value) return;
-    this.emailSent = await this.authEmailService.sendResetEmail(
-      this.emailAddress.value as string
-    );
+    this._sendEmailSubject.next(this.emailAddress.value);
   }
 }

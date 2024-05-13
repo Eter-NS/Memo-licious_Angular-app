@@ -73,7 +73,7 @@ describe('ForgotPasswordComponent', () => {
       it('should render a simple form if emailSent is false', () => {
         const form = fixture.debugElement.query(By.css('.form'));
 
-        expect(component.emailSent).toBeFalse();
+        expect(component.emailSentSubject).toBeFalse();
         expect(form).toBeTruthy();
       });
 
@@ -112,7 +112,7 @@ describe('ForgotPasswordComponent', () => {
       // BUGGED
       xit('should render success block with the email if emailSent is true', () => {
         component.emailAddress$ = of('example@example.com');
-        component.emailSent = true;
+        component.emailSentSubject = true;
         fixture.detectChanges();
 
         const successBlock = fixture.debugElement.query(

@@ -61,7 +61,8 @@ export class GroupMobileDetailsComponent {
   #router = inject(Router);
   #cd = inject(ChangeDetectorRef);
 
-  @ViewChild('viewContainer') viewContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('viewContainer', { static: true })
+  viewContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('form') formElement!: NoteListFormComponent;
 
   groupNotes$: Observable<NoteModel[]> = this.#notesService.notesBuffer$;

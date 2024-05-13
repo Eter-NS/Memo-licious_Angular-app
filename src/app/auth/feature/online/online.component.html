@@ -10,15 +10,9 @@
         "
       />
     </div>
-    <div
-      class="content"
-      #viewContainer
-    >
-      <div
-        class="login-register-content"
-        aria-label="Online account form"
-      >
-        @if (register) {
+    <div class="content" #viewContainer>
+      <div class="login-register-content" aria-label="Online account form">
+        @if (register$ | async) {
         <!--  -->
         @defer (on immediate; prefetch on immediate) {
         <app-online-register
@@ -59,7 +53,7 @@
           (keyup.enter)="googleAuth('continueWithGoogle')"
         />
         <div class="login-register-switch">
-          @if (register) {
+          @if (register$ | async) {
           <a
             (click)="toggleRegister()"
             (keyup.enter)="toggleRegister()"

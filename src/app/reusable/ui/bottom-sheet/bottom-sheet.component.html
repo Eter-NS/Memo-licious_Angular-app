@@ -1,9 +1,10 @@
+@if (data$ | async; as data) {
 <div
   #overlay
   class="overlay"
   [ngClass]="{
-    'do-not-animate': noAnimation,
-    visible: isOpened
+    'do-not-animate': data.noAnimation,
+    visible: data.isOpened
   }"
   (click)="close()"
   (keyup.enter)="close()"
@@ -14,9 +15,9 @@
   #sheet
   class="bottom-sheet"
   [ngClass]="{
-    'do-not-animate': noAnimation,
-    open: isOpened,
-    drag: isDragging
+    'do-not-animate': data.noAnimation,
+    open: data.isOpened,
+    drag: data.isDragging
   }"
 >
   <div
@@ -35,3 +36,5 @@
     <h2>There is nothing to be shown 😢</h2>
   </ng-template>
 </div>
+
+}

@@ -65,7 +65,6 @@ export class AppViewListComponent {
   private _removeAnimations = removeAnimations;
   private _runAnimationOnce = runAnimationOnce;
 
-  @ViewChild('container') mainElement!: ElementRef<HTMLDivElement>;
   @ViewChild('mobileAddNoteGroupButton') button!: ElementRef<HTMLDivElement>;
 
   mobileFormVisible = false;

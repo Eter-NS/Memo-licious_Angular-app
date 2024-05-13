@@ -1,11 +1,11 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   NgZone,
-  OnDestroy,
+  OnInit,
   Output,
   ViewChild,
   inject,
@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Subscription } from 'rxjs';
 import { runAnimationOnce } from 'src/app/reusable/utils/animations/animation-triggers';
 import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-previous-page-button',
@@ -49,22 +50,19 @@ import { ViewTransitionService } from 'src/app/reusable/data-access/view-transit
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PreviousPageButtonComponent implements AfterViewInit, OnDestroy {
+export class PreviousPageButtonComponent implements OnInit {
   @Output() clicked = new EventEmitter<void>(true);
-  @ViewChild('anchor') anchor!: ElementRef<HTMLAnchorElement>;
+  @ViewChild('anchor', { static: true }) anchor!: ElementRef<HTMLAnchorElement>;
   viewTransitionService = inject(ViewTransitionService);
   #zone = inject(NgZone);
+  #destroy = inject(DestroyRef);
   subscription!: Subscription;
   runAnimationOnce = runAnimationOnce;
 
-  ngAfterViewInit(): void {
-    this.subscription = this.viewTransitionService.pageState$.subscribe(
-      (value) => value === 'start' && this.fadeOut()
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+  ngOnInit(): void {
+    this.viewTransitionService.pageState$
+      .pipe(takeUntilDestroyed(this.#destroy))
+      .subscribe((value) => value === 'start' && this.fadeOut());
   }
 
   goBackEmitter() {

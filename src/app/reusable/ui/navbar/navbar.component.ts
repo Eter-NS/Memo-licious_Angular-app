@@ -42,7 +42,8 @@ export class NavbarComponent {
   @ContentChild('sidenavLinks') sidenavLinks!: TemplateRef<unknown>;
   @ContentChild('content') content!: TemplateRef<unknown>;
 
-  @ViewChild('drawer') drawer!: MatSidenav;
+  // Required for manual drawer manipulation
+  @ViewChild('drawer') public drawer!: MatSidenav;
 
   data$ = combineLatest({
     isHandset: this.#viewportListenersService.isHandset$,

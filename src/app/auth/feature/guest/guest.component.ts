@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -20,6 +19,8 @@ import { GuestLoginComponent } from '../../ui/guest-login/guest-login.component'
 import { AuthCommonFeaturesService } from '../../data-access/auth-common-features/auth-common-features.service';
 import { ActivatedRoute } from '@angular/router';
 import { LocalUserFormData } from '../../utils/Models/LocalAuthModels.interface';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -33,28 +34,34 @@ import { LocalUserFormData } from '../../utils/Models/LocalAuthModels.interface'
     MatSnackBarModule,
     MatProgressSpinnerModule,
     GuestLoginComponent,
+    AsyncPipe,
   ],
 })
-export class GuestComponent implements OnInit, AfterViewInit {
+export class GuestComponent implements OnInit {
   viewTransitionService = inject(ViewTransitionService);
   authLocalUserService = inject(AuthLocalUserService);
   authCommonFeaturesService = inject(AuthCommonFeaturesService);
   #route = inject(ActivatedRoute);
   #snackBar = inject(MatSnackBar);
 
-  @ViewChild('mainTagRef') mainTagRef!: ElementRef<HTMLDivElement>;
-  register!: boolean;
-  redirect?: string;
-  rememberMe = false;
+  @ViewChild('mainTagRef', { static: true })
+  mainTagRef!: ElementRef<HTMLDivElement>;
 
-  alreadyInUseError = false;
-  wrongCredentials = false;
+  private _registerSubject = new BehaviorSubject<boolean>(true);
+  private _redirectSubject = new BehaviorSubject<string | undefined>(undefined);
+  private _rememberMeSubject = new BehaviorSubject<boolean>(false);
+
+  private _wrongCredentialsSubject = new BehaviorSubject<boolean>(false);
+
+  protected data$ = combineLatest({
+    register: this._registerSubject.asObservable(),
+    redirect: this._redirectSubject.asObservable(),
+    rememberMe: this._rememberMeSubject.asObservable(),
+    wrongCredentials: this._wrongCredentialsSubject.asObservable(),
+  });
 
   ngOnInit(): void {
     this._checkParams();
-  }
-
-  ngAfterViewInit(): void {
     this.checkTransitionDirection();
   }
 
@@ -68,12 +75,16 @@ export class GuestComponent implements OnInit, AfterViewInit {
       this.#route,
       'siteAction'
     );
-    this.register = register;
-    this.redirect = redirect;
+    this._registerSubject.next(register);
+    this._redirectSubject.next(redirect);
   }
 
   toggleRegister() {
-    this.register = !this.register;
+    this._registerSubject.next(!this._registerSubject.value);
+  }
+
+  protected updateRememberMe(value: boolean) {
+    this._rememberMeSubject.next(value);
   }
 
   handleRegister({ name, passwordGroup, pinGroup }: LocalAuthUserData): void {
@@ -93,11 +104,6 @@ export class GuestComponent implements OnInit, AfterViewInit {
 
     if (result?.message) {
       this.#snackBar.open(result.message, 'close', { duration: 5000 });
-
-      if (result.code === 'user-exists') {
-        this.alreadyInUseError = true;
-      }
-
       return;
     }
 
@@ -106,21 +112,21 @@ export class GuestComponent implements OnInit, AfterViewInit {
 
   handleLogin({ name, passphrase }: LocalAuthUserData): void {
     if (!passphrase) {
-      this.wrongCredentials = true;
+      this._wrongCredentialsSubject.next(true);
       return;
     }
 
     const result = this.authLocalUserService.logIn(
       name,
       passphrase,
-      this.rememberMe ? 'local' : 'session'
+      this._rememberMeSubject.value ? 'local' : 'session'
     );
 
     if (result?.message) {
       this.#snackBar.open(result.message, 'close', { duration: 5000 });
 
       if (result.code === 'invalid-passkey') {
-        this.wrongCredentials = true;
+        this._wrongCredentialsSubject.next(true);
       }
 
       return;

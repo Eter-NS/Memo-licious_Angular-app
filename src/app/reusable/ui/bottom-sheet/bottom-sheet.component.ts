@@ -1,4 +1,4 @@
-import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -17,11 +17,12 @@ import {
   booleanAttribute,
   inject,
 } from '@angular/core';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-bottom-sheet',
   standalone: true,
-  imports: [NgTemplateOutlet, NgClass],
+  imports: [NgTemplateOutlet, NgClass, AsyncPipe],
   templateUrl: './bottom-sheet.component.html',
   styleUrl: './bottom-sheet.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,14 +31,21 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
   #renderer = inject(Renderer2);
   #zone = inject(NgZone);
 
-  isOpened!: boolean;
-  noAnimation!: boolean;
+  private readonly _isOpenedSubject = new BehaviorSubject<boolean>(false);
+  private readonly _noAnimationSubject = new BehaviorSubject<boolean>(false);
+  private readonly _isDraggingSubject = new BehaviorSubject<boolean>(false);
+
+  protected readonly data$ = combineLatest({
+    isOpened: this._isOpenedSubject.asObservable(),
+    noAnimation: this._noAnimationSubject.asObservable(),
+    isDragging: this._isDraggingSubject.asObservable(),
+  });
 
   @Input({ required: true }) set open(value: boolean) {
-    this.isOpened = value;
+    this._isOpenedSubject.next(value);
   }
   @Input({ transform: booleanAttribute }) set 'no-animation'(value: boolean) {
-    this.noAnimation = value ?? false;
+    this._noAnimationSubject.next(value);
   }
 
   @Output() openChange = new EventEmitter<boolean>();
@@ -45,7 +53,6 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
   @ContentChild('content') content!: TemplateRef<unknown>;
   @ViewChild('sheet') element!: ElementRef<HTMLDivElement>;
 
-  isDragging = false;
   startY!: number;
   startHeight!: number;
   initialHeight!: number;
@@ -69,7 +76,7 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
   }
 
   close() {
-    this.isOpened = false;
+    this._isOpenedSubject.next(false);
     const element = this.element.nativeElement;
 
     const effectWrapper = (eventName: 'transitionend' | 'animationend') => {
@@ -87,7 +94,9 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
   }
 
   startDragging(e: MouseEvent | TouchEvent) {
-    this.isDragging = true;
+    e.preventDefault();
+    e.stopPropagation();
+    this._isDraggingSubject.next(true);
 
     if (e instanceof MouseEvent) {
       this.startY = e.pageY;
@@ -98,10 +107,8 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
     this.startHeight = this.element.nativeElement.offsetHeight;
   }
 
-  // @HostListener('document:mousemove', ['$event'])
-  // @HostListener('document:touchmove', ['$event'])
   dragTo(e: MouseEvent | TouchEvent) {
-    if (!this.isDragging) return;
+    if (!this._isDraggingSubject.value) return;
 
     const effect = () => {
       let delta = 0;
@@ -122,7 +129,7 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
   @HostListener('document:mouseup')
   @HostListener('document:touchend')
   stopDragging() {
-    this.isDragging = false;
+    this._isDraggingSubject.next(false);
 
     const height = this.element.nativeElement.offsetHeight;
     const minHeight = 50;

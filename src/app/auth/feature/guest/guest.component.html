@@ -1,5 +1,7 @@
 <main #mainTagRef>
   <section class="container">
+    @if (data$ | async; as data) {
+
     <div class="go-back-button-wrapper">
       <app-previous-page-button
         (clicked)="
@@ -10,15 +12,9 @@
         "
       />
     </div>
-    <div
-      #viewContainer
-      class="content"
-    >
-      <div
-        class="login-register-content"
-        aria-label="Guest account form"
-      >
-        @if (register) {
+    <div #viewContainer class="content">
+      <div class="login-register-content" aria-label="Guest account form">
+        @if (data.register ) {
         <!--  -->
         @defer (on immediate; prefetch on immediate) {
         <app-guest-register (data)="handleRegister($event)" />
@@ -34,10 +30,10 @@
         <!--  -->
         @defer (on immediate; prefetch on immediate) {
         <app-guest-login
-          [wrongCredentials]="wrongCredentials"
+          [wrongCredentials]="data.wrongCredentials"
           [users]="authLocalUserService.allUsers"
           (data)="handleLogin($event)"
-          (rememberMe)="rememberMe = $event"
+          (rememberMe)="updateRememberMe($event)"
         />
         } @loading ( minimum 250ms) {
         <mat-spinner
@@ -51,7 +47,7 @@
       </div>
       <div class="component-content">
         <div class="login-register-switch">
-          @if (register) {
+          @if (data.register) {
           <a
             (click)="toggleRegister()"
             (keyup.enter)="toggleRegister()"
@@ -71,5 +67,6 @@
         </div>
       </div>
     </div>
+    }
   </section>
 </main>

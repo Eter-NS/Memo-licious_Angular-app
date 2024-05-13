@@ -26,6 +26,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from 'src/environments/environment.dev';
 import { AuthCommonFeaturesService } from '../../data-access/auth-common-features/auth-common-features.service';
 import { ActivatedRoute } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -39,6 +41,7 @@ import { ActivatedRoute } from '@angular/router';
     MatSnackBarModule,
     PreviousPageButtonComponent,
     MatProgressSpinnerModule,
+    AsyncPipe,
   ],
 })
 export class OnlineComponent implements OnInit {
@@ -47,15 +50,18 @@ export class OnlineComponent implements OnInit {
   #authCommonFeaturesService = inject(AuthCommonFeaturesService);
   #route = inject(ActivatedRoute);
   #snackBar = inject(MatSnackBar);
-  viewTransitionService = inject(ViewTransitionService);
   #cd = inject(ChangeDetectorRef);
+  viewTransitionService = inject(ViewTransitionService);
+
   @ViewChild('mainTagRef', { static: true })
   mainTagRef!: ElementRef<HTMLDivElement>;
   @ViewChild('viewContainer', { static: true })
   viewContainer!: ElementRef<HTMLDivElement>;
 
-  register!: boolean;
   redirect?: string;
+
+  private _registerSubject = new BehaviorSubject<boolean>(true);
+  protected register$ = this._registerSubject.asObservable();
 
   alreadyInUseError = false;
   wrongEmailOrPassword = false;
@@ -98,7 +104,7 @@ export class OnlineComponent implements OnInit {
   }
 
   toggleRegister(): void {
-    this.register = !this.register;
+    this._registerSubject.next(!this._registerSubject.value);
   }
 
   updateRememberMe(action: boolean) {
@@ -203,7 +209,7 @@ export class OnlineComponent implements OnInit {
   private _checkParams() {
     const { register, redirect } =
       this.#authCommonFeaturesService.checkParamMap(this.#route, 'siteAction');
-    this.register = register;
+    this._registerSubject.next(register);
     this.redirect = redirect;
   }
 }

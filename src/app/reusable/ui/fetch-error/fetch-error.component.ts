@@ -5,6 +5,7 @@ import {
   ElementRef,
   EventEmitter,
   HostBinding,
+  OnInit,
   Output,
   Renderer2,
   ViewChild,
@@ -18,19 +19,19 @@ import {
   styleUrl: './fetch-error.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FetchErrorComponent implements AfterViewInit {
+export class FetchErrorComponent implements OnInit {
   renderer = inject(Renderer2);
   @Output() clicked = new EventEmitter<void>();
 
-  @ViewChild('message')
-  message!: ElementRef<Node>;
+  @ViewChild('message', { static: true })
+  messageRef!: ElementRef<Node>;
 
   @HostBinding('role') get role() {
     return 'paragraph';
   }
 
-  ngAfterViewInit(): void {
-    const messageElement = this.message.nativeElement;
+  ngOnInit(): void {
+    const messageElement = this.messageRef.nativeElement;
     console.log(typeof messageElement);
 
     if (!messageElement.textContent?.trim().length) {

@@ -1,8 +1,8 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  OnInit,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -33,15 +33,17 @@ import { environment } from 'src/environments/environment.dev';
   styleUrls: ['./choose-path.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChoosePathComponent implements AfterViewInit {
+export class ChoosePathComponent implements OnInit {
   #router = inject(Router);
   viewTransitionService = inject(ViewTransitionService);
-  @ViewChild('container') hostElement!: ElementRef<HTMLElement>;
+  @ViewChild('container', { static: true })
+  hostElement!: ElementRef<HTMLElement>;
+
   removeAnimations = removeAnimations;
   addAnimations = addAnimations;
   runWithDelay = runWithDelay;
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     for (const child of Object.values(
       this.hostElement.nativeElement.children
     )) {
@@ -51,24 +53,24 @@ export class ChoosePathComponent implements AfterViewInit {
     }
   }
 
-  runTransition(suffix: string) {
+  async runTransition(suffix: string) {
     const element = this.hostElement.nativeElement;
 
     this.removeAnimations(element, 'fadeIn-vol-2-animation', true);
     this.addAnimations(element, 'fade-out-animation', true);
 
-    this.runWithDelay(element.children, {
-      reverse: true,
-      timeout: 800,
-    })
-      .then(() => {
-        this.viewTransitionService.goBackClicked = false;
-        this.#router.navigateByUrl(suffix);
-      })
-      .catch((err) => {
-        if (!environment.production) {
-          console.error(err);
-        }
+    try {
+      await this.runWithDelay(element.children, {
+        reverse: true,
+        timeout: 800,
       });
+
+      this.viewTransitionService.goBackClicked = false;
+      await this.#router.navigateByUrl(suffix);
+    } catch (err) {
+      if (!environment.production) {
+        console.error(err);
+      }
+    }
   }
 }
