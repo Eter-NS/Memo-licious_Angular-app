@@ -20,7 +20,11 @@ export const redirectUnverifiedToGuard = (
           return false;
         }
 
-        if ('groups' in user || 'emailVerified' in user) {
+        if ('groups' in user) {
+          return true;
+        }
+
+        if ('emailVerified' in user && user.emailVerified) {
           return true;
         }
 

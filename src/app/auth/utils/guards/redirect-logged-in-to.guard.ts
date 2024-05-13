@@ -15,13 +15,21 @@ export const redirectLoggedInToGuard = (
 
     return authUserConnectorService.activeUser$.pipe(
       map((user) => {
+        const redirect = () => {
+          router.navigateByUrl(loggedInFallback);
+          return false;
+        };
+
         if (!user) {
           return true;
         }
 
-        if ('groups' in user || 'emailVerified' in user) {
-          router.navigateByUrl(loggedInFallback);
-          return false;
+        if ('groups' in user) {
+          return redirect();
+        }
+
+        if ('emailVerified' in user && user.emailVerified) {
+          return redirect();
         }
 
         return true;
