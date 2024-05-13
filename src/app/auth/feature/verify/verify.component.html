@@ -22,14 +22,14 @@
             svgPrimaryColor="var(--color-primary-500)"
             [svgMinMaxWidth]="[200, 300]"
           />
-          <h2 class="result__header">Hurray! 🥳</h2>
+          <h2 class="result__header">Hurray! <app-partying-face-emoji /></h2>
           <p>
             You've got mail, but not the spammy kind. We've sent a link to
             {{ userEmail }} to verify your email address.
           </p>
           <p>
             Click on it and you'll be all set to enjoy our service without any
-            fret 😊
+            fret <app-smiling-face-emoji class="p-emoji" />
           </p>
           <button
             type="button"
@@ -44,10 +44,12 @@
         </div>
         } @case ('failure') {
         <div class="result" data-test="failure-state">
-          <h2 class="result__header">Oh no! We've crashed 😬</h2>
+          <h2 class="result__header">
+            Oh no! We've crashed <app-face-with-head-bandage-emoji />
+          </h2>
           <p>
             Please click the button below to get us back on track
-            <app-bullet-train-emoji />
+            <app-bullet-train-emoji class="p-emoji" />
           </p>
 
           @if (!userEmail) {

@@ -25,6 +25,7 @@ import { NgClass } from '@angular/common';
 import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-color-checker.directive';
 import { LocalUsers } from '../../utils/Models/LocalAuthModels.interface';
 import { ProfilePictureComponent } from 'src/app/reusable/ui/profile-picture/profile-picture.component';
+import { CryingFaceComponent } from '../../../reusable/ui/SVGs/crying-face-emoji/crying-face-emoji.component';
 
 @Component({
   selector: 'app-guest-login',
@@ -44,6 +45,7 @@ import { ProfilePictureComponent } from 'src/app/reusable/ui/profile-picture/pro
     NgClass,
     CustomMatRippleDirective,
     ProfilePictureComponent,
+    CryingFaceComponent,
   ],
 })
 export class GuestLoginComponent implements AfterViewInit, OnChanges {

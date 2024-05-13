@@ -55,11 +55,11 @@ h1 {
     cubic-bezier(0.55, 0.085, 0.68, 0.53);
 
   & span {
-    font-size: var(--p);
+    font-size: clamp(1.1rem, 2vmax, var(--h3));
   }
 
   .emoji {
-    --custom-svg-size: clamp(1.1rem, 2vmax, var(--h3));
+    --custom-svg-size: clamp(var(--svg-in-paragraph), 2vmax, var(--h3));
   }
 }
 

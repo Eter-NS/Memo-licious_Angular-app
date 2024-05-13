@@ -43,9 +43,7 @@
         />
         <div class="xyz">
           <div>
-            <mat-checkbox
-              color="primary"
-              [formControl]="rememberMeControl"
+            <mat-checkbox color="primary" [formControl]="rememberMeControl"
               >Remember Me</mat-checkbox
             >
           </div>
@@ -73,7 +71,7 @@
   </li>
   } @empty {
   <li class="no-accounts">
-    <p>Sorry, but there is no account on this device 😥</p>
+    <p>Sorry, but there is no account on this device <app-crying-face /></p>
   </li>
   }
 </ul>

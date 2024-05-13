@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -19,6 +18,9 @@ import { PreviousPageButtonComponent } from 'src/app/reusable/ui/previous-page-b
 import { AuthEmailService } from '../../data-access/email/auth-email.service';
 import { AuthStateService } from '../../data-access/state/auth-state.service';
 import { checkEmail } from 'src/app/reusable/utils/custom-validations/custom-validations';
+import { PartyingFaceEmojiComponent } from '../../../reusable/ui/SVGs/partying-face-emoji/partying-face-emoji.component';
+import { SmilingFaceEmojiComponent } from '../../../reusable/ui/SVGs/smiling-face-emoji/smiling-face-emoji.component';
+import { FaceWithHeadBandageEmojiComponent } from '../../../reusable/ui/SVGs/face-with-head-bandage-emoji/face-with-head-bandage-emoji.component';
 
 const SENDING_STATE = {
   Sending: 'sending',
@@ -30,6 +32,7 @@ const SENDING_STATE = {
   standalone: true,
   templateUrl: './verify.component.html',
   styleUrls: ['./verify.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatProgressSpinnerModule,
@@ -37,10 +40,12 @@ const SENDING_STATE = {
     BulletTrainEmojiComponent,
     CompletionOneComponent,
     PreviousPageButtonComponent,
+    PartyingFaceEmojiComponent,
+    SmilingFaceEmojiComponent,
+    FaceWithHeadBandageEmojiComponent,
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VerifyComponent implements OnInit, AfterViewInit {
+export class VerifyComponent implements OnInit {
   #authStateService = inject(AuthStateService);
   #authEmailService = inject(AuthEmailService);
   viewTransitionService = inject(ViewTransitionService);
@@ -55,26 +60,25 @@ export class VerifyComponent implements OnInit, AfterViewInit {
   );
 
   userEmail = this.#authStateService.checkUserSession();
-  @ViewChild('content') contentRef!: ElementRef<HTMLElement>;
+  @ViewChild('content', { static: true }) contentRef!: ElementRef<HTMLElement>;
 
   ngOnInit(): void {
+    this.viewTransitionService.viewFadeIn(this.contentRef.nativeElement);
     this.sendEmail();
   }
 
-  ngAfterViewInit(): void {
-    this.viewTransitionService.viewFadeIn(this.contentRef.nativeElement);
-  }
-
-  isValidEmail() {
+  private isInvalidEmail() {
     if (!this.userEmail || checkEmail(this.userEmail)) {
       this._sendingSubject.next(SENDING_STATE.Failure);
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   async sendEmail() {
-    if (!this.isValidEmail()) return;
+    if (this.isInvalidEmail()) {
+      return;
+    }
 
     try {
       await this.#authEmailService.sendVerificationEmail();

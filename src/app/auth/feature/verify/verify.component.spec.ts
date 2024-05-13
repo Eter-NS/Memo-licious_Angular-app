@@ -138,11 +138,9 @@ describe('VerifyComponent', () => {
 
         expect(component.sendEmail).toHaveBeenCalled();
       });
-    });
 
-    describe('ngAfterViewInit()', () => {
       it('should call viewTransitionService.viewFadeIn() method', () => {
-        component.ngAfterViewInit();
+        component.ngOnInit();
 
         expect(viewTransitionServiceMock.viewFadeIn).toHaveBeenCalledWith(
           component.contentRef.nativeElement
@@ -155,7 +153,7 @@ describe('VerifyComponent', () => {
         component.userEmail = 'example@example.com';
         spyOn((component as any)._sendingSubject, 'next');
 
-        component.isValidEmail();
+        component['isInvalidEmail']();
 
         expect((component as any)._sendingSubject.next).not.toHaveBeenCalled();
       });
@@ -164,7 +162,7 @@ describe('VerifyComponent', () => {
         component.userEmail = 'XXXXXXXXXXXXX';
         spyOn((component as any)._sendingSubject, 'next');
 
-        component.isValidEmail();
+        component['isInvalidEmail']();
 
         expect((component as any)._sendingSubject.next).toHaveBeenCalled();
       });
@@ -172,11 +170,11 @@ describe('VerifyComponent', () => {
 
     describe('sendEmail()', () => {
       it('should call isValidEmail() method', async () => {
-        spyOn(component, 'isValidEmail');
+        spyOn(component as any, 'isValidEmail');
 
         await component.sendEmail();
 
-        expect(component.isValidEmail).toHaveBeenCalled();
+        expect(component['isInvalidEmail']).toHaveBeenCalled();
       });
 
       it('should call authEmailService.sendVerificationEmail()', async () => {

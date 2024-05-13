@@ -34,7 +34,7 @@ h1 {
   }
 
   .emoji {
-    --custom-svg-size: clamp(1.1rem, 2vmax, var(--h3));
+    --custom-svg-size: clamp(var(--svg-in-paragraph), 2vmax, var(--h3));
   }
 }
 
