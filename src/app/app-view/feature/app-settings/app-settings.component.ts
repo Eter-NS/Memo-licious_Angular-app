@@ -66,7 +66,7 @@ export class AppSettingsComponent implements OnInit {
 
   existingUser$ = this.#userProfileService.userProfile$;
 
-  #savedFormState: SettingsFormModelI | null =
+  private _savedFormState: SettingsFormModelI | null =
     this.#localStorageService.loadFromStorage<SettingsFormModelI>(
       APP_SETTINGS_FORM_TOKEN
     );
@@ -89,10 +89,10 @@ export class AppSettingsComponent implements OnInit {
   }
 
   private _loadAppState() {
-    if (!this.#savedFormState) {
+    if (!this._savedFormState) {
       return;
     }
-    this.appSettingsForm.setValue(this.#savedFormState);
+    this.appSettingsForm.setValue(this._savedFormState);
   }
 
   private _saveAppChanges() {
@@ -100,12 +100,12 @@ export class AppSettingsComponent implements OnInit {
       this.appSettingsForm.getRawValue();
 
     // App modules change
-    if (this.#savedFormState?.theme !== currentFormState.theme) {
+    if (this._savedFormState?.theme !== currentFormState.theme) {
       this.#viewportListenersService.changeTheme(currentFormState.theme);
     }
 
     if (
-      this.#savedFormState?.fastDeletingMode !==
+      this._savedFormState?.fastDeletingMode !==
       currentFormState.fastDeletingMode
     ) {
       this.#notesService.changeRemovingStrategy(
@@ -113,7 +113,7 @@ export class AppSettingsComponent implements OnInit {
       );
     }
 
-    this.#savedFormState = currentFormState;
+    this._savedFormState = currentFormState;
 
     this.#localStorageService.saveToStorage(
       APP_SETTINGS_FORM_TOKEN,

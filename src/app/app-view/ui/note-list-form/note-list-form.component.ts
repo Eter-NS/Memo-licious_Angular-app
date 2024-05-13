@@ -86,15 +86,15 @@ export class NoteListFormComponent {
   timeoutId!: unknown;
   separatorCodes = [ENTER, COMMA] as const;
 
-  #errorMessage = new BehaviorSubject<ValidationErrorI | null | undefined>(
-    undefined
-  );
+  private _errorMessage = new BehaviorSubject<
+    ValidationErrorI | null | undefined
+  >(undefined);
 
   get errorMessage$() {
-    return this.#errorMessage.asObservable();
+    return this._errorMessage.asObservable();
   }
 
-  #lengthValidationConfig = {
+  private _lengthValidationConfig = {
     min: 0,
     max: 35,
   };
@@ -129,18 +129,16 @@ export class NoteListFormComponent {
 
     const isModificationEvent = 'event' in e;
     const result = isModificationEvent
-      ? this._stringLengthValidator(e.event.value, this.#lengthValidationConfig)
-      : this._stringLengthValidator(e.value, this.#lengthValidationConfig);
+      ? this._stringLengthValidator(e.event.value, this._lengthValidationConfig)
+      : this._stringLengthValidator(e.value, this._lengthValidationConfig);
 
     if (!result) {
-      this.#errorMessage.next({
-        cause: `The note can't be longer than ${
-          this.#lengthValidationConfig.max
-        } characters`,
+      this._errorMessage.next({
+        cause: `The note can't be longer than ${this._lengthValidationConfig.max} characters`,
       });
     } else {
       isModificationEvent ? this.editNote.emit(e) : this.createNote.emit(e);
-      this.#errorMessage.next(null);
+      this._errorMessage.next(null);
     }
   }
 

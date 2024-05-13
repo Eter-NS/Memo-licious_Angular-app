@@ -5,17 +5,17 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class ErrorHandlerService implements OnDestroy {
-  #error = new Subject<string>();
+  private _error = new Subject<string>();
 
   get error$() {
-    return this.#error.asObservable();
+    return this._error.asObservable();
   }
 
   onError(message: string) {
-    this.#error.next(message);
+    this._error.next(message);
   }
 
   ngOnDestroy(): void {
-    this.#error.complete();
+    this._error.complete();
   }
 }

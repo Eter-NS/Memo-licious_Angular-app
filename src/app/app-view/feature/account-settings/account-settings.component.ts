@@ -75,8 +75,8 @@ export class AccountSettingsComponent {
   userProfile$ = this.#userProfileService.userProfile$;
   readonly activeUserType = this.#authUserConnectorService.activeUserTypeSig;
 
-  #pictureChangeSubject = new BehaviorSubject<File | null>(null);
-  readonly pictureChange$ = this.#pictureChangeSubject.asObservable().pipe(
+  private _pictureChangeSubject = new BehaviorSubject<File | null>(null);
+  readonly pictureChange$ = this._pictureChangeSubject.asObservable().pipe(
     distinctUntilChanged((prev, curr) => prev?.size === curr?.size),
     switchMap((picture) => {
       return picture ? from(this._preparePicture(picture)) : of(null);
@@ -92,11 +92,12 @@ export class AccountSettingsComponent {
     )
   );
 
-  #userProfileStateSubject = new BehaviorSubject<UserProfileUpdateResultI>({
-    state: 'idle',
-  });
+  private _userProfileStateSubject =
+    new BehaviorSubject<UserProfileUpdateResultI>({
+      state: 'idle',
+    });
   readonly userProfileUpdateNotifier$ = merge(
-    this.#userProfileStateSubject.asObservable(),
+    this._userProfileStateSubject.asObservable(),
     this.#userProfileService.userProfileUpdateResult$
   );
 
@@ -135,7 +136,7 @@ export class AccountSettingsComponent {
         )
       )
       .subscribe((actionState) =>
-        this.#userProfileStateSubject.next(actionState)
+        this._userProfileStateSubject.next(actionState)
       );
   }
 
@@ -149,7 +150,7 @@ export class AccountSettingsComponent {
   }
 
   private _pushUserImage(file: File | null) {
-    this.#pictureChangeSubject.next(file);
+    this._pictureChangeSubject.next(file);
   }
 
   private _prepareUpdate(

@@ -137,9 +137,9 @@ export class AccountSettingsOnlineComponent implements OnInit, AfterViewInit {
     ),
   });
 
-  #isDataSendingSubject = new BehaviorSubject<boolean>(false);
+  private _isDataSendingSubject = new BehaviorSubject<boolean>(false);
   get isDataSending$() {
-    return this.#isDataSendingSubject.asObservable();
+    return this._isDataSendingSubject.asObservable();
   }
 
   ngOnInit(): void {
@@ -248,6 +248,6 @@ export class AccountSettingsOnlineComponent implements OnInit, AfterViewInit {
   }
 
   private _updateSendingState(state: boolean) {
-    this.#isDataSendingSubject.next(state);
+    this._isDataSendingSubject.next(state);
   }
 }

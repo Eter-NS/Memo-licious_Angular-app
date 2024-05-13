@@ -36,9 +36,9 @@ export class UserProfileService {
     );
   }
 
-  #userProfileUpdateSubject = new Subject<UserProfileChangesI>();
+  private _userProfileUpdateSubject = new Subject<UserProfileChangesI>();
   get userProfileUpdateAction$() {
-    return this.#userProfileUpdateSubject.asObservable().pipe(
+    return this._userProfileUpdateSubject.asObservable().pipe(
       switchMap((value) =>
         from(this.#authUserConnectorService.updateUser(value))
       ),
@@ -63,7 +63,7 @@ export class UserProfileService {
   }
 
   uploadProfileChanges(changes: UserProfileChangesI) {
-    this.#userProfileUpdateSubject.next(changes);
+    this._userProfileUpdateSubject.next(changes);
   }
 
   private _createUserProfile(user: LocalUserAccount | User): UserProfile {

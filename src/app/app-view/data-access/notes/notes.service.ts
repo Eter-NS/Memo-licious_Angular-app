@@ -41,24 +41,24 @@ export class NotesService implements OnDestroy {
   readonly MAX_ERROR_COUNT = 3;
   readonly RECONNECT_DELAY = 2500;
 
-  #removingSpeed = new BehaviorSubject<GroupRemovingStrategy>(
+  private _removingSpeed = new BehaviorSubject<GroupRemovingStrategy>(
     this.#appConfigService.appConfigState.deletingMode
   );
 
-  #notesBufferSubject = new BehaviorSubject<NoteModel[]>([]);
+  private _notesBufferSubject = new BehaviorSubject<NoteModel[]>([]);
 
   get notesBuffer$() {
-    return this.#notesBufferSubject.asObservable();
+    return this._notesBufferSubject.asObservable();
   }
 
-  #userType = this.#authUserConnectorService.activeUserTypeSig;
+  private _userType = this.#authUserConnectorService.activeUserTypeSig;
 
   notes$: Observable<NoteGroupModel[]> =
     this.#authUserConnectorService.activeUser$.pipe(
       switchMap((user) => {
-        if (this.#userType() === 'local') {
+        if (this._userType() === 'local') {
           return of((user as LocalUserAccount).groups);
-        } else if (this.#userType() === 'online') {
+        } else if (this._userType() === 'online') {
           return this.#authDatabaseService.getGroups((user as User).uid).pipe(
             catchError((err) => {
               if (!environment.production) {
@@ -80,15 +80,15 @@ export class NotesService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.fillNotesBuffer([]);
-    this.#notesBufferSubject.complete();
+    this._notesBufferSubject.complete();
   }
 
   fillNotesBuffer(notes: NoteModel[]) {
-    this.#notesBufferSubject.next(notes);
+    this._notesBufferSubject.next(notes);
   }
 
   changeRemovingStrategy(value: GroupRemovingStrategy) {
-    this.#removingSpeed.next(value);
+    this._removingSpeed.next(value);
 
     this.#appConfigService.updateConfig({ deletingMode: value });
   }
@@ -117,7 +117,7 @@ export class NotesService implements OnDestroy {
           const payload: NoteGroupModel = {
             id: this._randomId(27),
             title,
-            notes: this.#notesBufferSubject.value,
+            notes: this._notesBufferSubject.value,
             createdAt,
           };
 
@@ -126,7 +126,7 @@ export class NotesService implements OnDestroy {
           );
 
           if (result) {
-            this.#notesBufferSubject.next([]);
+            this._notesBufferSubject.next([]);
           }
 
           resolve(result);
@@ -138,9 +138,9 @@ export class NotesService implements OnDestroy {
   }
 
   async modifyGroups(payload: NoteGroupModel[]): Promise<boolean> {
-    if (!this.#userType()) return false;
+    if (!this._userType()) return false;
 
-    switch (this.#userType()) {
+    switch (this._userType()) {
       case 'local':
         return this.#authLocalUserService.modifyCurrentUser({
           groups: payload,
@@ -154,7 +154,7 @@ export class NotesService implements OnDestroy {
 
   deleteGroup(id: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      if (!this.#userType()) {
+      if (!this._userType()) {
         reject(new Error('No user logged in'));
         return;
       }
@@ -165,7 +165,7 @@ export class NotesService implements OnDestroy {
           return;
         }
 
-        switch (this.#userType()) {
+        switch (this._userType()) {
           case 'local': {
             resolve(this.#authLocalUserService.deleteGroup(id));
             return;
@@ -214,7 +214,7 @@ export class NotesService implements OnDestroy {
           const threeMinutes = 3 * 60 * 1000;
           const deleteAt =
             (await this._createTimestamp()) +
-            (this.#removingSpeed.value === 'slow' ? threeDays : threeMinutes);
+            (this._removingSpeed.value === 'slow' ? threeDays : threeMinutes);
 
           updatedGroups = [
             ...groups.slice(0, updatedGroupIndex),
@@ -250,13 +250,13 @@ export class NotesService implements OnDestroy {
       value,
     };
 
-    this.#notesBufferSubject.next([...this.#notesBufferSubject.value, note]);
+    this._notesBufferSubject.next([...this._notesBufferSubject.value, note]);
   }
 
   editNote(noteId: string, changes: Partial<NoteModel>): boolean {
     let isEdited = false;
 
-    const updatedNotes = this.#notesBufferSubject.value.map((note) => {
+    const updatedNotes = this._notesBufferSubject.value.map((note) => {
       if (note.id === noteId) {
         isEdited = true;
         return { ...note, ...changes };
@@ -265,19 +265,19 @@ export class NotesService implements OnDestroy {
       return note;
     });
 
-    this.#notesBufferSubject.next(updatedNotes);
+    this._notesBufferSubject.next(updatedNotes);
 
     return isEdited;
   }
 
   deleteNote(id: string): boolean {
-    const initialLength = this.#notesBufferSubject.value.length;
+    const initialLength = this._notesBufferSubject.value.length;
 
-    const leftNotes = this.#notesBufferSubject.value.filter(
+    const leftNotes = this._notesBufferSubject.value.filter(
       (note) => note.id !== id
     );
     if (leftNotes.length !== initialLength) {
-      this.#notesBufferSubject.next(leftNotes);
+      this._notesBufferSubject.next(leftNotes);
     }
 
     return leftNotes.length !== initialLength;
@@ -289,7 +289,7 @@ export class NotesService implements OnDestroy {
       return false;
     }
 
-    if (!this.#notesBufferSubject.value.length) {
+    if (!this._notesBufferSubject.value.length) {
       this.#errorHandlerService.onError('There are no notes to save 😥');
       return false;
     }

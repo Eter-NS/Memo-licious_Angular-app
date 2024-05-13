@@ -14,19 +14,19 @@ const initialAppState: AppSettingsToken = {
 export class AppConfigService {
   #localStorageService = inject(LocalStorageService);
 
-  #currentState =
+  private _currentState =
     this.#localStorageService.loadFromStorage<AppSettingsToken>(
       APP_SETTINGS_TOKEN
     ) || initialAppState;
 
   get appConfigState() {
-    return this.#currentState;
+    return this._currentState;
   }
 
   updateConfig(changes: Partial<AppSettingsToken>) {
     const changedState = { ...this.appConfigState, ...changes };
 
-    this.#currentState = changedState;
+    this._currentState = changedState;
     this.#localStorageService.saveToStorage(APP_SETTINGS_TOKEN, changedState);
   }
 }

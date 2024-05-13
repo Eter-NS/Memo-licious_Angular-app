@@ -18,12 +18,12 @@ export class ViewportListenersService {
   private _darkModeListener = darkModeListener;
   private _throttle = throttle;
 
-  #appTheme = new BehaviorSubject<ThemeOptions>(
+  private _appTheme = new BehaviorSubject<ThemeOptions>(
     this.#appConfigService.appConfigState.theme
   );
 
   get appTheme$() {
-    return this.#appTheme.asObservable();
+    return this._appTheme.asObservable();
   }
 
   get isHandset$(): Observable<boolean> {
@@ -39,7 +39,7 @@ export class ViewportListenersService {
   }
 
   changeTheme(value: ThemeOptions) {
-    this.#appTheme.next(value);
+    this._appTheme.next(value);
 
     this.#appConfigService.updateConfig({ theme: value });
   }

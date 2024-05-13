@@ -61,12 +61,12 @@ export class NoteListFormDialogEditorComponent implements OnInit {
 
   @ViewChild('form') formElement!: NoteListFormComponent;
 
-  #noteGroupId = this.#dialogData.id;
+  private _noteGroupId = this.#dialogData.id;
   noteGroup$ = this.#notesService.notes$.pipe(
     filter((groups) => !!groups),
     map((groups) =>
       (groups as NoteGroupModel[]).find(
-        ({ id: storedId }) => storedId === this.#noteGroupId
+        ({ id: storedId }) => storedId === this._noteGroupId
       )
     ),
     switchMap((group) => {

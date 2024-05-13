@@ -11,14 +11,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class ViewTransitionService {
   #router = inject(Router);
   #location = inject(Location);
-  #history: Array<string> = [];
-  #pageSubject = new BehaviorSubject<'start' | 'end' | 'idle'>('idle');
+
+  private _history: Array<string> = [];
+  private _pageSubject = new BehaviorSubject<'start' | 'end' | 'idle'>('idle');
 
   private _runAnimationOnce = runAnimationOnce;
   goBackClicked = false;
 
   get pageState$() {
-    return this.#pageSubject.asObservable();
+    return this._pageSubject.asObservable();
   }
 
   constructor() {
@@ -26,7 +27,7 @@ export class ViewTransitionService {
       if (event instanceof NavigationEnd) {
         const currentUrl = event.urlAfterRedirects.replace(location.origin, '');
 
-        if (this.#history.at(-1) !== currentUrl) {
+        if (this._history.at(-1) !== currentUrl) {
           this._pushNewHistoryRecord(currentUrl);
         }
       }
@@ -54,7 +55,7 @@ export class ViewTransitionService {
 
     this._popLatestHistoryRecord();
 
-    if (this.#history.length > 0) {
+    if (this._history.length > 0) {
       this.#location.back();
     } else {
       this.#router.navigateByUrl(fallback || '/');
@@ -99,16 +100,16 @@ export class ViewTransitionService {
 
   private _modifyStateOnTransition(value: boolean) {
     this.goBackClicked = value;
-    this.#pageSubject.next('start');
+    this._pageSubject.next('start');
   }
 
   private _pushNewHistoryRecord(path: string) {
-    this.#history = [...this.#history, path];
-    this.#pageSubject.next('end');
+    this._history = [...this._history, path];
+    this._pageSubject.next('end');
   }
 
   private _popLatestHistoryRecord() {
-    this.#history.pop();
-    this.#history = [...this.#history];
+    this._history.pop();
+    this._history = [...this._history];
   }
 }

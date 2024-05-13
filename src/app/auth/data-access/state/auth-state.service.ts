@@ -13,10 +13,10 @@ import { FirebaseAuthControllerService } from 'src/app/reusable/data-access/fire
 export class AuthStateService {
   auth = inject(Auth);
   #firebaseAuthControllerService = inject(FirebaseAuthControllerService);
-  #session = signal<User | null | undefined>(undefined);
+  private _session = signal<User | null | undefined>(undefined);
 
   get sessionSig() {
-    return this.#session.asReadonly();
+    return this._session.asReadonly();
   }
 
   readonly user$ = this.#firebaseAuthControllerService.user(this.auth);
@@ -39,6 +39,6 @@ export class AuthStateService {
   }
 
   updateSession(state: User | null | undefined) {
-    this.#session.set(state);
+    this._session.set(state);
   }
 }

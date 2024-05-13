@@ -18,8 +18,8 @@ export class AppComponent implements OnDestroy {
   #document = inject(DOCUMENT);
   #renderer = inject(Renderer2);
 
-  #darkModeSubscription!: DarkModeSubscription;
-  #isDeviceInDarkMode!: boolean;
+  private _darkModeSubscription!: DarkModeSubscription;
+  private _isDeviceInDarkMode!: boolean;
   currTheme!: ThemeOptions;
 
   private readonly LIGHT_THEME = 'light';
@@ -31,13 +31,13 @@ export class AppComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.#darkModeSubscription?.unsubscribe();
+    this._darkModeSubscription?.unsubscribe();
   }
 
   private _listenForAutomaticThemeChanges() {
-    this.#darkModeSubscription =
+    this._darkModeSubscription =
       this.#viewportListenersService.darkModeListener((event) => {
-        this.#isDeviceInDarkMode = event.matches;
+        this._isDeviceInDarkMode = event.matches;
         this.currTheme === 'auto' && this._updateBodyClass();
       });
   }
@@ -66,7 +66,7 @@ export class AppComponent implements OnDestroy {
   private _toggleTheme() {
     this.#renderer.addClass(
       this.#document.body,
-      this.#isDeviceInDarkMode ? this.DARK_THEME : this.LIGHT_THEME
+      this._isDeviceInDarkMode ? this.DARK_THEME : this.LIGHT_THEME
     );
   }
 }

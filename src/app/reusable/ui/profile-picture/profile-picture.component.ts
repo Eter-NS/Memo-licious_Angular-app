@@ -26,27 +26,29 @@ interface TransformedAvatarInput {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfilePictureComponent implements OnChanges {
-  #userTextData: TransformedAvatarInput | undefined;
+  private _userTextData: TransformedAvatarInput | undefined;
 
   @Input() photoUrl?: string;
   @Input() set userTextAvatar(valueObj: TextAvatarInput | undefined) {
     if (!valueObj) {
-      this.#userTextData = undefined;
+      this._userTextData = undefined;
       return;
     }
 
-    this.#userTextData = {
+    this._userTextData = {
       color: valueObj.color,
       character: valueObj.name[0].toUpperCase(),
     };
   }
 
-  #viewOption = signal<'photoUrl' | 'singleCharacter' | 'default'>('default');
+  private _viewOption = signal<'photoUrl' | 'singleCharacter' | 'default'>(
+    'default'
+  );
 
-  viewOptionSig = this.#viewOption.asReadonly();
+  viewOptionSig = this._viewOption.asReadonly();
 
   get userTextData() {
-    return this.#userTextData;
+    return this._userTextData;
   }
 
   ngOnChanges(): void {
@@ -55,11 +57,11 @@ export class ProfilePictureComponent implements OnChanges {
 
   private _checkInputs() {
     if (this.photoUrl) {
-      this.#viewOption.set('photoUrl');
-    } else if (this.#userTextData) {
-      this.#viewOption.set('singleCharacter');
+      this._viewOption.set('photoUrl');
+    } else if (this._userTextData) {
+      this._viewOption.set('singleCharacter');
     } else {
-      this.#viewOption.set('default');
+      this._viewOption.set('default');
     }
   }
 }
