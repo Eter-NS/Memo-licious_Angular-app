@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'app-crying-face',
+  selector: 'app-face-with-head-bandage-emoji',
   standalone: true,
   imports: [],
-  templateUrl: './crying-face.component.html',
+  templateUrl: './face-with-head-bandage-emoji.component.html',
   styleUrl: `../emoji-styles/emoji-styles.scss`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CryingFaceComponent {}
+export class FaceWithHeadBandageEmojiComponent {}

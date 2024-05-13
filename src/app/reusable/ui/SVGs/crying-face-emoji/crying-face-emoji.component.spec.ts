@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CryingFaceComponent } from './crying-face.component';
+import { CryingFaceComponent } from './crying-face-emoji.component';
 
 describe('CryingFaceComponent', () => {
   let component: CryingFaceComponent;
@@ -8,10 +8,9 @@ describe('CryingFaceComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CryingFaceComponent]
-    })
-    .compileComponents();
-    
+      imports: [CryingFaceComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(CryingFaceComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
