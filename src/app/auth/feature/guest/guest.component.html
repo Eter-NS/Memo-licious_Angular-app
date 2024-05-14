@@ -1,0 +1,72 @@
+<main #mainTagRef>
+  <section class="container">
+    @if (data$ | async; as data) {
+
+    <div class="go-back-button-wrapper">
+      <app-previous-page-button
+        (clicked)="
+          viewTransitionService.goBack(
+            viewContainer,
+            '/getting-started/choose-path'
+          )
+        "
+      />
+    </div>
+    <div #viewContainer class="content">
+      <div class="login-register-content" aria-label="Guest account form">
+        @if (data.register ) {
+        <!--  -->
+        @defer (on immediate; prefetch on immediate) {
+        <app-guest-register (data)="handleRegister($event)" />
+        } @loading ( minimum 250ms) {
+        <mat-spinner
+          class="loading-defer-spinner loading-state-register"
+        ></mat-spinner>
+        }@placeholder (minimum 500ms) {
+        <span class="loading-state-register"> Loading... </span>
+        }
+        <!--  -->
+        } @else {
+        <!--  -->
+        @defer (on immediate; prefetch on immediate) {
+        <app-guest-login
+          [wrongCredentials]="data.wrongCredentials"
+          [users]="authLocalUserService.allUsers"
+          (data)="handleLogin($event)"
+          (rememberMe)="updateRememberMe($event)"
+        />
+        } @loading ( minimum 250ms) {
+        <mat-spinner
+          class="loading-defer-spinner loading-state-login"
+        ></mat-spinner>
+        }@placeholder (minimum 500ms) {
+        <span class="loading-state-login"> Loading... </span>
+        }
+        <!--  -->
+        }
+      </div>
+      <div class="component-content">
+        <div class="login-register-switch">
+          @if (data.register) {
+          <a
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
+            tabindex="0"
+            data-test="to-login-button"
+            >Wanna Log in?</a
+          >
+          } @else {
+          <a
+            (click)="toggleRegister()"
+            (keyup.enter)="toggleRegister()"
+            tabindex="0"
+            data-test="to-register-button"
+            >Wanna Register?</a
+          >
+          }
+        </div>
+      </div>
+    </div>
+    }
+  </section>
+</main>

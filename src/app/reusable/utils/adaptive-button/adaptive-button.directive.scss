@@ -1,0 +1,41 @@
+@use 'src/scss/utils.scss' as *;
+@use 'src/scss/components.scss' as *;
+
+:host {
+  display: block;
+}
+
+button {
+  display: grid;
+  place-content: center;
+}
+
+.common {
+  @extend %common-button;
+}
+.fab {
+  @extend %floating-action-button;
+}
+.extended-fab {
+  @extend %extended-fab;
+}
+
+.primary {
+  @extend %primary-button-1;
+}
+.primary-less {
+  @extend %primary-button-2;
+}
+.accent {
+  @extend %accent-button-1;
+}
+.accent-less {
+  @extend %accent-button-2;
+}
+
+.circle {
+  padding: 0.75em;
+}
+.not-animated {
+  transition-property: none;
+}

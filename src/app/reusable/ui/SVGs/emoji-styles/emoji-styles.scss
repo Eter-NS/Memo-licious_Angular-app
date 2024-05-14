@@ -1,0 +1,7 @@
+:host,
+svg {
+  display: inline-block;
+  width: var(--custom-svg-size, calc(var(--p) * 1.75));
+  height: var(--custom-svg-size, calc(var(--p) * 1.75));
+  transform: translateY(10%);
+}

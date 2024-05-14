@@ -1,0 +1,16 @@
+@use 'src/scss/utils.scss' as *;
+
+:host {
+  display: grid;
+  @include border-radius('sm');
+  padding: free-space('sm');
+  text-align: center;
+  background-color: var(--color-warn-accent);
+  color: var(--contrast-color-warn);
+}
+
+.fetch-error__link {
+  cursor: pointer;
+  text-decoration: underline;
+  color: var(--color-warn-input);
+}

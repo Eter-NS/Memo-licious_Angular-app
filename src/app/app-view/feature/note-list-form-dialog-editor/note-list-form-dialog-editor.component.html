@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>Notes editor</h2>
+
+<mat-dialog-content #content>
+  <app-note-list-form
+    #form
+    environment="note-edit"
+    [noteListTitle]="(noteGroup$ | async)?.title || ''"
+    [notes]="groupNotes$ | async"
+    (createNote)="onCreateNote($event)"
+    (editNote)="onEditNote($event)"
+    (removeNote)="onRemoveNote($event)"
+  />
+</mat-dialog-content>
+
+<mat-dialog-actions class="note-edit__actions">
+  <button
+    type="button"
+    class="note-edit__action-button"
+    (click)="closeDialog('close')"
+    appAdaptiveButton
+    [styleConfiguration]="{ look: 'extended-fab', color: 'primary-less' }"
+  >
+    <mat-icon>cancel</mat-icon> Close
+  </button>
+
+  <button
+    type="button"
+    class="note-edit__action-button"
+    (click)="closeDialog('save')"
+    appAdaptiveButton
+    [styleConfiguration]="{ look: 'extended-fab', color: 'primary' }"
+  >
+    <mat-icon>save</mat-icon> Save
+  </button>
+</mat-dialog-actions>

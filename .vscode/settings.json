@@ -1,9 +1,14 @@
 {
-  "cSpell.words": ["licious"],
+  "cSpell.words": [
+    "ABCDEFGHIJKLMNPQRSTUVWXYZ",
+    "keycodes",
+    "licious",
+    "unixtime"
+  ],
   "angular-schematics.schematicsDefaultOptions": {
     "angular-*": {
       "style": "scss"
     }
   },
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

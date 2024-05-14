@@ -1,0 +1,17 @@
+@use 'src/scss/utils.scss' as *;
+@use '../app-view.page-common-child-styles.scss' as *;
+@use '../note-list-form-editor-common-styles/note-list-form-editor.scss';
+
+:host {
+  --container-max-size: 215px;
+}
+
+main {
+  @extend %main;
+  overflow: hidden;
+}
+
+.form-wrapper {
+  display: grid;
+  justify-items: center;
+}

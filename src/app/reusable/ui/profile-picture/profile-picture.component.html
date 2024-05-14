@@ -1,0 +1,21 @@
+@switch (viewOptionSig()) {
+<!--  -->
+@case ("photoUrl") {
+<img
+  [src]="photoUrl"
+  alt="profile picture"
+/>
+} @case ('singleCharacter') {
+<div
+  class="user-letter-avatar"
+  [style.--user-avatar-color]="userTextData!.color"
+>
+  <span class="user-letter-avatar__text">
+    {{ userTextData!.character }}
+  </span>
+</div>
+} @case ('default') {
+<app-no-profile-picture class="no-profile-picture" />
+}
+<!--  -->
+}

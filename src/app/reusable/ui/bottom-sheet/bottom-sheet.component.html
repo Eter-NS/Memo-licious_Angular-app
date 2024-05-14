@@ -1,0 +1,40 @@
+@if (data$ | async; as data) {
+<div
+  #overlay
+  class="overlay"
+  [ngClass]="{
+    'do-not-animate': data.noAnimation,
+    visible: data.isOpened
+  }"
+  (click)="close()"
+  (keyup.enter)="close()"
+  tabindex="0"
+></div>
+
+<div
+  #sheet
+  class="bottom-sheet"
+  [ngClass]="{
+    'do-not-animate': data.noAnimation,
+    open: data.isOpened,
+    drag: data.isDragging
+  }"
+>
+  <div
+    class="drag-icon"
+    (mousedown)="startDragging($event)"
+    (touchstart)="startDragging($event)"
+  >
+    <span></span>
+  </div>
+
+  <div class="content">
+    <ng-container *ngTemplateOutlet="content || defaultContent"></ng-container>
+  </div>
+
+  <ng-template #defaultContent>
+    <h2>There is nothing to be shown 😢</h2>
+  </ng-template>
+</div>
+
+}

@@ -4,12 +4,10 @@ import { LandingPageComponent } from './landing-page.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { By } from '@angular/platform-browser';
 import { Router, RouterLinkWithHref } from '@angular/router';
-import { Location } from '@angular/common';
 import { routes } from '../app.config';
 
 describe('LandingPageComponent', () => {
   let router: Router;
-  let location: Location;
 
   let component: LandingPageComponent;
   let fixture: ComponentFixture<LandingPageComponent>;
@@ -23,7 +21,6 @@ describe('LandingPageComponent', () => {
   beforeEach(() => {
     router = TestBed.inject(Router);
     router.initialNavigation();
-    location = TestBed.inject(Location);
     fixture = TestBed.createComponent(LandingPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

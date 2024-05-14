@@ -1,0 +1,147 @@
+<div class="form-wrapper">
+  <form class="form" [formGroup]="onlineProfileForm" (ngSubmit)="onSubmit()">
+    <fieldset class="form-element">
+      <label>
+        <p class="form-label">name</p>
+        <input type="text" formControlName="name" />
+      </label>
+      @if(getError('name', 'required') &&
+      onlineProfileForm.get('name')?.touched) {
+      <p class="input-error">This field is required!</p>
+      } @else if(getError('name', 'minlength')) {
+      <p class="input-error">Your name is too short</p>
+      } @else if(getError('name', 'maxlength')) {
+      <p class="input-error">Your name is too long</p>
+      }
+    </fieldset>
+
+    <mat-accordion class="form-element accordion" multi>
+      <mat-expansion-panel
+        class="expansion-panel"
+        (opened)="enablePanel('changeEmail')"
+        (closed)="disablePanel('changeEmail')"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title> Email </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div formGroupName="changeEmail" data-test="password-group">
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">Current email</p>
+              <input type="email" formControlName="currentEmail" />
+            </label>
+            @if (isErrorAndTouched( ['changeEmail', 'currentEmail'],
+            'required')) {
+            <p class="input-error">This field is required!</p>
+            } @else if(isErrorAndDirty( ['changeEmail', 'currentEmail'],
+            'emailError')) {
+            <p class="input-error">This is not an email</p>
+            }
+          </fieldset>
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">New email</p>
+              <input type="email" formControlName="email" />
+            </label>
+            @if(isErrorAndTouched( ['changeEmail', 'email'], 'required')) {
+            <p class="input-error">This field is required!</p>
+            } @else if(isErrorAndDirty( ['changeEmail', 'email'], 'emailError'))
+            {
+            <p class="input-error">This is not an email</p>
+            }
+          </fieldset>
+          @if(onlineProfileForm.controls.changeEmail.hasError('sameEmail')){
+          <p class="input-error">The emails are the same</p>
+          }
+
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">Current password (for authentication)</p>
+              <input type="password" formControlName="currentPassword" />
+            </label>
+            @if (isErrorAndTouched( ['changeEmail', 'currentPassword'],
+            'required')) {
+            <p class="input-error">This field is required!</p>
+            }
+          </fieldset>
+        </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel
+        class="expansion-panel"
+        (opened)="enablePanel('changePassword')"
+        (closed)="disablePanel('changePassword')"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title> Password </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div formGroupName="changePassword" data-test="password-group">
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">Current password</p>
+              <input type="password" formControlName="currentPassword" />
+            </label>
+            @if (isErrorAndTouched( ['changePassword', 'currentPassword'],
+            'required')) {
+            <p class="input-error">This field is required!</p>
+            }
+          </fieldset>
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">New password</p>
+              <input type="password" formControlName="password" />
+            </label>
+            @if (isErrorAndTouched( ['changePassword', 'password'], 'required'))
+            {
+            <p class="input-error">This field is required!</p>
+            }
+            <!--  -->
+            @if (isErrorAndDirty( ['changePassword', 'password'],
+            'passwordError')) {
+            <p class="input-error">
+              The password must have 8 characters, numbers, and special
+              characters
+            </p>
+            }
+          </fieldset>
+          <fieldset class="form-element">
+            <label>
+              <p class="form-label">Confirm new password</p>
+              <input type="password" formControlName="confirmPassword" />
+            </label>
+            @if (isErrorAndTouched(['changePassword', 'confirmPassword'],
+            'required')) {
+            <p class="input-error">This field is required!</p>
+            }
+            <!--  -->
+            @if (isErrorAndDirty(['changePassword', 'confirmPassword'],
+            'passwordMatch')) {
+            <p class="input-error">The passwords are not the same</p>
+            }
+          </fieldset>
+          @if(onlineProfileForm.controls.changePassword.hasError('samePassword')){
+          <p class="input-error">
+            The current password and a new one are the same
+          </p>
+          }
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    @if (onlineProfileForm.hasError('mismatchedExistingPasswords')) {
+    <p class="input-error">The existing passwords are not the same</p>
+    }
+
+    <button
+      type="submit"
+      class="submit-button"
+      appCustomMatRipple
+      [appMatSpinnerToggler]="onlineProfileForm.valid"
+    >
+      @if (isDataSending$ | async) {
+      <mat-spinner title="Saving changes" class="sending-spinner"></mat-spinner>
+      } @else { Save changes }
+    </button>
+  </form>
+</div>

@@ -12,5 +12,8 @@
 
 # npx browserslist
 
-defaults
-not dead
+# defaults
+
+# not dead
+
+defaults and fully supports es6-module

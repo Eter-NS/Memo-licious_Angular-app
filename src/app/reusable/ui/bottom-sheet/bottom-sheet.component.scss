@@ -1,0 +1,94 @@
+@use "src/scss/utils.scss" as *;
+
+:host {
+  display: block;
+}
+
+.overlay {
+  @extend %fillBeforeAfter;
+  background-color: var(--color-accent-50);
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  transition: opacity 200ms linear;
+
+  &.visible {
+    opacity: 0.5;
+    pointer-events: auto;
+  }
+}
+
+.bottom-sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: fit-content;
+  max-height: 100vh;
+  max-height: 100dvh;
+
+  display: grid;
+  justify-items: center;
+  border-top-left-radius: border-radius-implicit("sm");
+  border-top-right-radius: border-radius-implicit("sm");
+  background-color: var(--color-accent-100);
+  color: var(--contrast-color-accent-100);
+
+  user-select: none;
+  touch-action: none;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(50%);
+  transition: opacity 200ms cubic-bezier(0.645, 0.045, 0.355, 1),
+    transform 200ms cubic-bezier(0.645, 0.045, 0.355, 1);
+
+  &.open {
+    pointer-events: auto;
+
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &.drag {
+    transition: none;
+  }
+
+  & .drag-icon {
+    --drag-height: 4px;
+    --drag-width: 40px;
+    display: grid;
+    place-content: center;
+    width: var(--drag-width);
+    height: calc(var(--drag-height) * 7.5);
+    padding: {
+      left: free-space("sm");
+      right: free-space("sm");
+    }
+    cursor: grab;
+
+    & span {
+      user-select: none;
+      width: var(--drag-width);
+      height: var(--drag-height);
+      background-color: var(--color-accent-700);
+      @include border-radius("xs");
+    }
+  }
+
+  & .content {
+    padding: free-space("sm");
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    display: grid;
+    justify-items: center;
+  }
+}
+
+.do-not-animate {
+  transition-duration: 2ms !important;
+  transition-delay: 1ms !important;
+  animation-duration: 2ms !important;
+  animation-delay: 1ms !important;
+}

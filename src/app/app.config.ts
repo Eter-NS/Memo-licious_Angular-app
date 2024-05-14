@@ -14,19 +14,17 @@ import {
   getDatabase,
   connectDatabaseEmulator,
 } from '@angular/fire/database';
+import {
+  connectStorageEmulator,
+  getStorage,
+  provideStorage,
+} from '@angular/fire/storage';
 import { environment } from 'src/environments/environment.dev';
-import { appViewRoutes } from './app-view/app-view.routes';
-import { gettingStartedRoutes } from './getting-started/getting-started.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
-
-export const routes = [
-  /* ...appViewRoutes, */ ...gettingStartedRoutes,
-  ...appRoutes,
-];
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(appRoutes),
     provideAnimations(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
@@ -51,6 +49,13 @@ export const appConfig: ApplicationConfig = {
           connectDatabaseEmulator(database, 'localhost', 9000);
         }
         return database;
+      }),
+      provideStorage(() => {
+        const storage = getStorage();
+        if (!environment.production) {
+          connectStorageEmulator(storage, 'localhost', 9199);
+        }
+        return storage;
       })
     ),
   ],

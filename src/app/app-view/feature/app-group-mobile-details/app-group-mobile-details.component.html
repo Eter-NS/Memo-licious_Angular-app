@@ -1,0 +1,51 @@
+<main>
+  <section
+    #viewContainer
+    aria-label="you can edit your notes here"
+    class="note-edit"
+  >
+    @if (data$ | async; as data){
+
+    <div class="form-wrapper">
+      <app-note-list-form
+        #form
+        environment="note-edit"
+        [noteListTitle]="data.noteGroupTitle"
+        [notes]="data.groupNotes"
+        (createNote)="onCreateNote($event)"
+        (editNote)="onEditNote($event)"
+        (removeNote)="onRemoveNote($event)"
+      />
+    </div>
+
+    <div class="note-edit__actions">
+      <button
+        type="button"
+        class="note-edit__action-button"
+        (click)="closeEditor('close')"
+        appAdaptiveButton
+        [styleConfiguration]="{ look: 'extended-fab', color: 'primary-less' }"
+      >
+        <mat-icon>cancel</mat-icon> Close
+      </button>
+
+      <button
+        type="button"
+        class="note-edit__action-button"
+        (click)="closeEditor('save')"
+        appAdaptiveButton
+        [styleConfiguration]="{ look: 'extended-fab', color: 'primary' }"
+      >
+        <mat-icon>save</mat-icon> Save
+      </button>
+    </div>
+
+    } @else {
+
+    <app-fetch-error (clicked)="viewTransitionService.hardPageReload()">
+      Unable to download note data.
+    </app-fetch-error>
+
+    }
+  </section>
+</main>

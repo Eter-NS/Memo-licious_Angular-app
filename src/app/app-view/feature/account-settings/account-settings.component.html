@@ -1,0 +1,112 @@
+<main>
+  @if (userProfile$ | async; as user) {
+  <section>
+    <div class="go-back-button-wrapper">
+      <app-previous-page-button
+        class="go-back-button"
+        (clicked)="viewTransitionService.goBack(content, '/app/settings')"
+      />
+    </div>
+
+    <div class="content" #content>
+      <h1>Edit profile</h1>
+
+      <div class="fadeInOnLoad | user-image">
+        @if(pictureChange$ | async; as changedProfilePicture) {
+        <app-profile-picture
+          class="app-profile-picture"
+          [photoUrl]="changedProfilePicture.blob | fileToUrl"
+        />
+        }@else {
+        <app-profile-picture
+          #profilePictureComponent
+          class="app-profile-picture"
+          [photoUrl]="user.photoUrl || ''"
+          [userTextAvatar]="
+            user.profileColor
+              ? {
+                  name: user.name,
+                  color: user.profileColor
+                }
+              : undefined
+          "
+        />
+        }
+
+        <button
+          type="button"
+          (click)="fileInput.click()"
+          (keyup.enter)="fileInput.click()"
+          tabindex="0"
+        >
+          Edit
+        </button>
+
+        <input
+          #fileInput
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp,.heif"
+          class="invisible-input"
+          placeholder="Import new profile picture"
+          (change)="onUserImageSelected($event)"
+        />
+      </div>
+
+      <ng-template #fetchError>
+        <app-fetch-error (clicked)="viewTransitionService.hardPageReload()">
+          It looks like profile notification is broken.
+        </app-fetch-error>
+      </ng-template>
+
+      @if (userProfileUpdateNotifier$ | async; as profileUpdateNotification) {
+      <!--  -->
+      @defer (when activeUserType() === 'online') {
+
+      <app-account-settings-online
+        [user]="user"
+        [result]="profileUpdateNotification.state"
+        (submittedChanges)="onSubmit($event)"
+      />
+
+      }@loading (minimum 250ms){
+
+      <mat-spinner class="loading-spinner"></mat-spinner>
+
+      }@error {
+
+      <ng-container [ngTemplateOutlet]="fetchError"></ng-container>
+
+      }
+      <!--  -->
+      @defer (when activeUserType() === 'local') {
+
+      <app-account-settings-local
+        [user]="user"
+        [result]="profileUpdateNotification.state"
+        (submittedChanges)="onSubmit($event)"
+      />
+
+      }@loading (minimum 250ms){
+
+      <mat-spinner class="loading-spinner"></mat-spinner>
+
+      }@error {
+
+      <ng-container [ngTemplateOutlet]="fetchError"></ng-container>
+
+      }
+      <!--  -->
+      } @else {
+
+      <ng-container [ngTemplateOutlet]="fetchError"></ng-container>
+
+      }
+    </div>
+  </section>
+
+  }@else {
+
+  <mat-spinner title="content loading" class="loading-spinner"></mat-spinner>
+
+  }
+</main>
