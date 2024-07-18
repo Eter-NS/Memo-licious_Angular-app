@@ -101,7 +101,7 @@ main {
   }
 }
 
-@media (min-width: view.$view-sm) {
+@media (min-width: view.$view-xs) {
   .container {
     position: relative;
     margin: {
