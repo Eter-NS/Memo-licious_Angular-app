@@ -1,6 +1,6 @@
 # Memo-licious
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.0.5.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.0.5 and updated to version 17.3.1.
 
 ## The main idea behind the application
 
