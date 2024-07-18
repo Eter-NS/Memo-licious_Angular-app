@@ -18,3 +18,5 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SHOPPING_NOTES_ANGULAR }}'
           channelId: live
           projectId: shopping-notes-angular
+          env:
+            FIREBASE_CLI_EXPERIMENTS: ${{ secrets.firebaseCliExperiments }}
