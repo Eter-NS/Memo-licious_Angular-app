@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { redirectLoggedInToGuard } from './auth/utils/guards/redirect-logged-in-to.guard';
 import { redirectUnauthorizedToGuard } from './auth/utils/guards/redirect-unauthorized-to.guard';
-import { LandingPageComponent } from './landing-page/landing-page.component';
 import { redirectUnverifiedToGuard } from './auth/utils/guards/online-only/redirect-unverified-to.guard';
 
 export const redirectUnauthorizedToGettingStartedChoosePath =
@@ -95,17 +94,18 @@ export const appRoutes: Routes = [
       ),
   },
   {
-    title: 'Home - Memo-licious',
-    path: '',
-    component: LandingPageComponent,
-    canActivate: [redirectLoggedInToApp],
+    path: 'home',
+    redirectTo: 'getting-started',
+    pathMatch: 'full',
   },
-
-  { path: 'home', redirectTo: '', pathMatch: 'full' },
-
+  {
+    path: '',
+    redirectTo: 'getting-started',
+    pathMatch: 'full',
+  },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'getting-started',
     pathMatch: 'full',
   },
 ];

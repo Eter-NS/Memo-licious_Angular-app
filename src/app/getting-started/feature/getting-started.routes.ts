@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { redirectLoggedInToApp } from '../../app.routes';
+import { redirectLoggedInToApp } from 'src/app/app.routes';
 
 export const gettingStartedRoutes: Routes = [
   {
@@ -11,6 +11,7 @@ export const gettingStartedRoutes: Routes = [
         /* 1. */
         title: 'Hello 👋',
         path: 'hello',
+        canActivate: [redirectLoggedInToApp],
         loadComponent: () =>
           import('./first-view/first-view.component').then(
             (c) => c.FirstViewComponent
@@ -27,8 +28,8 @@ export const gettingStartedRoutes: Routes = [
       },
       {
         path: '',
-        pathMatch: 'full',
         redirectTo: 'hello',
+        pathMatch: 'full',
       },
     ],
   },
