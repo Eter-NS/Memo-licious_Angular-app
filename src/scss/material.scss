@@ -1,0 +1,64 @@
+@use '@angular/material' as mat;
+@use './themes.scss' as theme;
+
+@include mat.core();
+
+@include mat.core-theme(theme.$light-theme);
+// @include mat.strong-focus-indicators();
+@include mat.toolbar-theme(theme.$light-theme);
+@include mat.sidenav-theme(theme.$light-theme);
+@include mat.dialog-theme(theme.$light-theme);
+@include mat.button-theme(theme.$light-theme);
+@include mat.menu-theme(theme.$light-theme);
+@include mat.slide-toggle-theme(theme.$light-theme);
+@include mat.checkbox-theme(theme.$light-theme);
+@include mat.select-theme(theme.$light-theme);
+@include mat.snack-bar-theme(theme.$light-theme);
+@include mat.radio-theme(theme.$light-theme);
+@include mat.input-theme(theme.$light-theme);
+@include mat.chips-theme(theme.$light-theme);
+@include mat.form-field-theme(theme.$light-theme);
+@include mat.expansion-theme(theme.$light-theme);
+@include mat.progress-spinner-theme(theme.$progress-spinner-light-theme);
+
+// Default theme
+.light {
+  @include theme.createCSSVars('light');
+  --color-warn-900: hsl(3, 77%, 29%);
+  color-scheme: light;
+
+  /* Warn colors */
+  --color-warn-primary: var(--color-warn-400);
+  --contrast-color-warn: #000000de;
+  --color-warn-accent: var(--color-warn-100);
+  --color-warn-input: var(--color-warn-900);
+}
+
+.dark {
+  @include mat.core-color(theme.$dark-theme);
+  // @include mat.strong-focus-indicators-theme(theme.$dark-theme);
+  @include mat.toolbar-color(theme.$dark-theme);
+  @include mat.sidenav-color(theme.$dark-theme);
+  @include mat.dialog-color(theme.$dark-theme);
+  @include mat.button-color(theme.$dark-theme);
+  @include mat.menu-color(theme.$dark-theme);
+  @include mat.slide-toggle-color(theme.$dark-theme);
+  @include mat.checkbox-color(theme.$dark-theme);
+  @include mat.select-color(theme.$dark-theme);
+  @include mat.snack-bar-color(theme.$dark-theme);
+  @include mat.radio-color(theme.$dark-theme);
+  @include mat.input-color(theme.$dark-theme);
+  @include mat.chips-color(theme.$dark-theme);
+  @include mat.form-field-color(theme.$dark-theme);
+  @include mat.expansion-color(theme.$dark-theme);
+  @include mat.progress-spinner-color(theme.$progress-spinner-dark-theme);
+
+  @include theme.createCSSVars('dark');
+  color-scheme: dark;
+
+  /* Warn colors */
+  --color-warn-primary: var(--color-warn-700);
+  --contrast-color-warn: #ffffffde;
+  --color-warn-accent: #4c2424;
+  --color-warn-input: var(--color-warn-200);
+}
