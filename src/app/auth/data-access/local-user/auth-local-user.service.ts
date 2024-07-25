@@ -70,7 +70,7 @@ export class AuthLocalUserService implements OnDestroy {
     );
   }
 
-  public get rememberMe(): LocalPersistence {
+  get rememberMe(): LocalPersistence {
     const defaultValue: LocalPersistence = {
       type: undefined,
       user: undefined,
@@ -87,7 +87,7 @@ export class AuthLocalUserService implements OnDestroy {
 
   public set rememberMe(newValue: Omit<LocalPersistence, 'expires'>) {
     if (newValue.type === undefined) {
-      this.#localStorageService.removeFromStorage(this._REMEMBER_ME_TOKEN);
+      this._removeRememberMeToken();
       return;
     }
 
@@ -129,15 +129,11 @@ export class AuthLocalUserService implements OnDestroy {
     this._loadUserData(result);
   }
 
-  logOut(unsavedUserData?: LocalUserAccount): void {
-    const previousData = this._localUserSubject$.value;
+  logOut(): void {
+    const user = this._localUserSubject$.value;
 
-    if (!previousData) {
+    if (!user) {
       return this._noLoggedInUser();
-    }
-
-    if (unsavedUserData) {
-      this.modifyCurrentUser(unsavedUserData);
     }
 
     this.rememberMe = {
@@ -173,25 +169,23 @@ export class AuthLocalUserService implements OnDestroy {
   }
 
   deleteGroup(id: string) {
-    const previousData = this._localUserSubject$.value;
+    const user = this._localUserSubject$.value;
 
-    if (!previousData) {
+    if (!user) {
       this._noLoggedInUser();
       return false;
     }
 
-    if (!previousData.groups.length) {
-      console.warn(`No groups in the storage`);
+    if (!user.groups.length) {
+      console.warn(`No groups in storage`);
       return false;
     }
 
-    const updatedGroups = previousData.groups.filter(
+    const updatedGroups = user.groups.filter(
       ({ id: storedId }) => storedId !== id
     );
 
-    this.modifyCurrentUser({ groups: updatedGroups });
-
-    return true;
+    return this.modifyCurrentUser({ groups: updatedGroups });
   }
 
   doesAccountExist(accountName: string) {
@@ -292,6 +286,9 @@ export class AuthLocalUserService implements OnDestroy {
     const result = this.validateUser(savedUser.name, savedUser.value);
 
     if ('message' in result) {
+      // Removes invalid user from persistance.
+      this._removeRememberMeToken();
+
       return undefined;
     }
 
@@ -313,6 +310,10 @@ export class AuthLocalUserService implements OnDestroy {
       return;
     }
 
+    this._removeRememberMeToken();
+  }
+
+  private _removeRememberMeToken(): void {
     this.#localStorageService.removeFromStorage(this._REMEMBER_ME_TOKEN);
   }
 }
