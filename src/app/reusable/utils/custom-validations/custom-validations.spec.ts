@@ -1,5 +1,6 @@
 import { FormControl, FormGroup, ValidationErrors } from '@angular/forms';
 import {
+  areInputsDifferent,
   checkConfirmPassword,
   checkConfirmPin,
   checkEmail,
@@ -9,264 +10,451 @@ import {
   includesSpecialCharacter,
 } from './custom-validations';
 
-describe('CustomValidations - checkConfirmPassword', () => {
+describe(`custom validations`, () => {
   let output: ValidationErrors | null;
 
-  it('should return null if passwords match', () => {
-    output = checkConfirmPassword(
-      new FormGroup({
-        password: new FormControl('zaq1@WSX2023'),
-        confirmPassword: new FormControl('zaq1@WSX2023'),
-      })
-    );
+  describe('checkConfirmPassword', () => {
+    it('should return null if passwords match', () => {
+      output = checkConfirmPassword(
+        new FormGroup({
+          password: new FormControl('zaq1@WSX2023'),
+          confirmPassword: new FormControl('zaq1@WSX2023'),
+        })
+      );
 
-    expect(output).toBeNull();
+      expect(output).toBeNull();
+    });
+
+    it('should return null if there is no password control', () => {
+      const spy = spyOn(console, 'warn').and.stub();
+      output = checkConfirmPassword(
+        new FormGroup({
+          confirmPassword: new FormControl('zaq1@WSX2023'),
+        })
+      );
+
+      expect(spy).toHaveBeenCalled();
+      expect(output).toBe(null);
+    });
+
+    it('should return null if there is no confirmPassword control', () => {
+      const spy = spyOn(console, 'warn').and.stub();
+      output = checkConfirmPassword(
+        new FormGroup({
+          password: new FormControl('zaq1@WSX2023'),
+        })
+      );
+
+      expect(spy).toHaveBeenCalled();
+      expect(output).toBe(null);
+    });
+
+    it('should return passwordMatch if the password does not match', () => {
+      output = checkConfirmPassword(
+        new FormGroup({
+          password: new FormControl('zaq1@WSX2022'),
+          confirmPassword: new FormControl('zaq1@WSX2023'),
+        })
+      );
+
+      expect(output).toEqual({ passwordMatch: true });
+    });
   });
 
-  it('should return InvalidPasswordConfig if there is no password control', () => {
-    output = checkConfirmPassword(
-      new FormGroup({
-        confirmPassword: new FormControl('zaq1@WSX2023'),
-      })
-    );
+  describe('checkEmail', () => {
+    it('should return null if email is valid (input as string)', () => {
+      output = checkEmail('example@example.com');
 
-    expect(output).toEqual({ InvalidPasswordConfig: true });
+      expect(output).toBeNull();
+    });
+
+    it('should return null if email is valid (input as FormControl)', () => {
+      const formControl = new FormControl('');
+
+      formControl.setValue('example@example.com');
+      formControl.markAsDirty();
+      output = checkEmail(formControl);
+
+      expect(output).toBeNull();
+    });
+
+    it('should return emailError if email is invalid (input as string)', () => {
+      output = checkEmail('example@example');
+
+      expect(output).toEqual({ emailError: true });
+    });
+
+    it('should return emailError if email is invalid (input as FormControl)', () => {
+      const formControl = new FormControl('');
+
+      formControl.setValue('example@example');
+      formControl.markAsDirty();
+      output = checkEmail(formControl);
+
+      expect(output).toEqual({ emailError: true });
+    });
+
+    it(`should return null if the email is pristine.`, () => {
+      // Arrange
+      const formControl = new FormControl('');
+
+      // Act
+      output = checkEmail(formControl);
+
+      // Assert
+      expect(output).toBeNull();
+    });
   });
 
-  it('should return InvalidPasswordConfig if there is no confirmPassword control', () => {
-    output = checkConfirmPassword(
-      new FormGroup({
-        password: new FormControl('zaq1@WSX2023'),
-      })
-    );
+  describe('includesSpecialCharacter', () => {
+    it('should return null if input does not include special characters (input as string)', () => {
+      output = includesSpecialCharacter('Peter');
 
-    expect(output).toEqual({ InvalidPasswordConfig: true });
+      expect(output).toBeNull();
+    });
+
+    it('should return null if input does not include special characters (input as FormControl)', () => {
+      const formControl = new FormControl('');
+
+      formControl.setValue('Peter');
+      formControl.markAsDirty();
+      output = includesSpecialCharacter(formControl);
+
+      expect(output).toBeNull();
+    });
+
+    it('should return includesSpecialChars if input includes special characters (input as string)', () => {
+      output = includesSpecialCharacter('Peter ');
+
+      expect(output).toEqual({ includesSpecialChars: true });
+    });
+
+    it('should return includesSpecialChars if input includes special characters (input as FormControl)', () => {
+      const formControl = new FormControl('');
+
+      formControl.setValue('Peter ');
+      formControl.markAsDirty();
+      output = includesSpecialCharacter(formControl);
+
+      expect(output).toEqual({ includesSpecialChars: true });
+    });
+
+    it(`should return null if the input is pristine.`, () => {
+      // Arrange
+      const formControl = new FormControl('');
+
+      // Act
+      output = includesSpecialCharacter(formControl);
+
+      // Assert
+      expect(output).toBeNull();
+    });
   });
 
-  it('should return passwordMatch if the password does not match', () => {
-    output = checkConfirmPassword(
-      new FormGroup({
-        password: new FormControl('zaq1@WSX2022'),
-        confirmPassword: new FormControl('zaq1@WSX2023'),
-      })
-    );
+  describe('includesNumbers', () => {
+    it('should return null if input does not include numbers (input as string)', () => {
+      output = includesNumbers('Peter');
 
-    expect(output).toEqual({ passwordMatch: true });
-  });
-});
+      expect(output).toBeNull();
+    });
 
-describe('CustomValidations - checkEmail', () => {
-  let output: ValidationErrors | null;
+    it('should return null if input does not include numbers (input as FormControl)', () => {
+      const formControl = new FormControl('');
 
-  it('should return null if email is valid (input as string)', () => {
-    output = checkEmail('example@example.com');
+      formControl.setValue('Peter');
+      formControl.markAsDirty();
+      output = includesNumbers(formControl);
 
-    expect(output).toBeNull();
-  });
+      expect(output).toBeNull();
+    });
 
-  it('should return null if email is valid (input as FormControl)', () => {
-    let formControl = new FormControl('');
+    it('should return includesNumbers if input includes numbers (input as string)', () => {
+      output = includesNumbers('Peter 123');
 
-    formControl.setValue('example@example.com');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = checkEmail(formControl);
+      expect(output).toEqual({ includesNumbers: true });
+    });
 
-    expect(output).toBeNull();
-  });
+    it('should return includesNumbers if input includes numbers (input as FormControl)', () => {
+      const formControl = new FormControl('');
 
-  it('should return emailError if email is invalid (input as string)', () => {
-    output = checkEmail('example@example');
+      formControl.setValue('Peter 123');
+      formControl.markAsDirty();
+      output = includesNumbers(formControl);
 
-    expect(output).toEqual({ emailError: true });
-  });
+      expect(output).toEqual({ includesNumbers: true });
+    });
 
-  it('should return emailError if email is invalid (input as FormControl)', () => {
-    let formControl = new FormControl('');
+    it(`should return null if the input is pristine.`, () => {
+      // Arrange
+      const formControl = new FormControl('');
 
-    formControl.setValue('example@example');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = checkEmail(formControl);
+      // Act
+      output = includesNumbers(formControl);
 
-    expect(output).toEqual({ emailError: true });
-  });
-});
-
-describe('CustomValidations - includesSpecialCharacter', () => {
-  let output: ValidationErrors | null;
-
-  it('should return null if input does not include special characters (input as string)', () => {
-    output = includesSpecialCharacter('Peter');
-
-    expect(output).toBeNull();
+      // Assert
+      expect(output).toBeNull();
+    });
   });
 
-  it('should return null if input does not include special characters (input as FormControl)', () => {
-    let formControl = new FormControl('');
+  describe('checkPassword', () => {
+    it('should return null if password matches the requisites (input as string)', () => {
+      output = checkPassword('zaq1@WSX2023');
 
-    formControl.setValue('Peter');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = includesSpecialCharacter(formControl);
+      expect(output).toBeNull();
+    });
 
-    expect(output).toBeNull();
+    it('should return null if password matches the requisites (input as FormControl)', () => {
+      const formControl = new FormControl('');
+
+      formControl.setValue('zaq1@WSX2023');
+      formControl.markAsDirty();
+      output = checkPassword(formControl);
+
+      expect(output).toBeNull();
+    });
+
+    it('should return passwordError if password does not match the requisites (input as string)', () => {
+      output = checkPassword('zaq');
+
+      expect(output).toEqual({ passwordError: true });
+    });
+
+    it('should return passwordError if password does not match the requisites (input as FormControl)', () => {
+      const formControl = new FormControl('');
+
+      formControl.setValue('zaq');
+      formControl.markAsDirty();
+      output = checkPassword(formControl);
+
+      expect(output).toEqual({ passwordError: true });
+    });
+
+    it(`should return null if the input is pristine.`, () => {
+      // Arrange
+      const formControl = new FormControl('');
+
+      // Act
+      output = checkPassword(formControl);
+
+      // Assert
+      expect(output).toBeNull();
+    });
   });
 
-  it('should return includesSpecialChars if input includes special characters (input as string)', () => {
-    output = includesSpecialCharacter('Peter ');
+  describe('checkPin', () => {
+    it('should return null if pin matches the requisites (input as string)', () => {
+      output = checkPin('1234');
 
-    expect(output).toEqual({ includesSpecialChars: true });
+      expect(output).toBeNull();
+    });
+
+    it('should return null if pin matches the requisites (input as FormControl)', () => {
+      output = checkPin(new FormControl('1234'));
+
+      expect(output).toBeNull();
+    });
+
+    it('should return pinError if pin does not match the requisites (input as string)', () => {
+      output = checkPin('123');
+
+      expect(output).toEqual({ pinError: true });
+    });
+
+    it('should return pinError if pin does not match the requisites (input as FormControl)', () => {
+      const formControl = new FormControl('');
+
+      formControl.setValue('123');
+      formControl.markAsDirty();
+      output = checkPin(formControl);
+
+      expect(output).toEqual({ pinError: true });
+    });
   });
 
-  it('should return includesSpecialChars if input includes special characters (input as FormControl)', () => {
-    let formControl = new FormControl('');
+  describe('checkConfirmPin', () => {
+    it('should return null if pins match', () => {
+      output = checkConfirmPin(
+        new FormGroup({
+          pin: new FormControl('1234'),
+          confirmPin: new FormControl('1234'),
+        })
+      );
 
-    formControl.setValue('Peter ');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = includesSpecialCharacter(formControl);
+      expect(output).toBeNull();
+    });
 
-    expect(output).toEqual({ includesSpecialChars: true });
-  });
-});
+    it('should return invalidSetup if pin does not exist', () => {
+      output = checkConfirmPin(
+        new FormGroup({ confirmPin: new FormControl('1234') })
+      );
 
-describe('CustomValidations - includesNumbers', () => {
-  let output: ValidationErrors | null;
+      expect(output).toEqual({ invalidSetup: true });
+    });
 
-  it('should return null if input does not include numbers (input as string)', () => {
-    output = includesNumbers('Peter');
+    it('should return invalidSetup if confirmPin does not exist', () => {
+      output = checkConfirmPin(new FormGroup({ pin: new FormControl('1234') }));
 
-    expect(output).toBeNull();
-  });
+      expect(output).toEqual({ invalidSetup: true });
+    });
 
-  it('should return null if input does not include numbers (input as FormControl)', () => {
-    let formControl = new FormControl('');
+    it('should return pinMatch if pins do not match', () => {
+      output = checkConfirmPin(
+        new FormGroup({
+          pin: new FormControl('1234'),
+          confirmPin: new FormControl('123'),
+        })
+      );
 
-    formControl.setValue('Peter');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = includesNumbers(formControl);
-
-    expect(output).toBeNull();
-  });
-
-  it('should return includesNumbers if input includes numbers (input as string)', () => {
-    output = includesNumbers('Peter 123');
-
-    expect(output).toEqual({ includesNumbers: true });
-  });
-
-  it('should return includesNumbers if input includes numbers (input as FormControl)', () => {
-    let formControl = new FormControl('');
-
-    formControl.setValue('Peter 123');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = includesNumbers(formControl);
-
-    expect(output).toEqual({ includesNumbers: true });
-  });
-});
-
-describe('CustomValidations - checkPassword', () => {
-  let output: ValidationErrors | null;
-
-  it('should return null if password matches the requisites (input as string)', () => {
-    output = checkPassword('zaq1@WSX2023');
-
-    expect(output).toBeNull();
+      expect(output).toEqual({ pinMatch: true });
+    });
   });
 
-  it('should return null if password matches the requisites (input as FormControl)', () => {
-    let formControl = new FormControl('');
+  describe(`areInputsDifferent()`, () => {
+    it(`should return a validator function.`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const errorName = 'example-error';
 
-    formControl.setValue('zaq1@WSX2023');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = checkPassword(formControl);
+      // Act
+      const validator = areInputsDifferent(input1, input2, errorName);
 
-    expect(output).toBeNull();
-  });
+      // Assert
+      expect(typeof validator).toBe('function');
+    });
 
-  it('should return passwordError if password does not match the requisites (input as string)', () => {
-    output = checkPassword('zaq');
+    it(`should log an error and return null if the first input is not defined.`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input2]: new FormControl('input2-value'),
+      });
+      const errorName = 'example-error';
+      const spy = spyOn(console, 'error').and.stub();
 
-    expect(output).toEqual({ passwordError: true });
-  });
+      // Act
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
 
-  it('should return passwordError if password does not match the requisites (input as FormControl)', () => {
-    let formControl = new FormControl('');
+      // Assert
+      expect(spy).toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
 
-    formControl.setValue('zaq');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = checkPassword(formControl);
+    it(`should log an error and return null if the second input is not defined.`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1]: new FormControl('input1-value'),
+      });
+      const errorName = 'example-error';
+      const spy = spyOn(console, 'error').and.stub();
 
-    expect(output).toEqual({ passwordError: true });
-  });
-});
+      // Act
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
 
-describe('CustomValidations - checkPin', () => {
-  let output: ValidationErrors | null;
+      // Assert
+      expect(spy).toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
 
-  it('should return null if pin matches the requisites (input as string)', () => {
-    output = checkPin('1234');
+    it(`should log an error and return null if the nested input is not defined.`, () => {
+      // Arrange
+      const input1 = ['input1', 'nestedInput'];
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1[0]]: new FormControl('input1-value'),
+        [input2]: new FormControl('input2-value'),
+      });
+      const errorName = 'example-error';
+      const spy = spyOn(console, 'error').and.stub();
 
-    expect(output).toBeNull();
-  });
+      // Act
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
 
-  it('should return null if pin matches the requisites (input as FormControl)', () => {
-    output = checkPin(new FormControl('1234'));
+      // Assert
+      expect(spy).toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
 
-    expect(output).toBeNull();
-  });
+    it(`should return null if both inputs are disabled.`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1]: new FormControl({ value: 'input1-value', disabled: true }),
+        [input2]: new FormControl({ value: 'input2-value', disabled: true }),
+      });
+      const errorName = 'example-error';
 
-  it('should return pinError if pin does not match the requisites (input as string)', () => {
-    output = checkPin('123');
+      // Act
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
 
-    expect(output).toEqual({ pinError: true });
-  });
+      // Assert
+      expect(result).toBeNull();
+    });
 
-  it('should return pinError if pin does not match the requisites (input as FormControl)', () => {
-    let formControl = new FormControl('');
+    it(`should return null if both inputs are pristine.`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1]: new FormControl(''),
+        [input2]: new FormControl(''),
+      });
+      const errorName = 'example-error';
 
-    formControl.setValue('123');
-    formControl = Object.assign(formControl, { pristine: false });
-    output = checkPin(formControl);
+      // Act
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
 
-    expect(output).toEqual({ pinError: true });
-  });
-});
+      // Assert
+      expect(result).toBeNull();
+    });
 
-describe('CustomValidations - checkConfirmPin', () => {
-  let output: ValidationErrors | null;
+    it(`should return an object with specified error key with true as a value when two inputs values are equal.`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1]: new FormControl('example-value'),
+        [input2]: new FormControl('example-value'),
+      });
+      const errorName = 'example-error';
 
-  it('should return null if pins match', () => {
-    output = checkConfirmPin(
-      new FormGroup({
-        pin: new FormControl('1234'),
-        confirmPin: new FormControl('1234'),
-      })
-    );
+      // Act
+      formGroup.controls[input1].markAsDirty();
+      formGroup.controls[input2].markAsDirty();
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
 
-    expect(output).toBeNull();
-  });
+      // Assert
+      expect(result).toEqual({ [errorName]: true });
+    });
 
-  it('should return invalidSetup if pin does not exist', () => {
-    output = checkConfirmPin(
-      new FormGroup({ confirmPin: new FormControl('1234') })
-    );
+    it(`should return null when two inputs values are different.`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1]: new FormControl('example-value'),
+        [input2]: new FormControl('example-value2'),
+      });
+      const errorName = 'example-error';
 
-    expect(output).toEqual({ invalidSetup: true });
-  });
+      // Act
+      formGroup.controls[input1].markAsDirty();
+      formGroup.controls[input2].markAsDirty();
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
 
-  it('should return invalidSetup if confirmPin does not exist', () => {
-    output = checkConfirmPin(new FormGroup({ pin: new FormControl('1234') }));
-
-    expect(output).toEqual({ invalidSetup: true });
-  });
-
-  it('should return unmatchedPins if pins do not match', () => {
-    output = checkConfirmPin(
-      new FormGroup({
-        pin: new FormControl('1234'),
-        confirmPin: new FormControl('123'),
-      })
-    );
-
-    expect(output).toEqual({ unmatchedPins: true });
+      // Assert
+      expect(result).toBe(null);
+    });
   });
 });

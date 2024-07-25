@@ -13,10 +13,8 @@ export const checkConfirmPassword = (
   }
   const firstValue = firstPassword.value as string | null | undefined;
   if (firstPassword.valid && firstValue === secondPassword.value) {
-    secondPassword.setErrors(null);
     return null;
   } else {
-    secondPassword.setErrors({ passwordMatch: true });
     return { passwordMatch: true };
   }
 };
@@ -31,7 +29,10 @@ export const checkEmail = (
   }
 
   if (control instanceof AbstractControl) {
-    if (control.pristine) return null;
+    if (control.pristine) {
+      return null;
+    }
+
     return checkInput(control.value);
   }
   return checkInput(control);
@@ -47,7 +48,10 @@ export const includesSpecialCharacter = (
   }
 
   if (control instanceof AbstractControl) {
-    if (control.pristine) return null;
+    if (control.pristine) {
+      return null;
+    }
+
     return checkInput(control.value);
   }
   return checkInput(control);
@@ -63,7 +67,10 @@ export const includesNumbers = (
   }
 
   if (control instanceof AbstractControl) {
-    if (control.pristine) return null;
+    if (control.pristine) {
+      return null;
+    }
+
     return checkInput(control.value);
   }
   return checkInput(control);
@@ -79,7 +86,10 @@ export const checkPassword = (
   }
 
   if (control instanceof AbstractControl) {
-    if (control.pristine) return null;
+    if (control.pristine) {
+      return null;
+    }
+
     return checkInput(control.value);
   }
   return checkInput(control);
@@ -95,7 +105,10 @@ export const checkPin = (
   }
 
   if (control instanceof AbstractControl) {
-    if (control.pristine) return null;
+    if (control.pristine) {
+      return null;
+    }
+
     return checkInput(control.value);
   }
   return checkInput(control);
@@ -107,16 +120,15 @@ export const checkConfirmPin = (
   const pin1 = control.get('pin'),
     pin2 = control.get('confirmPin');
 
-  if (!pin1 || !pin2) return { invalidSetup: true };
+  if (!pin1 || !pin2) {
+    return { invalidSetup: true };
+  }
 
   if (pin1.valid && pin1.value === pin2.value) {
-    pin1.setErrors(null);
-    pin2.setErrors(null);
     return null;
   }
 
-  pin2.setErrors({ unmatchedPins: true });
-  return { unmatchedPins: true };
+  return { pinMatch: true };
 };
 
 export const areInputsDifferent = (
@@ -130,25 +142,17 @@ export const areInputsDifferent = (
 
     if (!firstInput) {
       showError(input1);
+      return null;
     }
     if (!secondInput) {
       showError(input2);
-    }
-
-    if (!firstInput || !secondInput) {
       return null;
     }
+
     if (firstInput.disabled && secondInput.disabled) {
       return null;
     }
     if (firstInput.pristine && secondInput.pristine) {
-      return null;
-    }
-    if (firstInput.value == null && secondInput.value == null) {
-      return null;
-    }
-
-    if (!firstInput.value?.length || !secondInput.value?.length) {
       return null;
     }
 
