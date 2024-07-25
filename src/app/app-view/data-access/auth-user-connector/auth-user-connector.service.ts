@@ -11,13 +11,14 @@ import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.inte
 import { AuthAccountService } from 'src/app/auth/data-access/account/auth-account.service';
 import { AuthLocalUserService } from 'src/app/auth/data-access/local-user/auth-local-user.service';
 import { AuthStateService } from 'src/app/auth/data-access/state/auth-state.service';
-import { ErrorHandlerService } from '../error-handler/error-handler.service';
+import { ErrorHandlerService } from '../../../reusable/data-access/error-handler/error-handler.service';
 import { User } from '@angular/fire/auth';
 import { UserProfileChangesI } from '../../utils/models/user-profile.interface';
 import { environment } from 'src/environments/environment.dev';
 import { RegisterCustomOptions } from 'src/app/auth/utils/Models/OnlineAuthModels.interface';
 import { StorageService } from 'src/app/reusable/data-access/firebase-storage/storage.service';
 import { FILE_TO_BASE64_TOKEN } from 'src/app/reusable/utils/file-to-base64/file-to-base64.pipe.injector';
+import { readMessageProperty } from 'src/app/reusable/utils/data-tools/readMessageProperty';
 
 export type UserType = 'online' | 'local' | null;
 
@@ -73,7 +74,12 @@ export class AuthUserConnectorService {
       if (!environment.production) {
         console.error(err);
       }
-      this.#errorHandlerService.onError('message' in err ? err.message : err);
+      const message = readMessageProperty(err);
+
+      if (message) {
+        this.#errorHandlerService.onError(message);
+      }
+
       return throwError(() => err);
     })
   );
@@ -95,6 +101,7 @@ export class AuthUserConnectorService {
 
   logOutUser() {
     const activeUser = this.activeUserTypeSig();
+
     if (!activeUser) {
       return;
     }
@@ -118,17 +125,21 @@ export class AuthUserConnectorService {
     changes: UserProfileChangesI
   ): Promise<boolean> {
     const { name, authOption, passphrase, photoBlob, profileColor } = changes;
+    let didUpdateProfilePicture = false;
 
     if (photoBlob) {
       const profilePictureUrl = await this.#fileToBase64Pipe.transform(
         photoBlob.blob
       );
 
-      this.#authLocalUserService.modifyCurrentUser({ profilePictureUrl });
+      didUpdateProfilePicture = this.#authLocalUserService.modifyCurrentUser({
+        profilePictureUrl,
+      });
     }
 
     if (!passphrase) {
-      return false;
+      // Returns false if nothing was updated or true if at least profile picture was updated.
+      return didUpdateProfilePicture;
     }
 
     return this.#authLocalUserService.modifyCurrentUser({
@@ -175,23 +186,27 @@ export class AuthUserConnectorService {
         photoURL: photoURL || undefined,
       };
 
-      await this.#authAccountService.changeUserProfileData(mainPayload);
+      const profileDataResult =
+        await this.#authAccountService.changeUserProfileData(mainPayload);
 
       if (!oldPassphrase) {
-        return true;
+        return profileDataResult;
       }
 
       await this._handleOptionalPasswordUpdate(oldPassphrase, passphrase);
-      await this._handleOptionalEmailUpdate(
-        oldPassphrase,
-        passphrase,
+      await this._handleOptionalEmailUpdate({
         oldEmail,
-        email
-      );
+        email,
+        existingPassphrase: oldPassphrase,
+        newPassphrase: passphrase,
+      });
 
       return true;
     } catch (err) {
-      console.error('Updating online user ', err);
+      console.error(
+        'Error while updating online user: ',
+        readMessageProperty(err) || err
+      );
       return false;
     }
   }
@@ -200,44 +215,58 @@ export class AuthUserConnectorService {
     oldPassphrase?: string,
     passphrase?: string
   ) {
-    if (oldPassphrase && passphrase) {
-      return await this.#authAccountService.updatePassword(
-        oldPassphrase,
-        passphrase
-      );
+    if (!oldPassphrase || !passphrase) {
+      return null;
     }
+    const result = await this.#authAccountService.updatePassword(
+      oldPassphrase,
+      passphrase
+    );
 
-    throw new Error('No existing password nor new password has been provided.');
-  }
-
-  private async _handleOptionalEmailUpdate(
-    existingPassphrase?: string,
-    newPassphrase?: string,
-    oldEmail?: string,
-    email?: string
-  ) {
-    if (!existingPassphrase) {
-      throw new Error('No existing password has been provided.');
-    }
-
-    const wasPasswordUpdated = !!existingPassphrase && !!newPassphrase;
-
-    if (oldEmail && email) {
-      const result = await this.#authAccountService.updateEmail(
-        wasPasswordUpdated ? newPassphrase : existingPassphrase,
-        oldEmail,
-        email
-      );
-
-      if (result.errors) {
-        if (result.errors.alreadyInUseError) {
-          throw new Error('Email already in use.');
-        }
-      }
-
+    if (!result.errors) {
       return result;
     }
+    if (!environment.production) {
+      console.error(
+        'Error while attending to change password: ',
+        result.errors
+      );
+    }
+    throw new Error(result.errors.unknownError?.message);
+  }
 
-    throw new Error('No existing email nor new email has been provided.');
+  private async _handleOptionalEmailUpdate(args: {
+    existingPassphrase?: string;
+    newPassphrase?: string;
+    oldEmail?: string;
+    email?: string;
+  }) {
+    const { existingPassphrase, newPassphrase, oldEmail, email } = args;
+
+    if (!existingPassphrase) {
+      return null;
+    }
+    const wasPasswordUpdated =
+      !!newPassphrase && newPassphrase !== existingPassphrase;
+
+    if (!oldEmail || !email) {
+      return null;
+    }
+    const result = await this.#authAccountService.updateEmail(
+      wasPasswordUpdated ? newPassphrase : existingPassphrase,
+      oldEmail,
+      email
+    );
+
+    if (!result.errors) {
+      return result;
+    }
+    if (!environment.production) {
+      console.error('Error while attending to change email: ', result.errors);
+    }
+    if (result.errors.alreadyInUseError) {
+      throw new Error('Email already in use.');
+    }
+    throw new Error(result.errors.unknownError?.message);
   }
 }
