@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Storage } from '@angular/fire/storage';
 import {
   getBlob,
   getDownloadURL,
@@ -10,6 +11,8 @@ import {
   providedIn: 'root',
 })
 export class FirebaseStorageControllerService {
+  storage = inject(Storage);
+
   ref = ref;
   getBlob = getBlob;
   getDownloadURL = getDownloadURL;
