@@ -3,21 +3,21 @@ import { LocalStorageService } from 'src/app/reusable/data-access/localStorage/l
 import { AppSettingsToken } from '../../utils/models/app-settings.interface';
 import { APP_SETTINGS_TOKEN } from '../../utils/tokens/app-settings.tokens';
 
-const initialAppState: AppSettingsToken = {
-  deletingMode: 'slow',
-  theme: 'auto',
-};
-
 @Injectable({
   providedIn: 'root',
 })
 export class AppConfigService {
   #localStorageService = inject(LocalStorageService);
 
+  private readonly _initialAppState: AppSettingsToken = {
+    deletingMode: 'slow',
+    theme: 'auto',
+  };
+
   private _currentState =
     this.#localStorageService.loadFromStorage<AppSettingsToken>(
       APP_SETTINGS_TOKEN
-    ) || initialAppState;
+    ) || this._initialAppState;
 
   get appConfigState() {
     return this._currentState;
