@@ -75,15 +75,7 @@ export class AuthAccountService {
 
       return returnObj;
     } catch (error) {
-      const errorOutput = this._handleAuthError(error);
-
-      if (errorOutput) {
-        return errorOutput;
-      }
-
-      return {
-        errors: { unknownError: error as UnknownError },
-      };
+      return this._catchResolve(error);
     }
   }
 
@@ -100,21 +92,13 @@ export class AuthAccountService {
 
       this.#authState.updateSession(result.user);
 
-      if (this.#authState.sessionSig()?.emailVerified) {
+      if (result.user.emailVerified) {
         return { passed: true };
       }
 
       return { errors: { unverifiedEmail: true } };
     } catch (error) {
-      const errorOutput = this._handleAuthError(error);
-
-      if (errorOutput) {
-        return errorOutput;
-      }
-
-      return {
-        errors: { unknownError: error as UnknownError },
-      };
+      return this._catchResolve(error);
     }
   }
 
@@ -175,31 +159,35 @@ export class AuthAccountService {
   }
 
   async signOutUser() {
-    if (!this.#authState.sessionSig()) return;
+    if (!this.#authState.sessionSig()) {
+      return;
+    }
 
     await this.#fireAuthController.signOut(this.#authState.auth);
     await this.#router.navigateByUrl('/online/force=login');
   }
 
-  async changeUserProfileData(options: RegisterCustomOptions): Promise<void> {
+  async changeUserProfileData(
+    options: RegisterCustomOptions
+  ): Promise<boolean> {
     try {
       const user = this._getUser();
-      if (!user) {
-        this._devErrorLog('No user registered/logged in.');
-
-        return;
-      }
 
       if (!Object.keys(options).length) {
         this._devErrorLog('No options provided.');
 
-        return;
+        return false;
       }
 
       await this.#fireAuthController.updateProfile(user, options);
+
+      return true;
     } catch (err) {
-      console.error('changeUserProfileData', err);
-      return;
+      console.error(
+        'changeUserProfileData ',
+        isAuthError(err) ? err.message : err
+      );
+      return false;
     }
   }
 
@@ -212,22 +200,19 @@ export class AuthAccountService {
       const user = this._getUser();
 
       try {
-        await user.getIdToken();
         await this.#fireAuthController.updateEmail(user, newEmail);
       } catch (err) {
         if (isAuthError(err) && err.code === 'auth/requires-recent-login') {
-          await this._reauthenticateUser(user, existingEmail, existingPassword);
+          await this._reauthenticateUser(user, existingPassword, existingEmail);
           await this.#fireAuthController.updateEmail(user, newEmail);
+        } else {
+          throw err;
         }
       }
 
       return { passed: true };
     } catch (err) {
-      this._devErrorLog(err);
-
-      return {
-        errors: { unknownError: err as UnknownError },
-      };
+      return this._catchResolve(err);
     }
   }
 
@@ -239,7 +224,6 @@ export class AuthAccountService {
       const user = this._getUser();
 
       try {
-        await user.getIdToken();
         await this.#fireAuthController.updatePassword(user, newPassword);
       } catch (err) {
         if (isAuthError(err) && err.code === 'auth/requires-recent-login') {
@@ -250,16 +234,14 @@ export class AuthAccountService {
           );
 
           await this.#fireAuthController.updatePassword(user, newPassword);
+        } else {
+          throw err;
         }
       }
 
       return { passed: true };
     } catch (err) {
-      this._devErrorLog(err);
-
-      return {
-        errors: { unknownError: err as UnknownError },
-      };
+      return this._catchResolve(err);
     }
   }
 
@@ -267,7 +249,7 @@ export class AuthAccountService {
     const user = this.#authState.sessionSig();
 
     if (!user) {
-      throw { code: 'noUser', message: 'No user logged in.' };
+      throw { code: 'noUser', message: 'No user logged in' };
     }
 
     return user;
@@ -276,16 +258,19 @@ export class AuthAccountService {
   private async _reauthenticateUser(
     user: User,
     password: string,
-    email?: string
+    email: string
   ): Promise<void> {
     let credentials: AuthCredential;
 
-    if (user.providerId === 'google') {
-      // Handle Google sign-in
-      credentials = await this._googleReauthenticate();
-    } else {
-      // Handle email sign-in
-      credentials = this._emailReauthenticate(email, password);
+    switch (user.providerData[0].providerId) {
+      case 'google.com':
+        credentials = await this._googleReauthenticate();
+        break;
+      case 'password':
+        credentials = this._emailReauthenticate(email, password);
+        break;
+      default:
+        throw new Error('Unsupported auth provider');
     }
 
     this.#fireAuthController.reauthenticateWithCredential(user, credentials);
@@ -293,10 +278,12 @@ export class AuthAccountService {
 
   private async _googleReauthenticate(): Promise<OAuthCredential> {
     const provider = this._createGoogleProvider();
+
     const result = await this.#fireAuthController.signInWithPopup(
       this.#authState.auth,
       provider
     );
+
     const googleCredential = GoogleAuthProvider.credentialFromResult(result);
 
     if (!googleCredential) {
@@ -314,7 +301,7 @@ export class AuthAccountService {
   }
 
   private _emailReauthenticate(
-    existingEmail: string | undefined,
+    existingEmail: string,
     existingPassword: string
   ) {
     if (!existingEmail) {
@@ -324,7 +311,7 @@ export class AuthAccountService {
     if (!existingPassword) {
       throw {
         code: 'noPassword',
-        message: 'No password provided.',
+        message: 'No password provided',
       };
     }
 
@@ -341,7 +328,9 @@ export class AuthAccountService {
   private _handleAuthError(error: unknown): { errors: Errors } | null {
     return isAuthError(error)
       ? {
-          errors: this.#authErrorDictionary[error.code] || error,
+          errors: this.#authErrorDictionary[error.code] || {
+            unknownError: error,
+          },
         }
       : null;
   }
@@ -350,5 +339,19 @@ export class AuthAccountService {
     if (!environment.production) {
       console.error(message);
     }
+  }
+
+  private _catchResolve(err: unknown) {
+    const errorOutput = this._handleAuthError(err);
+
+    this._devErrorLog(err);
+
+    if (errorOutput) {
+      return errorOutput;
+    }
+
+    return {
+      errors: { unknownError: { code: 'Unknown', message: 'Unknown Error' } },
+    };
   }
 }
