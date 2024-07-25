@@ -12,6 +12,7 @@ const styles = `
 `;
 
 @Component({
+  selector: 'app-test',
   standalone: true,
   template: `<div>
     <div class="fade-out-animation"></div>
@@ -170,7 +171,9 @@ describe(`animation-triggers`, () => {
         fixture.nativeElement as HTMLElement
       ).querySelectorAll<HTMLElement>(`.fade-out-animation`);
       const unknownElements = Array.from(elements).map((element, index) => {
-        if (index === 2) return null;
+        if (index === 2) {
+          return null;
+        }
         return element;
       });
 

@@ -83,7 +83,9 @@ export const runWithDelay = (
       options.timeout < calculatedTimeout &&
       !environment.production
     ) {
-      console.warn(`Your timeout is lower than recommended one`);
+      console.warn(
+        `Your timeout is lower than recommended one. ${options.timeout} < ${calculatedTimeout}`
+      );
     }
 
     function* runInSequence() {
@@ -116,6 +118,7 @@ export const runWithDelay = (
       e.preventDefault();
 
       finishAnimation(e.target as HTMLElement);
+      e.target?.removeEventListener('animationend', afterAnimation);
     }
 
     function afterLastAnimation(e: Event) {
