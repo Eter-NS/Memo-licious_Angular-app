@@ -1,10 +1,15 @@
-import { Component, OnDestroy, Renderer2, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { ViewportListenersService } from './reusable/data-access/viewport-listeners/viewport-listeners.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DOCUMENT } from '@angular/common';
-import { DarkModeSubscription } from './reusable/utils/data-tools/listenerMethods';
 import { ThemeOptions } from './app-view/utils/models/app-settings.interface';
 
 @Component({
@@ -13,41 +18,41 @@ import { ThemeOptions } from './app-view/utils/models/app-settings.interface';
   template: `<router-outlet></router-outlet> `,
   imports: [RouterOutlet, MatIconModule],
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnInit {
   #viewportListenersService = inject(ViewportListenersService);
   #document = inject(DOCUMENT);
   #renderer = inject(Renderer2);
+  #destroyRef = inject(DestroyRef);
 
-  private _darkModeSubscription!: DarkModeSubscription;
   private _isDeviceInDarkMode!: boolean;
-  currTheme!: ThemeOptions;
+  private _currTheme!: ThemeOptions;
 
   private readonly LIGHT_THEME = 'light';
   private readonly DARK_THEME = 'dark';
 
-  constructor() {
+  ngOnInit() {
     this._listenForThemeChanges();
     this._listenForAutomaticThemeChanges();
   }
 
-  ngOnDestroy(): void {
-    this._darkModeSubscription?.unsubscribe();
-  }
-
-  private _listenForAutomaticThemeChanges() {
-    this._darkModeSubscription =
-      this.#viewportListenersService.darkModeListener((event) => {
-        this._isDeviceInDarkMode = event.matches;
-        this.currTheme === 'auto' && this._updateBodyClass();
+  private _listenForThemeChanges() {
+    this.#viewportListenersService.appTheme$
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe((theme) => {
+        this._currTheme = theme;
+        this._updateBodyClass();
       });
   }
 
-  private _listenForThemeChanges() {
-    this.#viewportListenersService.appTheme$
-      .pipe(takeUntilDestroyed())
-      .subscribe((theme) => {
-        this.currTheme = theme;
-        this._updateBodyClass();
+  private _listenForAutomaticThemeChanges() {
+    this.#viewportListenersService.darkModeListener$
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe((event) => {
+        this._isDeviceInDarkMode = event.matches;
+
+        if (this._currTheme === 'auto') {
+          this._updateBodyClass();
+        }
       });
   }
 
@@ -55,12 +60,12 @@ export class AppComponent implements OnDestroy {
     this.#renderer.removeClass(this.#document.body, this.LIGHT_THEME);
     this.#renderer.removeClass(this.#document.body, this.DARK_THEME);
 
-    if (this.currTheme === 'auto') {
+    if (this._currTheme === 'auto') {
       this._toggleTheme();
       return;
     }
 
-    this.#renderer.addClass(this.#document.body, this.currTheme);
+    this.#renderer.addClass(this.#document.body, this._currTheme);
   }
 
   private _toggleTheme() {
