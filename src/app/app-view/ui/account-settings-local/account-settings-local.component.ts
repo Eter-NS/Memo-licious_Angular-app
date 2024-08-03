@@ -10,8 +10,6 @@ import {
   inject,
 } from '@angular/core';
 import {
-  AbstractControl,
-  FormControl,
   FormGroup,
   NonNullableFormBuilder,
   ReactiveFormsModule,
@@ -39,20 +37,13 @@ import { AsyncPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthOptions } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 import { UserProfileUpdateResultI } from '../../data-access/user-profile/user-profile.service';
+import { LocalProfileFormI } from '../../utils/models/LocalProfileForm.interface';
+import { hasInvalidCurrentPassphrase } from '../../utils/validators/hasInvalidCurrentPassphrase';
+import { hasInvalidNewPassphrase } from '../../utils/validators/hasInvalidNewPassphrase';
 
-export interface LocalProfileFormI {
-  name: FormControl<string>;
-  currentPassphrase: FormControl<string>;
-  authOption: FormControl<AuthOptions>;
-  pinGroup: FormGroup<{
-    pin: FormControl<string | null>;
-    confirmPin: FormControl<string | null>;
-  }>;
-  passwordGroup: FormGroup<{
-    password: FormControl<string | null>;
-    confirmPassword: FormControl<string | null>;
-  }>;
-}
+export type UnsuccessfulSubmitI =
+  | { state: false }
+  | { state: true; cause: string };
 
 @Component({
   selector: 'app-account-settings-local',
@@ -68,8 +59,8 @@ export interface LocalProfileFormI {
   ],
   templateUrl: './account-settings-local.component.html',
   styleUrls: [
-    '/src/app/reusable/utils/forms/form.scss',
-    '/src/app/auth/feature/guest/guest-forms.scss',
+    '../../../reusable/utils/forms/form.scss',
+    '../../../auth/feature/guest/guest-forms.scss',
     './account-settings-local.component.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -90,12 +81,8 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
     this._updateSendingState(false);
 
     if (result === 'success') {
-      const { currentPassphrase, passwordGroup, pinGroup } =
-        this.localProfileForm.controls;
-
-      currentPassphrase.reset();
-      pinGroup.reset();
-      passwordGroup.reset();
+      this.localProfileForm.reset();
+      this._applyUserState();
     }
   }
   @Output() submittedChanges = new EventEmitter<UserProfileChangesI>();
@@ -104,7 +91,7 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
     {
       name: this.#fb.control('', [
         Validators.required,
-        Validators.minLength(3),
+        Validators.minLength(2),
         Validators.maxLength(15),
       ]),
       currentPassphrase: this.#fb.control('', [Validators.required]),
@@ -148,14 +135,21 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
           ['passwordGroup', 'password'],
           'samePassphrase'
         ),
+        hasInvalidCurrentPassphrase,
+        hasInvalidNewPassphrase,
       ],
     }
   );
 
-  #authOptionSubject: BehaviorSubject<AuthOptions> =
-    new BehaviorSubject<AuthOptions>('pin');
+  private _authOptionSubject = new BehaviorSubject<AuthOptions>('pin');
   get authOption$() {
-    return this.#authOptionSubject.asObservable();
+    return this._authOptionSubject.asObservable();
+  }
+
+  private readonly _unsuccessfulSubmitSubject =
+    new BehaviorSubject<UnsuccessfulSubmitI>({ state: false });
+  get unsuccessfulSubmit$() {
+    return this._unsuccessfulSubmitSubject.asObservable();
   }
 
   private _isDataSendingSubject = new BehaviorSubject<boolean>(false);
@@ -197,13 +191,7 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
 
   toggleAuthMethod() {
     const toggleFormGroup = (groupName: string, state: boolean) => {
-      const formGroup = this.localProfileForm?.get([groupName]) as FormGroup;
-
-      if (!formGroup) {
-        console.warn('No formGroup detected');
-
-        return;
-      }
+      const formGroup = this.localProfileForm.get([groupName]) as FormGroup;
 
       if (state) {
         formGroup.enable();
@@ -213,7 +201,7 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
       }
     };
 
-    const currentAuth = this.#authOptionSubject.value;
+    const currentAuth = this._authOptionSubject.value;
     toggleFormGroup('pinGroup', currentAuth === 'pin');
     toggleFormGroup('passwordGroup', currentAuth === 'password');
   }
@@ -230,73 +218,52 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit(): void {
-    if (this.localProfileForm.invalid || this._isFormInvalid()) {
+    const { invalid, value } = this.localProfileForm;
+
+    if (invalid) {
+      this._unsuccessfulSubmitSubject.next({
+        state: true,
+        cause: 'invalid-form',
+      });
       return;
     }
+    const { name, currentPassphrase, authOption, passwordGroup, pinGroup } =
+      value;
 
-    const {
-      name,
-      currentPassphrase: passphrase,
-      passwordGroup,
-      pinGroup,
-    } = this.localProfileForm.value;
+    if (typeof authOption === 'undefined') {
+      this._unsuccessfulSubmitSubject.next({
+        state: true,
+        cause: 'no-authOption',
+      });
+      return;
+    }
 
     const payload: UserProfileChangesI = {
       ...this.user,
       name: name as string,
-      oldPassphrase: passphrase || undefined,
-      authOption: this._checkAuthGroups() || this.user.authOption,
-      passphrase: passwordGroup?.password || pinGroup?.pin || undefined,
+      oldPassphrase: currentPassphrase || undefined,
+      authOption,
+      passphrase:
+        (authOption === 'password' ? passwordGroup?.password : pinGroup?.pin) ||
+        undefined,
     };
 
     this._updateSendingState(true);
     this.submittedChanges.emit(payload);
-
-    this.localProfileForm.markAsPristine();
-    this.localProfileForm.markAsUntouched();
-  }
-
-  private _isFormInvalid(): boolean {
-    const { /* name, */ currentPassphrase: passphrase } =
-      this.localProfileForm.value;
-    let isInvalid = false;
-
-    const passphraseControl = this.localProfileForm.controls.currentPassphrase;
-    // If new passphrase is okay and there is no current passphrase
-    if (this._checkAuthGroups() && !passphrase) {
-      passphraseControl.setErrors({
-        invalidCurrentPassphrase: true,
-      });
-      isInvalid = true;
-    } else {
-      delete passphraseControl.errors?.['invalidCurrentPassphrase'];
-    }
-
-    // If there is no new passphrase and current passphrase is okay
-    if (passphrase && !this._checkAuthGroups()) {
-      this.localProfileForm.setErrors({
-        invalidNewPassphrase: true,
-      });
-      isInvalid = true;
-    } else {
-      delete this.localProfileForm.errors?.['invalidNewPassphrase'];
-    }
-
-    // No changes made
-    // if (this.user.name === name && !passphrase) {
-    //   isInvalid = true;
-    // }
-    return isInvalid;
+    this._unsuccessfulSubmitSubject.next({ state: false });
   }
 
   private _setInitialAuthOption() {
-    this.localProfileForm.controls.authOption.setValue(this.user.authOption);
+    const { authOption, pinGroup, passwordGroup } =
+      this.localProfileForm.controls;
 
-    this.#authOptionSubject.next(this.user.authOption);
+    authOption.setValue(this.user.authOption);
+
+    this._authOptionSubject.next(this.user.authOption);
 
     this.user.authOption === 'password'
-      ? this.localProfileForm.controls.pinGroup.disable()
-      : this.localProfileForm.controls.passwordGroup.disable();
+      ? pinGroup.disable()
+      : passwordGroup.disable();
   }
 
   private _applyUserState() {
@@ -309,38 +276,9 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
     this.localProfileForm.controls.authOption.valueChanges
       .pipe(takeUntilDestroyed(this.#destroyRef))
       .subscribe((value) => {
-        this.#authOptionSubject.next(value);
+        this._authOptionSubject.next(value);
         this.toggleAuthMethod();
       });
-  }
-
-  private _checkAuthGroups(): AuthOptions | undefined {
-    const {
-      pinGroup: {
-        controls: { pin, confirmPin },
-      },
-      passwordGroup: {
-        controls: { password, confirmPassword },
-      },
-    } = this.localProfileForm.controls;
-
-    if (areInputsCorrect(pin, confirmPin)) {
-      return 'pin';
-    }
-    if (areInputsCorrect(password, confirmPassword)) {
-      return 'password';
-    }
-
-    return undefined;
-
-    function areInputsCorrect(
-      input1: AbstractControl,
-      input2: AbstractControl
-    ) {
-      const result1 = input1.enabled && input1.valid;
-      const result2 = input2.enabled && input2.valid;
-      return result1 && result2;
-    }
   }
 
   private _updateSendingState(state: boolean) {
