@@ -5,10 +5,7 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import {
-  AccountSettingsLocalComponent,
-  UnsuccessfulSubmitI,
-} from './account-settings-local.component';
+import { AccountSettingsLocalComponent } from './account-settings-local.component';
 import { Provider } from '@angular/core';
 import { FormCommonFeaturesService } from 'src/app/reusable/data-access/form-common-features/form-common-features.service';
 import { AuthOptions } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
@@ -19,6 +16,7 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { HarnessLoader } from '@angular/cdk/testing';
 import { MatExpansionPanelHarness } from '@angular/material/expansion/testing';
 import { UserProfile } from '../../utils/models/user-profile.interface';
+import { SubmitValidState } from '../../utils/models/unsuccessfulSubmit.type';
 
 const makeFormValid = (
   component: AccountSettingsLocalComponent,
@@ -57,6 +55,8 @@ const makeFormValid = (
   });
 };
 
+const userProp: UserProfile = { authOption: 'password', name: 'Nick' };
+
 describe(`AccountSettingsLocalComponent`, () => {
   // Mocks
   let formCommonFeaturesServiceMock: FormCommonFeaturesService;
@@ -66,7 +66,6 @@ describe(`AccountSettingsLocalComponent`, () => {
   let loader: HarnessLoader;
   let component: AccountSettingsLocalComponent;
   let panel: MatExpansionPanelHarness;
-  const userProp: UserProfile = { authOption: 'password', name: 'Nick' };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -205,7 +204,7 @@ describe(`AccountSettingsLocalComponent`, () => {
     describe(`unsuccessfulSubmit$`, () => {
       it(`should emit false as the initial value.`, fakeAsync(() => {
         // Arrange
-        let result: UnsuccessfulSubmitI | undefined;
+        let result: SubmitValidState | undefined;
 
         // Act
         const subscription = component.unsuccessfulSubmit$.subscribe(
@@ -223,7 +222,7 @@ describe(`AccountSettingsLocalComponent`, () => {
 
       it(`should emit new value when _unsuccessfulSubmitSubject.next has been called.`, fakeAsync(() => {
         // Arrange
-        let result: UnsuccessfulSubmitI | undefined;
+        let result: SubmitValidState | undefined;
         const subscription = component.unsuccessfulSubmit$.subscribe(
           (value) => {
             result = value;
@@ -657,7 +656,6 @@ describe(`AccountSettingsLocalComponent`, () => {
 
         // Act
         await fixture.whenStable();
-        console.log(component.localProfileForm.invalid);
         component.onSubmit();
 
         // Assert

@@ -40,10 +40,7 @@ import { UserProfileUpdateResultI } from '../../data-access/user-profile/user-pr
 import { LocalProfileFormI } from '../../utils/models/LocalProfileForm.interface';
 import { hasInvalidCurrentPassphrase } from '../../utils/validators/hasInvalidCurrentPassphrase';
 import { hasInvalidNewPassphrase } from '../../utils/validators/hasInvalidNewPassphrase';
-
-export type UnsuccessfulSubmitI =
-  | { state: false }
-  | { state: true; cause: string };
+import { SubmitValidState } from '../../utils/models/unsuccessfulSubmit.type';
 
 @Component({
   selector: 'app-account-settings-local',
@@ -147,7 +144,7 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
   }
 
   private readonly _unsuccessfulSubmitSubject =
-    new BehaviorSubject<UnsuccessfulSubmitI>({ state: false });
+    new BehaviorSubject<SubmitValidState>({ state: false });
   get unsuccessfulSubmit$() {
     return this._unsuccessfulSubmitSubject.asObservable();
   }
