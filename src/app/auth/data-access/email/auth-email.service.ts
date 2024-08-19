@@ -13,20 +13,24 @@ export class AuthEmailService {
   #fireAuthController = inject(FirebaseAuthControllerService);
 
   async sendVerificationEmail() {
-    if (!this.#authState.sessionSig()) return null;
+    const session = this.#authState.sessionSig();
+
+    if (!session) {
+      throw new Error('No active user');
+    }
 
     try {
-      return await this.#fireAuthController.sendEmailVerification(
-        this.#authState.sessionSig()!
-      );
+      await this.#fireAuthController.sendEmailVerification(session);
     } catch (err) {
       if (!environment.production) {
-        if (isAuthError(err)) {
-          console.error(`Error when sending email message: ${err.message}`);
-        } else {
-          console.error(err);
-        }
+        console.error(
+          isAuthError(err)
+            ? `Error when sending email message: ${err.message}`
+            : err
+        );
       }
+
+      throw err;
     }
   }
 
