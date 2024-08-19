@@ -3,7 +3,6 @@ export interface NoteModel {
   value: string;
   // getUTCTimestamp().unixtime for createdAt and deleteAt
   createdAt: number;
-  deleteAt?: number;
 }
 export interface NoteGroupModel {
   id: string;
