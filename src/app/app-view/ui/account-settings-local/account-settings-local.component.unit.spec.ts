@@ -15,16 +15,20 @@ import { setFormInputValue } from 'src/app/reusable/utils/testing/utils/setFormI
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { HarnessLoader } from '@angular/cdk/testing';
 import { MatExpansionPanelHarness } from '@angular/material/expansion/testing';
-import { UserProfile } from '../../utils/models/user-profile.interface';
+import {
+  UserProfile,
+  UserProfileChangesI,
+} from '../../utils/models/user-profile.interface';
 import { SubmitValidState } from '../../utils/models/unsuccessfulSubmit.type';
+
+const currentPassphrase = 'asasas@@#221DS';
+const pin = '194683';
+const password = 'wd.)8Y!0%2kges1dHERZ';
 
 const makeFormValid = (
   component: AccountSettingsLocalComponent,
   newPassphrase: AuthOptions
 ) => {
-  const pin = '194683';
-  const password = 'wd.)8Y!0%2kges1dHERZ';
-
   component.enablePassphrasePanel();
   component['_authOptionSubject'].next(newPassphrase);
   component.toggleAuthMethod();
@@ -47,7 +51,7 @@ const makeFormValid = (
         };
 
   component.localProfileForm.setValue({
-    name: 'Star_Maximus',
+    name: 'Sam',
     currentPassphrase: 'asasas@@#221DS',
     authOption: newPassphrase,
 
@@ -98,54 +102,48 @@ describe(`AccountSettingsLocalComponent`, () => {
   });
 
   describe(`inputs`, () => {
+    let updateSendingStateSpy: jasmine.Spy<any>;
+
     beforeEach(() => {
       fixture.detectChanges();
+      updateSendingStateSpy = spyOn(component as any, '_updateSendingState');
     });
 
     it(`should not call _updateSendingState() when the result value is 'pending'.`, () => {
       // Arrange
-      const spy = spyOn(component as any, '_updateSendingState');
       component.result = 'pending';
 
       // Act
       fixture.detectChanges();
 
       // Assert
-      expect(spy).not.toHaveBeenCalled();
+      expect(updateSendingStateSpy).not.toHaveBeenCalled();
     });
 
-    it(`should should call _updateSendingState() when result value is 'idle'.`, () => {
+    it(`should call _updateSendingState() when result value is 'idle'.`, () => {
       // Arrange
-      const spy = spyOn(component as any, '_updateSendingState');
-      component.result = 'success';
-      fixture.detectChanges();
       component.result = 'idle';
 
       // Act
       fixture.detectChanges();
 
       // Assert
-      expect(spy).toHaveBeenCalled();
+      expect(updateSendingStateSpy).toHaveBeenCalled();
     });
 
-    it(`should should call _updateSendingState() when result value is 'failure'.`, () => {
+    it(`should call _updateSendingState() when result value is 'failure'.`, () => {
       // Arrange
-      const spy = spyOn(component as any, '_updateSendingState');
       component.result = 'failure';
 
       // Act
       fixture.detectChanges();
 
       // Assert
-      expect(spy).toHaveBeenCalled();
+      expect(updateSendingStateSpy).toHaveBeenCalled();
     });
 
-    it(`should should call _updateSendingState() when result value is 'success' and reset form controls.`, () => {
+    it(`should call _updateSendingState() when result value is 'success' and reset form controls.`, () => {
       // Arrange
-      const updateSendingStateSpy = spyOn(
-        component as any,
-        '_updateSendingState'
-      );
       const resetSpy = spyOn(
         component.localProfileForm,
         'reset'
@@ -629,16 +627,25 @@ describe(`AccountSettingsLocalComponent`, () => {
     });
 
     describe(`onSubmit()`, () => {
+      let nextSpy: jasmine.Spy<(value: SubmitValidState) => void>;
+      let emitSpy: jasmine.Spy<
+        (value?: UserProfileChangesI | undefined) => void
+      >;
+
+      beforeEach(() => {
+        nextSpy = spyOn(component['_unsuccessfulSubmitSubject'], 'next');
+        emitSpy = spyOn(component.submittedChanges, 'emit');
+      });
+
       it(`should call _unsuccessfulSubmitSubject.next if the form is invalid and stop method execution.`, async () => {
         // Arrange
         await panel.expand();
-        const spy = spyOn(component['_unsuccessfulSubmitSubject'], 'next');
 
         // Act
         component.onSubmit();
 
         // Assert
-        expect(spy).toHaveBeenCalledWith({
+        expect(nextSpy).toHaveBeenCalledWith({
           state: true,
           cause: 'invalid-form',
         });
@@ -646,7 +653,6 @@ describe(`AccountSettingsLocalComponent`, () => {
 
       it(`should call _unsuccessfulSubmitSubject.next if the authOption control is disabled.`, async () => {
         // Arrange
-        const spy = spyOn(component['_unsuccessfulSubmitSubject'], 'next');
         component.localProfileForm.controls.authOption.disable();
         spyOnProperty(
           component.localProfileForm,
@@ -659,7 +665,7 @@ describe(`AccountSettingsLocalComponent`, () => {
         component.onSubmit();
 
         // Assert
-        expect(spy).toHaveBeenCalledWith({
+        expect(nextSpy).toHaveBeenCalledWith({
           state: true,
           cause: 'no-authOption',
         });
@@ -667,7 +673,6 @@ describe(`AccountSettingsLocalComponent`, () => {
 
       it(`should emit form without new authentication section when expansion panel is not opened.`, () => {
         // Arrange
-        const spy = spyOn(component as any, '_updateSendingState');
         component.localProfileForm.patchValue({
           name: 'Napoleon',
         });
@@ -677,12 +682,16 @@ describe(`AccountSettingsLocalComponent`, () => {
         component.onSubmit();
 
         // Assert
-        expect(spy).toHaveBeenCalled();
+        expect(emitSpy).toHaveBeenCalledWith({
+          authOption: component.user.authOption,
+          name: 'Napoleon',
+          oldPassphrase: undefined,
+          passphrase: undefined,
+        } satisfies UserProfileChangesI);
       });
 
       it(`should emit form with all fields and correct new auth (password).`, async () => {
         // Arrange
-        const spy = spyOn(component as any, '_updateSendingState');
         await panel.expand();
         makeFormValid(component, 'password');
         component.localProfileForm.markAsDirty();
@@ -692,12 +701,16 @@ describe(`AccountSettingsLocalComponent`, () => {
         component.onSubmit();
 
         // Assert
-        expect(spy).toHaveBeenCalled();
+        expect(emitSpy).toHaveBeenCalledWith({
+          authOption: 'password',
+          name: 'Sam',
+          oldPassphrase: currentPassphrase,
+          passphrase: password,
+        } satisfies UserProfileChangesI);
       });
 
       it(`should emit form with all fields and correct new auth (pin).`, async () => {
         // Arrange
-        const spy = spyOn(component as any, '_updateSendingState');
         await panel.expand();
         makeFormValid(component, 'pin');
         component.localProfileForm.markAsDirty();
@@ -707,7 +720,12 @@ describe(`AccountSettingsLocalComponent`, () => {
         component.onSubmit();
 
         // Assert
-        expect(spy).toHaveBeenCalled();
+        expect(emitSpy).toHaveBeenCalledWith({
+          authOption: 'pin',
+          name: 'Sam',
+          oldPassphrase: currentPassphrase,
+          passphrase: pin,
+        } satisfies UserProfileChangesI);
       });
     });
 

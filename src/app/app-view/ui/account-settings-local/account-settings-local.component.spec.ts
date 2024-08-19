@@ -31,7 +31,6 @@ import { touchFormInput } from 'src/app/reusable/utils/testing/utils/touchFormIn
     <app-account-settings-local
       [user]="user"
       [result]="result"
-      (submittedChanges)="onSubmittedChanges($event)"
     ></app-account-settings-local>
   `,
 })
@@ -41,9 +40,6 @@ class TestComponent {
     name: 'Nick',
   };
   result: UserProfileUpdateResultI['state'] = 'idle';
-
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  onSubmittedChanges!: Function;
 
   @ViewChild(AccountSettingsLocalComponent)
   testedComponent!: AccountSettingsLocalComponent;
@@ -157,51 +153,49 @@ describe('AccountSettingsLocalComponent - template', () => {
   });
 
   describe(`input group toggling and its state management.`, () => {
-    describe(`password group`, () => {
-      it(`should find one expansion panel.`, async () => {
-        const panels = await loader.getAllHarnesses(MatExpansionPanelHarness);
-        expect(panels.length).toBe(1);
-      });
+    it(`should find one expansion panel.`, async () => {
+      const panels = await loader.getAllHarnesses(MatExpansionPanelHarness);
+      expect(panels.length).toBe(1);
+    });
 
-      it(`should enable group inputs when user click the mat-accordion expansion panel (pinGroup).`, async () => {
-        // Arrange
-        const enablePassphrasePanelSpy = spyOn(
-          component.testedComponent,
-          'enablePassphrasePanel'
-        ).and.callThrough();
+    it(`should enable group inputs when user click the mat-accordion expansion panel (pinGroup).`, async () => {
+      // Arrange
+      const enablePassphrasePanelSpy = spyOn(
+        component.testedComponent,
+        'enablePassphrasePanel'
+      ).and.callThrough();
 
-        // Act
-        await panel.expand();
+      // Act
+      await panel.expand();
 
-        // Assert
-        expect(enablePassphrasePanelSpy).toHaveBeenCalled();
-        const controls = component.testedComponent.localProfileForm.controls;
-        expect(controls.currentPassphrase.enabled).toBeTruthy();
-        expect(controls.pinGroup.enabled).toBeTruthy();
-      });
+      // Assert
+      expect(enablePassphrasePanelSpy).toHaveBeenCalled();
+      const controls = component.testedComponent.localProfileForm.controls;
+      expect(controls.currentPassphrase.enabled).toBeTruthy();
+      expect(controls.pinGroup.enabled).toBeTruthy();
+    });
 
-      it(`should enable group inputs when user click the mat-accordion expansion panel (pinGroup).`, async () => {
-        // Arrange
-        const enablePassphrasePanelSpy = spyOn(
-          component.testedComponent,
-          'enablePassphrasePanel'
-        ).and.callThrough();
+    it(`should enable group inputs when user click the mat-accordion expansion panel (pinGroup).`, async () => {
+      // Arrange
+      const enablePassphrasePanelSpy = spyOn(
+        component.testedComponent,
+        'enablePassphrasePanel'
+      ).and.callThrough();
 
-        // Act
-        await panel.expand();
-        const radioButton = await panel.getHarness(
-          MatRadioButtonHarness.with({
-            selector: `[data-test="radio-password"]`,
-          })
-        );
-        await radioButton.check();
+      // Act
+      await panel.expand();
+      const radioButton = await panel.getHarness(
+        MatRadioButtonHarness.with({
+          selector: `[data-test="radio-password"]`,
+        })
+      );
+      await radioButton.check();
 
-        // Assert
-        expect(enablePassphrasePanelSpy).toHaveBeenCalled();
-        const controls = component.testedComponent.localProfileForm.controls;
-        expect(controls.currentPassphrase.enabled).toBeTruthy();
-        expect(controls.passwordGroup.enabled).toBeTruthy();
-      });
+      // Assert
+      expect(enablePassphrasePanelSpy).toHaveBeenCalled();
+      const controls = component.testedComponent.localProfileForm.controls;
+      expect(controls.currentPassphrase.enabled).toBeTruthy();
+      expect(controls.passwordGroup.enabled).toBeTruthy();
     });
   });
 

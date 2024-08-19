@@ -1,6 +1,6 @@
 import { AbstractControl, FormGroup, ValidationErrors } from '@angular/forms';
 import { LocalProfileFormI } from '../models/LocalProfileForm.interface';
-import { _getPassphrases } from './tools';
+import { _getPassphrases } from './validation-tools';
 
 export const hasInvalidCurrentPassphrase = (
   form: AbstractControl
