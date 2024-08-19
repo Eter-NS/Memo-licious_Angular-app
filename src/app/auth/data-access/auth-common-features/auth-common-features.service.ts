@@ -11,9 +11,9 @@ type SiteAction = {
 })
 export class AuthCommonFeaturesService {
   checkParamMap(route: ActivatedRoute, actionParam: string): SiteAction {
-    const returnObj = {
+    const returnObj: SiteAction = {
       register: true,
-      redirect: undefined as string | undefined,
+      redirect: undefined,
     };
 
     const pathElement = route.snapshot.paramMap.get(actionParam);
