@@ -4,6 +4,7 @@ import { runAnimationOnce } from '../../utils/animations/animation-triggers';
 import { BehaviorSubject } from 'rxjs';
 import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { readMessageProperty } from '../../utils/data-tools/readMessageProperty';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +46,7 @@ export class ViewTransitionService {
       ? destination.replace(location.origin, '')
       : destination;
 
-    this.#router.navigateByUrl(path);
+    await this.#router.navigateByUrl(path);
     this._pushNewHistoryRecord(path);
   }
 
@@ -58,7 +59,7 @@ export class ViewTransitionService {
     if (this._history.length > 0) {
       this.#location.back();
     } else {
-      this.#router.navigateByUrl(fallback || '/');
+      await this.#router.navigateByUrl(fallback || '/');
     }
   }
 
@@ -66,18 +67,23 @@ export class ViewTransitionService {
     try {
       await this._runTransition(element, 'fadeIn-from-bottom-animation', true);
     } catch (err) {
-      console.error(err);
+      console.error(readMessageProperty(err) || err);
     }
   }
 
-  pageReload() {
-    this.#router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-      this.#router.navigateByUrl(this.#router.url);
-    });
-  }
+  async pageReload() {
+    try {
+      const currentPage = this.#router.url;
 
-  hardPageReload() {
-    location.replace(this.#router.url);
+      await this.#router.navigateByUrl('/', {
+        skipLocationChange: true,
+      });
+
+      return await this.#router.navigateByUrl(currentPage);
+    } catch (err) {
+      console.error(readMessageProperty(err) || err);
+      return false;
+    }
   }
 
   private async _runTransition(

@@ -1,8 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 
 import { ViewTransitionService } from './view-transition.service';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { Component, Provider, inject } from '@angular/core';
 import { Location } from '@angular/common';
@@ -14,13 +19,14 @@ const styles = `
 
 @Component({
   standalone: true,
-  template: `<div
+  template: `<button
     (click)="viewTransitionService.goForward($event, '/example')"
     (keyup.enter)="viewTransitionService.goForward(element, '/example')"
     tabindex="0"
+    data-test="test-button"
   >
     Hello there
-  </div>`,
+  </button>`,
   styles: styles,
 })
 class TestComponent {
@@ -46,6 +52,7 @@ describe('ViewTransitionService', () => {
   };
   const MockLocation = {
     back: jasmine.createSpy('back', Location.prototype.back),
+    go: jasmine.createSpy('go', Location.prototype.go),
   };
 
   let fixture: ComponentFixture<TestComponent>;
@@ -66,34 +73,43 @@ describe('ViewTransitionService', () => {
         },
       ] satisfies Provider[],
     });
+
     fixture = TestBed.createComponent(TestComponent);
     service = TestBed.inject(ViewTransitionService);
+
+    spyOn(service as any, '_runAnimationOnce').and.resolveTo();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  describe(`page$`, () => {
-    it(`should emit 'end' on navigation end`, (done: DoneFn) => {
-      MockRouter.events = of<NavigationEnd | NavigationStart>(
+  describe(`pageState$`, () => {
+    it(`should emit 'end' on navigation end`, fakeAsync(() => {
+      MockRouterEventsSubject.next(
         new NavigationEnd(
           1,
           'http://localhost:9876/',
           'http://localhost:9876/example'
         )
       );
+      let result: 'start' | 'end' | 'idle';
 
       service.pageState$.subscribe((page) => {
-        expect(page).toBe('end');
-        done();
+        result = page;
       });
-    });
+
+      tick(1_000);
+
+      expect(result!).toBe('end');
+    }));
   });
 
   describe(`goForward()`, () => {
     it(`should navigate to the destination`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.goForward(element, '/example2');
 
@@ -101,7 +117,9 @@ describe('ViewTransitionService', () => {
     });
 
     it(`should navigate to the destination with the origin`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.goForward(element, 'http://localhost:9876/example2');
 
@@ -111,7 +129,9 @@ describe('ViewTransitionService', () => {
 
   describe(`goBack()`, () => {
     it(`should navigate to the previous page`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.goForward(element, '/example2');
       await service.goBack(element);
@@ -120,7 +140,9 @@ describe('ViewTransitionService', () => {
     });
 
     it(`should navigate to the fallback page`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.goBack(element, '/example');
 
@@ -128,7 +150,9 @@ describe('ViewTransitionService', () => {
     });
 
     it(`should navigate to the '/' page when no fallback was passed`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.goBack(element);
 
@@ -137,8 +161,41 @@ describe('ViewTransitionService', () => {
   });
 
   describe(`viewFadeIn()`, () => {
+    it(`should log an error when _runTransition() rejects (object with message property).`, async () => {
+      // Arrange
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
+      const spy = spyOn(console, 'error').and.stub();
+      spyOn(service as any, '_runTransition').and.rejectWith(
+        new Error('Example Error')
+      );
+      // Act
+      await service.viewFadeIn(element);
+
+      // Assert
+      expect(spy).toHaveBeenCalledWith('Example Error');
+    });
+
+    it(`should log an error when _runTransition() rejects (object without message property).`, async () => {
+      // Arrange
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
+      const spy = spyOn(console, 'error').and.stub();
+      const error = { msg: 'example other error' };
+      spyOn(service as any, '_runTransition').and.rejectWith(error);
+      // Act
+      await service.viewFadeIn(element);
+
+      // Assert
+      expect(spy).toHaveBeenCalledWith(error);
+    });
+
     it(`should fade in the element`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.viewFadeIn(element);
 
@@ -148,7 +205,9 @@ describe('ViewTransitionService', () => {
     });
 
     it(`should remove the animation class after the animation is finished`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.viewFadeIn(element);
 
@@ -156,7 +215,9 @@ describe('ViewTransitionService', () => {
     });
 
     it(`should stop the event propagation`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
       await service.viewFadeIn(element);
 
@@ -164,25 +225,61 @@ describe('ViewTransitionService', () => {
     });
   });
 
-  describe(`runTransition()`, () => {
-    it(`should run the transition`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
-      const spy = spyOn(service as any, 'runAnimationOnce').and.callThrough();
+  describe(`pageReload()`, () => {
+    it(`should return false if the first navigateByUrl rejects. (object with message property).`, async () => {
+      // Arrange
+      MockRouter.navigateByUrl.and.rejectWith(new Error('example error'));
 
-      await (service as any).runTransition(
-        element,
-        'fadeOut-to-left-animation',
-        true
+      // Act
+      const result = await service.pageReload();
+
+      // Assert
+      expect(result).toBeFalse();
+    });
+
+    it(`should return false if the first navigateByUrl rejects. (object without message property).`, async () => {
+      // Arrange
+      MockRouter.navigateByUrl.and.rejectWith({
+        msg: 'example error 2',
+      });
+
+      // Act
+      const result = await service.pageReload();
+
+      // Assert
+      expect(result).toBeFalse();
+    });
+
+    it(`should return true if the first navigateByUrl resolves to true.`, async () => {
+      // Arrange
+      MockRouter.navigateByUrl.and.returnValues(
+        ...[Promise.resolve(true), Promise.resolve(true)]
       );
 
-      expect(spy).toHaveBeenCalledWith(element, 'fadeOut-to-left-animation', {
-        removeAnimationClassOnFinish: true,
-      });
+      // Act
+      const result = await service.pageReload();
+
+      // Assert
+      expect(result).toBeTrue();
+    });
+  });
+
+  describe(`_runTransition()`, () => {
+    it(`should run the transition`, async () => {
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
+
+      await expectAsync(
+        service['_runTransition'](element, 'fadeOut-to-left-animation', true)
+      ).toBeResolved();
     });
 
     it(`should run the transition using the variable defined in the component's template`, () => {
-      const element = fixture.debugElement.query(By.css('div'));
-      const spy = spyOn(service as any, 'runTransition').and.callThrough();
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      );
+      const spy = spyOn(service as any, '_runTransition').and.callThrough();
 
       element.nativeNode.click();
 
@@ -190,12 +287,14 @@ describe('ViewTransitionService', () => {
     });
 
     it(`should remove the animation class after the animation is finished`, async () => {
-      const element = fixture.debugElement.query(By.css('div')).nativeNode;
+      const element = fixture.debugElement.query(
+        By.css('[data-test=test-button]')
+      ).nativeNode;
 
-      await (service as any).runTransition(
+      await service['_runTransition'](
         element,
         'fadeOut-to-left-animation',
-        { removeAnimationClassOnFinish: true }
+        true
       );
 
       expect(
