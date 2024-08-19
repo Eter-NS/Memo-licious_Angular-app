@@ -4,12 +4,12 @@ import { NoteModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { randomId } from 'src/app/reusable/utils/data-tools/objectTools';
 import { BehaviorSubject } from 'rxjs';
-import { TIMESTAMP_TOKEN } from 'src/app/reusable/data-access/timestamp/timestamp.token';
+import { OBJECT_TOOLS } from 'src/app/reusable/utils/data-tools/objectTools.token';
 
 @Injectable()
 export class NoteRestService implements OnDestroy {
   #announcer = inject(LiveAnnouncer);
-  #timestamp = inject(TIMESTAMP_TOKEN);
+  #objectTools = inject(OBJECT_TOOLS);
 
   readonly ID_LENGTH = 27;
 
@@ -71,7 +71,7 @@ export class NoteRestService implements OnDestroy {
       return;
     }
 
-    const createdAt = await this.#timestamp();
+    const createdAt = await this.#objectTools.createTimestamp();
     const note: NoteModel = {
       createdAt,
       id: randomId(this.ID_LENGTH),

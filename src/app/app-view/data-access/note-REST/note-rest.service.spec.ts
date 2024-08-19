@@ -6,8 +6,8 @@ import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
 import { NoteModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { Observable } from 'rxjs';
 import { Provider } from '@angular/core';
-import { TIMESTAMP_TOKEN } from 'src/app/reusable/data-access/timestamp/timestamp.token';
-import { localUTCTimestamp } from 'src/app/reusable/utils/data-tools/objectTools';
+import * as tools from 'src/app/reusable/utils/data-tools/objectTools';
+import { OBJECT_TOOLS } from 'src/app/reusable/utils/data-tools/objectTools.token';
 
 describe('NoteRestService', () => {
   const liveAnnouncerMock = jasmine.createSpyObj<LiveAnnouncer>(['announce']);
@@ -25,7 +25,7 @@ describe('NoteRestService', () => {
       providers: [
         NoteRestService,
         { provide: LiveAnnouncer, useValue: liveAnnouncerMock },
-        { provide: TIMESTAMP_TOKEN, useFactory: () => localUTCTimestamp },
+        { provide: OBJECT_TOOLS, useFactory: () => ({ ...tools }) },
       ] satisfies Provider[],
     });
     service = TestBed.inject(NoteRestService);
@@ -214,6 +214,9 @@ describe('NoteRestService', () => {
 
     it(`should call _notesBufferSubject.next() with the new note.`, async () => {
       // Arrange
+      spyOn(TestBed.inject(OBJECT_TOOLS), 'createTimestamp').and.resolveTo(
+        tools.localUTCTimestamp()
+      );
       const spy = spyOn(
         service['_notesBufferSubject'],
         'next'
