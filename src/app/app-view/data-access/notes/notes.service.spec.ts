@@ -23,8 +23,8 @@ import {
 } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { NoteRestService } from '../note-REST/note-rest.service';
 import { Provider } from '@angular/core';
-import { TIMESTAMP_TOKEN } from 'src/app/reusable/data-access/timestamp/timestamp.token';
-import { localUTCTimestamp } from 'src/app/reusable/utils/data-tools/objectTools';
+import * as tools from 'src/app/reusable/utils/data-tools/objectTools';
+import { OBJECT_TOOLS } from 'src/app/reusable/utils/data-tools/objectTools.token';
 
 describe('NotesService', () => {
   // Example model objects
@@ -104,7 +104,7 @@ describe('NotesService', () => {
         { provide: AppConfigService, useValue: appConfigServiceMock },
         { provide: ErrorHandlerService, useValue: errorHandlerServiceMock },
         { provide: NoteRestService, useValue: noteRestServiceMock },
-        { provide: TIMESTAMP_TOKEN, useFactory: () => localUTCTimestamp },
+        { provide: OBJECT_TOOLS, useFactory: () => ({ ...tools }) },
       ] satisfies Provider[],
     });
     service = TestBed.inject(NotesService);
@@ -319,6 +319,10 @@ describe('NotesService', () => {
     it(`should call modifyGroups successfully.`, async () => {
       // Arrange
       const spy = spyOn(service, 'modifyGroups');
+      spyOn(TestBed.inject(OBJECT_TOOLS), 'createTimestamp').and.resolveTo(
+        tools.localUTCTimestamp()
+      );
+
       userType = 'local';
 
       activeUserSubject.next({
@@ -339,6 +343,9 @@ describe('NotesService', () => {
       const title = 'Hello World';
       userType = 'local';
 
+      spyOn(TestBed.inject(OBJECT_TOOLS), 'createTimestamp').and.resolveTo(
+        tools.localUTCTimestamp()
+      );
       spyOn(service, 'modifyGroups').and.rejectWith(
         new Error('Example internal error')
       );
@@ -358,6 +365,10 @@ describe('NotesService', () => {
       userType = 'local';
 
       const spy = noteRestServiceMock.fillNotesBuffer;
+
+      spyOn(TestBed.inject(OBJECT_TOOLS), 'createTimestamp').and.resolveTo(
+        tools.localUTCTimestamp()
+      );
       spyOn(service, 'modifyGroups').and.resolveTo(false);
 
       activeUserSubject.next({
@@ -378,6 +389,9 @@ describe('NotesService', () => {
       userType = 'local';
 
       const spy = noteRestServiceMock.fillNotesBuffer;
+      spyOn(TestBed.inject(OBJECT_TOOLS), 'createTimestamp').and.resolveTo(
+        tools.localUTCTimestamp()
+      );
       spyOn(service, 'modifyGroups').and.resolveTo(true);
 
       activeUserSubject.next({
@@ -562,6 +576,12 @@ describe('NotesService', () => {
   });
 
   describe(`markGroupToDelete()`, () => {
+    beforeEach(() => {
+      spyOn(TestBed.inject(OBJECT_TOOLS), 'createTimestamp').and.resolveTo(
+        tools.localUTCTimestamp()
+      );
+    });
+
     it(`should reject if user has no groups.`, async () => {
       // Arrange
       userType = 'local';

@@ -22,7 +22,7 @@ import { User } from '@angular/fire/auth';
 import { environment } from 'src/environments/environment.dev';
 import { NoteRestService } from '../note-REST/note-rest.service';
 import { ErrorHandlerService } from 'src/app/reusable/data-access/error-handler/error-handler.service';
-import { TIMESTAMP_TOKEN } from 'src/app/reusable/data-access/timestamp/timestamp.token';
+import { OBJECT_TOOLS } from 'src/app/reusable/utils/data-tools/objectTools.token';
 
 @Injectable()
 export class NotesService {
@@ -32,7 +32,7 @@ export class NotesService {
   #noteRestService = inject(NoteRestService);
   #appConfigService = inject(AppConfigService);
   #errorHandlerService = inject(ErrorHandlerService);
-  #timestamp = inject(TIMESTAMP_TOKEN);
+  #objectTools = inject(OBJECT_TOOLS);
 
   readonly MAX_ERROR_COUNT = 3;
   readonly RECONNECT_DELAY = 2500;
@@ -79,7 +79,7 @@ export class NotesService {
           return;
         }
 
-        const now = await this.#timestamp();
+        const now = await this.#objectTools.createTimestamp();
         const existingGroups = groups.filter(
           (group) =>
             typeof group.deleteAt === 'undefined' || group.deleteAt >= now
@@ -99,7 +99,7 @@ export class NotesService {
         .pipe(combineLatestWith(this.#noteRestService.notesBuffer$), take(1))
         .subscribe(async ([groups, buffer]) => {
           try {
-            const createdAt = await this.#timestamp();
+            const createdAt = await this.#objectTools.createTimestamp();
             const payload: NoteGroupModel = {
               id: randomId(this.#noteRestService.ID_LENGTH),
               title,
@@ -190,7 +190,7 @@ export class NotesService {
           const threeDays = 3 * 24 * 60 * 60 * 1000;
           const threeMinutes = 3 * 60 * 1000;
           const deleteAt =
-            (await this.#timestamp()) +
+            (await this.#objectTools.createTimestamp()) +
             (this._removingSpeed === 'slow' ? threeDays : threeMinutes);
 
           updatedGroups = [
