@@ -17,5 +17,8 @@ export interface UserProfileChangesI extends UserProfile {
   oldEmail?: string;
   oldPassphrase?: string;
   passphrase?: string;
+}
+
+export interface UserProfileChangesWithImageI extends UserProfileChangesI {
   photoBlob?: PhotoBlob;
 }

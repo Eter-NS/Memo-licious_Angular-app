@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { AuthUserConnectorService } from '../auth-user-connector/auth-user-connector.service';
 import {
   UserProfile,
-  UserProfileChangesI,
+  UserProfileChangesWithImageI,
 } from '../../utils/models/user-profile.interface';
 import {
   Observable,
@@ -12,11 +12,11 @@ import {
   from,
   map,
   of,
-  shareReplay,
   switchMap,
 } from 'rxjs';
 import { User } from '@angular/fire/auth';
 import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
+import { readMessageProperty } from 'src/app/reusable/utils/data-tools/readMessageProperty';
 
 export interface UserProfileUpdateResultI {
   state: 'pending' | 'success' | 'failure' | 'idle';
@@ -36,13 +36,13 @@ export class UserProfileService {
     );
   }
 
-  private _userProfileUpdateSubject = new Subject<UserProfileChangesI>();
+  private _userProfileUpdateSubject =
+    new Subject<UserProfileChangesWithImageI>();
   get userProfileUpdateAction$() {
-    return this._userProfileUpdateSubject.asObservable().pipe(
+    return this._userProfileUpdateSubject.pipe(
       switchMap((value) =>
         from(this.#authUserConnectorService.updateUser(value))
-      ),
-      shareReplay({ refCount: false, bufferSize: 1, windowTime: 1000 })
+      )
     );
   }
 
@@ -56,18 +56,20 @@ export class UserProfileService {
       catchError((err) => {
         return of<UserProfileUpdateResultI>({
           state: 'failure',
-          cause: 'message' in err ? err.message : err,
+          cause: readMessageProperty(err) || undefined,
         });
       })
     );
   }
 
-  uploadProfileChanges(changes: UserProfileChangesI) {
+  uploadProfileChanges(changes: UserProfileChangesWithImageI) {
     this._userProfileUpdateSubject.next(changes);
   }
 
   private _createUserProfile(user: LocalUserAccount | User): UserProfile {
-    if (this.#authUserConnectorService.activeUserTypeSig() === 'local') {
+    const userType = this.#authUserConnectorService.activeUserTypeSig();
+
+    if (userType === 'local') {
       const {
         auth: { name, authOption },
         profilePictureUrl: photoUrl,
