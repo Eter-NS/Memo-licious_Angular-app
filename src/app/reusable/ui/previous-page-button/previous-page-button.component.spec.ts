@@ -9,7 +9,7 @@ describe('GoBackButtonComponent', () => {
   const pageSubject = new BehaviorSubject<'start' | 'end' | 'idle'>('idle');
   const viewTransitionServiceMock = {
     pageSubject,
-    page$: pageSubject.asObservable(),
+    pageState$: pageSubject.asObservable(),
   };
 
   let component: PreviousPageButtonComponent;
@@ -53,13 +53,13 @@ describe('GoBackButtonComponent', () => {
   });
 
   describe('component logic', () => {
-    describe('ngAfterViewInit()', () => {
+    describe('ngOnInit()', () => {
       it('should subscribe and call fadeOut() when the page$ contains value "start"', () => {
         viewTransitionServiceMock.pageSubject.next('start');
         const spy = spyOn(component, 'fadeOut');
         fixture.detectChanges();
 
-        component.ngAfterViewInit();
+        component.ngOnInit();
 
         expect(spy).toHaveBeenCalled();
       });
@@ -76,15 +76,21 @@ describe('GoBackButtonComponent', () => {
     });
 
     describe('fadeOut()', () => {
-      it('should call runAnimationOnce() with anchor element, "fade-out-vol-2-animation" and removeAnimationClassOnFinish set to true', () => {
-        const spy = spyOn(component, 'runAnimationOnce').and.callThrough();
+      it('should call runAnimationOnce() with anchor element, "fade-out-vol-2-animation" and removeAnimationClassOnFinish set to false', () => {
+        const spy = spyOn(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          component as any,
+          '_runAnimationOnce'
+        ).and.callThrough();
 
         component.fadeOut();
 
         expect(spy).toHaveBeenCalledWith(
           component.anchor.nativeElement,
           'fade-out-vol-2-animation',
-          { removeClassOnFinish: true }
+          {
+            removeClassOnFinish: false,
+          }
         );
       });
     });
