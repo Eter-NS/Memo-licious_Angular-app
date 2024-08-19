@@ -80,7 +80,7 @@ export const checkPassword = (
   control: AbstractControl | string
 ): ValidationErrors | null => {
   const pattern =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#$%^&*()-_=+,./?]).{8,}$/;
   function checkInput(input: string) {
     return !pattern.test(input) ? { passwordError: true } : null;
   }
