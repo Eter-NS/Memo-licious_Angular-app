@@ -6,10 +6,7 @@ import { AuthUserConnectorService } from 'src/app/app-view/data-access/auth-user
 export const redirectUnauthorizedToGuard = (
   denyFallback: string
 ): CanActivateFn => {
-  return function (/* route, state */):
-    | boolean
-    | Promise<boolean>
-    | Observable<boolean> {
+  return function (/* route, state */): Observable<boolean> {
     const authUserConnectorService = inject(AuthUserConnectorService),
       router = inject(Router);
 
