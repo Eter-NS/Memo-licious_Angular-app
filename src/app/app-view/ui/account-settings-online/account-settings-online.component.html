@@ -1,6 +1,6 @@
 <div class="form-wrapper">
   <form class="form" [formGroup]="onlineProfileForm" (ngSubmit)="onSubmit()">
-    <fieldset class="form-element">
+    <fieldset class="form-element" data-test="name">
       <label>
         <p class="form-label">name</p>
         <input type="text" formControlName="name" />
@@ -18,6 +18,7 @@
     <mat-accordion class="form-element accordion" multi>
       <mat-expansion-panel
         class="expansion-panel"
+        data-test="expansion-panel1"
         (opened)="enablePanel('changeEmail')"
         (closed)="disablePanel('changeEmail')"
       >
@@ -25,50 +26,60 @@
           <mat-panel-title> Email </mat-panel-title>
         </mat-expansion-panel-header>
 
-        <div formGroupName="changeEmail" data-test="password-group">
-          <fieldset class="form-element">
+        <div formGroupName="changeEmail" data-test="emailGroup">
+          <fieldset class="form-element" data-test="emailGroup-currentEmail">
             <label>
               <p class="form-label">Current email</p>
               <input type="email" formControlName="currentEmail" />
             </label>
-            @if (isErrorAndTouched( ['changeEmail', 'currentEmail'],
-            'required')) {
+            @if (isErrorAndTouched(['changeEmail', 'currentEmail'], 'required')
+            || ((unsuccessfulSubmit$ | async)?.state &&
+            getError(['changeEmail','currentEmail'], 'required'))) {
             <p class="input-error">This field is required!</p>
-            } @else if(isErrorAndDirty( ['changeEmail', 'currentEmail'],
+            } @else if(isErrorAndDirty(['changeEmail', 'currentEmail'],
             'emailError')) {
             <p class="input-error">This is not an email</p>
             }
           </fieldset>
-          <fieldset class="form-element">
+
+          <fieldset class="form-element" data-test="emailGroup-email">
             <label>
               <p class="form-label">New email</p>
               <input type="email" formControlName="email" />
             </label>
-            @if(isErrorAndTouched( ['changeEmail', 'email'], 'required')) {
+            @if(isErrorAndTouched(['changeEmail', 'email'], 'required') ||
+            ((unsuccessfulSubmit$ | async)?.state &&
+            getError(['changeEmail','email'], 'required'))) {
             <p class="input-error">This field is required!</p>
-            } @else if(isErrorAndDirty( ['changeEmail', 'email'], 'emailError'))
+            } @else if(isErrorAndDirty(['changeEmail', 'email'], 'emailError'))
             {
             <p class="input-error">This is not an email</p>
             }
           </fieldset>
+
           @if(onlineProfileForm.controls.changeEmail.hasError('sameEmail')){
-          <p class="input-error">The emails are the same</p>
+          <p class="input-error" data-test="sameEmail-error">
+            The emails are the same
+          </p>
           }
 
-          <fieldset class="form-element">
+          <fieldset class="form-element" data-test="emailGroup-currentPassword">
             <label>
               <p class="form-label">Current password (for authentication)</p>
               <input type="password" formControlName="currentPassword" />
             </label>
-            @if (isErrorAndTouched( ['changeEmail', 'currentPassword'],
-            'required')) {
+            @if (isErrorAndTouched(['changeEmail', 'currentPassword'],
+            'required') || ((unsuccessfulSubmit$ | async)?.state &&
+            getError(['changeEmail','currentPassword'], 'required'))) {
             <p class="input-error">This field is required!</p>
             }
           </fieldset>
         </div>
       </mat-expansion-panel>
+
       <mat-expansion-panel
         class="expansion-panel"
+        data-test="expansion-panel2"
         (opened)="enablePanel('changePassword')"
         (closed)="disablePanel('changePassword')"
       >
@@ -76,28 +87,34 @@
           <mat-panel-title> Password </mat-panel-title>
         </mat-expansion-panel-header>
 
-        <div formGroupName="changePassword" data-test="password-group">
-          <fieldset class="form-element">
+        <div formGroupName="changePassword" data-test="passwordGroup">
+          <fieldset
+            class="form-element"
+            data-test="passwordGroup-currentPassword"
+          >
             <label>
               <p class="form-label">Current password</p>
               <input type="password" formControlName="currentPassword" />
             </label>
-            @if (isErrorAndTouched( ['changePassword', 'currentPassword'],
-            'required')) {
+            @if (isErrorAndTouched(['changePassword', 'currentPassword'],
+            'required') || ((unsuccessfulSubmit$ | async)?.state &&
+            getError(['changePassword','currentPassword'], 'required'))) {
             <p class="input-error">This field is required!</p>
             }
           </fieldset>
-          <fieldset class="form-element">
+
+          <fieldset class="form-element" data-test="passwordGroup-password">
             <label>
               <p class="form-label">New password</p>
               <input type="password" formControlName="password" />
             </label>
-            @if (isErrorAndTouched( ['changePassword', 'password'], 'required'))
-            {
+            @if (isErrorAndTouched(['changePassword', 'password'], 'required')
+            || ((unsuccessfulSubmit$ | async)?.state &&
+            getError(['changePassword','password'], 'required'))) {
             <p class="input-error">This field is required!</p>
             }
             <!--  -->
-            @if (isErrorAndDirty( ['changePassword', 'password'],
+            @if (isErrorAndDirty(['changePassword', 'password'],
             'passwordError')) {
             <p class="input-error">
               The password must have 8 characters, numbers, and special
@@ -105,7 +122,11 @@
             </p>
             }
           </fieldset>
-          <fieldset class="form-element">
+
+          <fieldset
+            class="form-element"
+            data-test="passwordGroup-confirmPassword"
+          >
             <label>
               <p class="form-label">Confirm new password</p>
               <input type="password" formControlName="confirmPassword" />
@@ -115,11 +136,11 @@
             <p class="input-error">This field is required!</p>
             }
             <!--  -->
-            @if (isErrorAndDirty(['changePassword', 'confirmPassword'],
-            'passwordMatch')) {
+            @if (isErrorAndDirty('changePassword', 'passwordMatch')) {
             <p class="input-error">The passwords are not the same</p>
             }
           </fieldset>
+
           @if(onlineProfileForm.controls.changePassword.hasError('samePassword')){
           <p class="input-error">
             The current password and a new one are the same
@@ -134,6 +155,7 @@
     }
 
     <button
+      data-test="submit-button"
       type="submit"
       class="submit-button"
       appCustomMatRipple
