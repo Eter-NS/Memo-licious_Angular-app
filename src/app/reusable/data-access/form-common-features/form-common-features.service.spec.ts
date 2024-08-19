@@ -1,19 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ComponentFixture,
   TestBed,
   fakeAsync,
   flush,
+  tick,
 } from '@angular/core/testing';
 
 import { FormCommonFeaturesService } from './form-common-features.service';
-import { Component, EventEmitter, inject } from '@angular/core';
+import { Component, EventEmitter, inject, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   standalone: true,
   template: `
+    @if (showHeader()) {
     <h1>Testing header</h1>
+    }
     <form>
       <fieldset>
         <label class="form-element">
@@ -38,6 +42,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 })
 class TestComponent {
   formElements = inject(FormCommonFeaturesService);
+
+  showHeader = signal<boolean>(true);
 }
 
 describe('RegisterLoginCommonFeaturesService', () => {
@@ -58,6 +64,21 @@ describe('RegisterLoginCommonFeaturesService', () => {
   });
 
   describe('onInitAnimations()', () => {
+    it(`should stop executing if an element has not been found.`, fakeAsync(() => {
+      // Arrange
+      const spy = spyOn(service, 'addAnimations');
+      component.showHeader.set(false);
+      fixture.detectChanges();
+      tick();
+
+      // Act
+      component.formElements.onInitAnimations();
+      flush();
+
+      // Assert
+      expect(spy).not.toHaveBeenCalled();
+    }));
+
     it('should call addAnimations() three times', () => {
       spyOn(service, 'addAnimations');
 
@@ -75,7 +96,7 @@ describe('RegisterLoginCommonFeaturesService', () => {
       expect(service.runWithDelay).toHaveBeenCalledTimes(1);
     }));
 
-    it('should call removeAnimations() three times', fakeAsync(() => {
+    it('should call removeAnimations() three times after runWithDelay resolution.', fakeAsync(() => {
       spyOn(service, 'runWithDelay').and.returnValue(Promise.resolve());
       spyOn(service, 'removeAnimations');
 
@@ -91,22 +112,25 @@ describe('RegisterLoginCommonFeaturesService', () => {
         By.css('.submit-button')
       ).nativeElement;
 
-      expect(service.removeAnimations).toHaveBeenCalledWith(h1Element, [
-        'fadeIn-from-top-animation',
-      ]);
-      expect(service.removeAnimations).toHaveBeenCalledWith(formInputs, [
-        'fadeIn-from-left-animation',
-      ]);
-      expect(service.removeAnimations).toHaveBeenCalledWith(submitButton, [
-        'fadeIn-from-right-animation',
-      ]);
+      expect(service.removeAnimations).toHaveBeenCalledWith(
+        h1Element,
+        'fadeIn-from-top-animation'
+      );
+      expect(service.removeAnimations).toHaveBeenCalledWith(
+        formInputs,
+        'fadeIn-from-left-animation'
+      );
+      expect(service.removeAnimations).toHaveBeenCalledWith(
+        submitButton,
+        'fadeIn-from-right-animation'
+      );
     }));
 
     it('should call console.error in case of catch block', fakeAsync(() => {
       spyOn(service, 'runWithDelay').and.returnValue(
         Promise.reject(new Error('Example error message'))
       );
-      spyOn(console, 'error');
+      spyOn(console, 'error').and.stub();
 
       component.formElements.onInitAnimations();
       flush();
@@ -162,7 +186,7 @@ describe('RegisterLoginCommonFeaturesService', () => {
     });
   });
 
-  describe('onSubmit()', () => {
+  describe('submitForm()', () => {
     it('should set the FormGroup error if it is invalid and end the method execution', () => {
       const formGroup = new FormGroup({
         email: new FormControl('', [Validators.required, Validators.email]),
@@ -199,6 +223,177 @@ describe('RegisterLoginCommonFeaturesService', () => {
       service.submitForm(formGroup, emiter);
 
       expect(emiter.emit).toHaveBeenCalled();
+    });
+  });
+
+  describe(`hasInvalidControls()`, () => {
+    it(`should return false if the FormGroup has valid controls.`, () => {
+      // Arrange
+      const form = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        surname: new FormControl('', [Validators.required]),
+      });
+      form.patchValue({ name: 'example-name', surname: 'example-surname' });
+
+      // Act
+      const result = service.hasInvalidControls(form);
+
+      // Assert
+      expect(result).toBeFalsy();
+    });
+
+    it(`should return true if the FormGroup has invalid controls.`, () => {
+      // Arrange
+      const form = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        surname: new FormControl('', [Validators.required]),
+      });
+
+      // Act
+      const result = service.hasInvalidControls(form);
+
+      // Assert
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe(`onFailure()`, () => {
+    it(`should set invalidForm flag to true.`, () => {
+      // Arrange
+      const form = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        surname: new FormControl('', [Validators.required]),
+      });
+
+      // Act
+      service.onFailure(form);
+
+      // Assert
+      expect(form.errors?.['invalidForm']).toBeTruthy();
+    });
+  });
+
+  describe(`isErrorAndTouched()`, () => {
+    it(`should call and return the result of _formFieldConditionalCheck method.`, () => {
+      // Arrange
+      const spy = spyOn(
+        service as any,
+        '_formFieldConditionalCheck'
+      ).and.returnValue(true);
+      const form = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        surname: new FormControl('', [Validators.required]),
+      });
+
+      // Act
+      const result = service.isErrorAndTouched(form, 'name', 'required');
+
+      // Assert
+      expect(spy).toHaveBeenCalledWith(form, 'name', 'required', 'touched');
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe(`isErrorAndDirty()`, () => {
+    it(`should call and return the result of _formFieldConditionalCheck method.`, () => {
+      // Arrange
+      const spy = spyOn(
+        service as any,
+        '_formFieldConditionalCheck'
+      ).and.returnValue(true);
+      const form = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        surname: new FormControl('', [Validators.required]),
+      });
+
+      // Act
+      const result = service.isErrorAndDirty(form, 'name', 'required');
+
+      // Assert
+      expect(spy).toHaveBeenCalledWith(form, 'name', 'required', 'dirty');
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe(`_formFieldConditionalCheck()`, () => {
+    let form: FormGroup<{
+      name: FormControl<string | null>;
+      surname: FormControl<string | null>;
+    }>;
+    beforeEach(() => {
+      form = new FormGroup({
+        name: new FormControl('', [Validators.required]),
+        surname: new FormControl('', [Validators.required]),
+      });
+    });
+
+    it(`should call getError method and if the result is true then check the touched property.`, () => {
+      // Arrange
+      spyOn(service, 'getError').and.returnValue(true);
+      form.controls.name.markAsTouched();
+
+      // Act
+      const result = service['_formFieldConditionalCheck'](
+        form,
+        'name',
+        'required',
+        'touched'
+      );
+
+      // Assert
+      expect(result).toBeTruthy();
+    });
+
+    it(`should call getError method and if the result is true then check the dirty property.`, () => {
+      // Arrange
+      spyOn(service, 'getError').and.returnValue(true);
+      form.controls.name.markAsDirty();
+
+      // Act
+      const result = service['_formFieldConditionalCheck'](
+        form,
+        'name',
+        'required',
+        'dirty'
+      );
+
+      // Assert
+      expect(result).toBeTruthy();
+    });
+
+    it(`should call getError method and return false if the control is valid.`, () => {
+      // Arrange
+      spyOn(service, 'getError').and.returnValue(false);
+      form.controls.name.markAsTouched();
+
+      // Act
+      const result = service['_formFieldConditionalCheck'](
+        form,
+        'name',
+        'required',
+        'touched'
+      );
+
+      // Assert
+      expect(result).toBeFalsy();
+    });
+
+    it(`should not call getError method and return undefined if the control does not exist.`, () => {
+      // Arrange
+      const spy = spyOn(service, 'getError');
+      form.controls.name.markAsTouched();
+
+      // Act
+      const result = service['_formFieldConditionalCheck'](
+        form,
+        'uid',
+        'required',
+        'touched'
+      );
+
+      // Assert
+      expect(spy).not.toHaveBeenCalled();
+      expect(result).toBe(undefined);
     });
   });
 });

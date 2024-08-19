@@ -38,14 +38,18 @@ export class FormCommonFeaturesService {
 
   onInitAnimations() {
     const h1Element = document.querySelector('h1');
+
     const formInputs: Array<HTMLElement> = [];
     document
       .querySelectorAll<HTMLElement>('.form-element')
       .forEach((el) => formInputs.push(el));
+
     const submitButton =
       document.querySelector<HTMLButtonElement>('.submit-button');
 
-    if (!h1Element || !formInputs.length || !submitButton) return;
+    if (!h1Element || !formInputs.length || !submitButton) {
+      return;
+    }
 
     this.addAnimations(h1Element, 'fadeIn-from-top-animation');
     this.addAnimations(formInputs, 'fadeIn-from-left-animation');
@@ -55,13 +59,13 @@ export class FormCommonFeaturesService {
       delayT: 75,
     })
       .then(() => {
-        this.removeAnimations(h1Element, ['fadeIn-from-top-animation']);
-        this.removeAnimations(formInputs, ['fadeIn-from-left-animation']);
-        this.removeAnimations(submitButton, ['fadeIn-from-right-animation']);
+        this.removeAnimations(h1Element, 'fadeIn-from-top-animation');
+        this.removeAnimations(formInputs, 'fadeIn-from-left-animation');
+        this.removeAnimations(submitButton, 'fadeIn-from-right-animation');
       })
-      .catch((err: PromiseRejectedResult) => {
+      .catch((err: Error) => {
         if (!environment.production) {
-          console.error(err.reason);
+          console.error(err.message);
         }
       });
   }
@@ -80,12 +84,13 @@ export class FormCommonFeaturesService {
       formGroup.setErrors({ checkInputs: true });
       return false;
     }
+
     formGroup.setErrors(null);
     emitter.emit({ ...formGroup.value });
     return true;
   };
 
-  hasInvalidControls = (group: FormGroup) => {
+  hasInvalidControls = (group: FormGroup): boolean => {
     return Object.keys(group.controls).some((key) => {
       const control = group.get(key) as FormControl | null;
 
@@ -130,6 +135,11 @@ export class FormCommonFeaturesService {
     prop: 'dirty' | 'touched'
   ) {
     const el = formGroup.get(element);
-    return this.getError(formGroup, element, validation) && el?.[prop];
+
+    if (!el) {
+      return undefined;
+    }
+
+    return this.getError(formGroup, element, validation) && el[prop];
   }
 }
