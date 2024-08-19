@@ -1,66 +1,51 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { redirectLoggedInToGuard } from './redirect-logged-in-to.guard';
 import {
-  ActivatedRoute,
+  ActivatedRouteSnapshot,
   CanActivateFn,
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
-import { AuthStateService } from '../../data-access/state/auth-state.service';
-import { AuthLocalUserService } from '../../data-access/local-user/auth-local-user.service';
 import { LocalUserAccount } from '../Models/LocalAuthModels.interface';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '@angular/fire/auth';
+import { AuthUserConnectorService } from 'src/app/app-view/data-access/auth-user-connector/auth-user-connector.service';
+import { NoteGroupModel } from '../Models/UserDataModels.interface';
 
 describe('redirectLoggedInToGuard', () => {
+  const activeUserSubject = new BehaviorSubject<User | LocalUserAccount | null>(
+    null
+  );
+  const authUserConnectorServiceMock = {
+    activeUser$: activeUserSubject.asObservable(),
+  };
+  const routerMock = jasmine.createSpyObj<Router>(['navigateByUrl']);
+
+  const path = '/app';
+  let instance: CanActivateFn;
+
   const executeGuard = (loggedInFallback: string) => {
     return TestBed.runInInjectionContext(() =>
       redirectLoggedInToGuard(loggedInFallback)
     );
   };
 
-  let activatedRouteMock: ActivatedRoute;
-  const authLocalUserServiceMock = {
-    localUser$: of<LocalUserAccount | null | undefined>(undefined),
-  };
-  const authStateServiceMock = {
-    user$: of<User | null>(null),
-  };
-  const routerMock = {
-    navigateByUrl: jasmine
-      .createSpy('navigateByUrl', Router.prototype.navigateByUrl)
-      .and.resolveTo(true),
-  };
-
-  const path = '/app';
-  let instance: CanActivateFn;
+  beforeEach(() => {
+    activeUserSubject.next(null);
+  });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         {
-          provide: AuthStateService,
-          useValue: authStateServiceMock,
+          provide: AuthUserConnectorService,
+          useValue: authUserConnectorServiceMock,
         },
-        {
-          provide: AuthLocalUserService,
-          useValue: authLocalUserServiceMock,
-        },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {},
-          },
-        },
-        {
-          provide: Router,
-          useValue: routerMock,
-        },
+        { provide: Router, useValue: routerMock },
       ],
     });
 
-    activatedRouteMock = TestBed.inject(ActivatedRoute);
     instance = executeGuard(path);
   });
 
@@ -68,56 +53,90 @@ describe('redirectLoggedInToGuard', () => {
     expect(instance).toBeTruthy();
   });
 
-  it('should call router.navigateByUrl() if user is logged in (online user)', (done: DoneFn) => {
-    authStateServiceMock.user$ = of({ emailVerified: true } as User);
+  it('should call router.navigateByUrl() if user is logged in (online user)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      activeUserSubject.next({ emailVerified: true } as User);
+      let value: boolean | undefined;
 
-    TestBed.runInInjectionContext(() =>
-      (
-        instance(
-          activatedRouteMock.snapshot,
-          {} as RouterStateSnapshot
-        ) as Observable<boolean>
-      ).subscribe((result) => {
-        result;
-        expect(routerMock.navigateByUrl).toHaveBeenCalledWith(path);
-        expect(result).toBe(false);
-        done();
-      })
-    );
-  });
+      const result = instance(
+        {} as ActivatedRouteSnapshot,
+        {} as RouterStateSnapshot
+      ) as Observable<boolean>;
 
-  it('should call router.navigateByUrl() if user is logged in (local user)', (done: DoneFn) => {
-    authStateServiceMock.user$ = of(null);
-    authLocalUserServiceMock.localUser$ = of({} as LocalUserAccount);
+      const subscription = result.subscribe((result) => {
+        value = result;
+      });
 
-    TestBed.runInInjectionContext(() =>
-      (
-        instance(
-          activatedRouteMock.snapshot,
-          {} as RouterStateSnapshot
-        ) as Observable<boolean>
-      ).subscribe((result) => {
-        expect(routerMock.navigateByUrl).toHaveBeenCalledWith(path);
-        expect(result).toBe(false);
-        done();
-      })
-    );
-  });
+      tick(1_000);
+      subscription.unsubscribe();
 
-  it('should return true no user is logged in', (done: DoneFn) => {
-    authStateServiceMock.user$ = of(null);
-    authLocalUserServiceMock.localUser$ = of(null);
+      expect(routerMock.navigateByUrl).toHaveBeenCalledWith(path);
+      expect(value).toBe(false);
+    });
+  }));
 
-    TestBed.runInInjectionContext(() =>
-      (
-        instance(
-          activatedRouteMock.snapshot,
-          {} as RouterStateSnapshot
-        ) as Observable<boolean>
-      ).subscribe((result) => {
-        expect(result).toBe(true);
-        done();
-      })
-    );
-  });
+  it('should call router.navigateByUrl() if user is logged in (local user)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      activeUserSubject.next({
+        groups: [] as NoteGroupModel[],
+      } as LocalUserAccount);
+      let value: boolean | undefined;
+
+      const result = instance(
+        {} as ActivatedRouteSnapshot,
+        {} as RouterStateSnapshot
+      ) as Observable<boolean>;
+
+      const subscription = result.subscribe((result) => {
+        value = result;
+      });
+
+      tick(1_000);
+      subscription.unsubscribe();
+
+      expect(routerMock.navigateByUrl).toHaveBeenCalledWith(path);
+      expect(value).toBe(false);
+    });
+  }));
+
+  it('should return true if no user is logged in', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      let value: boolean | undefined;
+
+      const result = instance(
+        {} as ActivatedRouteSnapshot,
+        {} as RouterStateSnapshot
+      ) as Observable<boolean>;
+
+      const subscription = result.subscribe((result) => {
+        value = result;
+      });
+
+      tick(1_000);
+      subscription.unsubscribe();
+
+      expect(value).toBe(true);
+    });
+  }));
+
+  it('should return true if online user is unverified', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      activeUserSubject.next({ emailVerified: false } as User);
+      let value: boolean | undefined;
+
+      const result = instance(
+        {} as ActivatedRouteSnapshot,
+        {} as RouterStateSnapshot
+      ) as Observable<boolean>;
+
+      const subscription = result.subscribe((result) => {
+        value = result;
+      });
+
+      tick(1_000);
+      subscription.unsubscribe();
+
+      expect(value).toBe(true);
+    });
+  }));
 });
