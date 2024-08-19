@@ -7,7 +7,7 @@ export const OBJECT_TOOLS = new InjectionToken<OBJECT_TOOLS_TYPE>(
   'OBJECT_TOOLS',
   {
     factory: () => {
-      return tools;
+      return { ...tools };
     },
   }
 );
