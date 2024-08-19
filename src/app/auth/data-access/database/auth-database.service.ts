@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Database } from '@angular/fire/database';
 import { AuthStateService } from '../state/auth-state.service';
 import { UserCredential } from '@angular/fire/auth';
 import {
@@ -17,13 +16,14 @@ import { environment } from 'src/environments/environment.dev';
 })
 export class AuthDatabaseService {
   #authState = inject(AuthStateService);
-  #db = inject(Database);
   #fireDBController = inject(FirebaseDatabaseControllerService);
 
   async databaseRegisterHandler({
     user: { email, uid, photoURL },
   }: UserCredential): Promise<AuthReturnCredits> {
-    if (!email) return { errors: { noEmailProvided: true } };
+    if (!email) {
+      return { errors: { noEmailProvided: true } };
+    }
 
     if (await this.isUserInDatabase(uid)) {
       return {
@@ -52,7 +52,10 @@ export class AuthDatabaseService {
 
   async isUserInDatabase(uid: string): Promise<boolean | undefined> {
     try {
-      const userRef = this.#fireDBController.ref(this.#db, `users/${uid}`);
+      const userRef = this.#fireDBController.ref(
+        this.#fireDBController.db,
+        `users/${uid}`
+      );
       const userSnapshot = await this.#fireDBController.get(userRef);
 
       return userSnapshot.exists();
@@ -77,7 +80,7 @@ export class AuthDatabaseService {
     };
 
     const userRef = this.#fireDBController.ref(
-      this.#db,
+      this.#fireDBController.db,
       `users/${this.#authState.auth.currentUser?.uid}`
     );
 
@@ -97,7 +100,7 @@ export class AuthDatabaseService {
 
   getGroups(uid: string): Observable<NoteGroupModel[]> {
     const notesRef = this.#fireDBController.ref(
-      this.#db,
+      this.#fireDBController.db,
       `users/${uid}/groups`
     );
 
@@ -106,17 +109,26 @@ export class AuthDatabaseService {
 
   async updateGroups(payload: NoteGroupModel[]) {
     const uid = this.#authState.sessionSig()?.uid;
+
+    if (!uid) {
+      if (!environment.production) {
+        console.error('User not logged in');
+      }
+
+      return false;
+    }
+
     const path = `users/${uid}`;
 
     try {
-      await this.#fireDBController.update(
-        this.#fireDBController.ref(this.#db, path),
-        { groups: payload }
-      );
+      const ref = this.#fireDBController.ref(this.#fireDBController.db, path);
+
+      await this.#fireDBController.update(ref, { groups: payload });
+
       return true;
     } catch (err) {
       if (!environment.production) {
-        console.error(err);
+        console.error(isAuthError(err) ? err.message : err);
       }
       return false;
     }
@@ -127,7 +139,7 @@ export class AuthDatabaseService {
       return await this.updateGroups(payload);
     } catch (err) {
       if (!environment.production) {
-        console.error(err);
+        console.error(isAuthError(err) ? err.message : err);
       }
       return false;
     }
