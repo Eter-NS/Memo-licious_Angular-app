@@ -11,7 +11,10 @@ import { User } from '@angular/fire/auth';
 import { BehaviorSubject } from 'rxjs';
 import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 import { NoteGroupModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
-import { UserProfileChangesI } from '../../utils/models/user-profile.interface';
+import {
+  UserProfileChangesI,
+  UserProfileChangesWithImageI,
+} from '../../utils/models/user-profile.interface';
 import { FILE_TO_BASE64_TOKEN } from 'src/app/reusable/utils/file-to-base64/file-to-base64.pipe.injector';
 import { UploadResult } from '@angular/fire/storage';
 import { AuthReturnCredits } from 'src/app/auth/utils/Models/OnlineAuthModels.interface';
@@ -340,12 +343,12 @@ describe(`AuthUserConnectorService`, () => {
         ).and.callThrough();
         const spy2 =
           authLocalUserServiceMock.modifyCurrentUser.and.returnValue(true);
-        const payload: UserProfileChangesI = {
+        const payload: UserProfileChangesWithImageI = {
           photoBlob: {
             extension: `jpg`,
             blob: new File([], `example.jpg`),
           },
-        } as UserProfileChangesI;
+        } as UserProfileChangesWithImageI;
 
         const result = await service[`_handleLocalUserUpdate`](payload);
 
@@ -414,12 +417,12 @@ describe(`AuthUserConnectorService`, () => {
       it(`should return false if payload does contain photoBlob but no user is logged in`, async () => {
         authStateServiceMock.sessionSig.and.returnValue(undefined);
         const spy = storageServiceMock.uploadFile;
-        const payload: UserProfileChangesI = {
+        const payload: UserProfileChangesWithImageI = {
           photoBlob: {
             extension: 'jpg',
             blob: new File([], 'example.jpg'),
           },
-        } as UserProfileChangesI;
+        } as UserProfileChangesWithImageI;
 
         const result = await service['_handleOnlineUserUpdate'](payload);
 
@@ -432,13 +435,13 @@ describe(`AuthUserConnectorService`, () => {
         storageServiceMock.uploadFile.and.rejectWith(
           new Error('example error')
         );
-        const payload: UserProfileChangesI = {
+        const payload: UserProfileChangesWithImageI = {
           photoBlob: {
             extension: 'jpg',
             blob: new File([], 'example.jpg'),
           },
           name: 'someone',
-        } as UserProfileChangesI;
+        } as UserProfileChangesWithImageI;
 
         const result = await service['_handleOnlineUserUpdate'](payload);
 
@@ -453,13 +456,13 @@ describe(`AuthUserConnectorService`, () => {
         const spy = spyOn(console, 'error').and.stub();
         const errorObject = { msg: 'Example error' };
         storageServiceMock.uploadFile.and.rejectWith(errorObject);
-        const payload: UserProfileChangesI = {
+        const payload: UserProfileChangesWithImageI = {
           photoBlob: {
             extension: 'jpg',
             blob: new File([], 'example.jpg'),
           },
           name: 'someone',
-        } as UserProfileChangesI;
+        } as UserProfileChangesWithImageI;
 
         const result = await service['_handleOnlineUserUpdate'](payload);
 
@@ -476,13 +479,13 @@ describe(`AuthUserConnectorService`, () => {
         } as UploadResult);
         storageServiceMock.getFileUrl.and.resolveTo('example url');
         authAccountServiceMock.changeUserProfileData.and.resolveTo(true);
-        const payload: UserProfileChangesI = {
+        const payload: UserProfileChangesWithImageI = {
           photoBlob: {
             extension: 'jpg',
             blob: new File([], 'example.jpg'),
           },
           name: 'someone',
-        } as UserProfileChangesI;
+        } as UserProfileChangesWithImageI;
 
         const result = await service['_handleOnlineUserUpdate'](payload);
 

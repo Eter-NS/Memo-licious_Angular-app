@@ -13,7 +13,7 @@ import { AuthLocalUserService } from 'src/app/auth/data-access/local-user/auth-l
 import { AuthStateService } from 'src/app/auth/data-access/state/auth-state.service';
 import { ErrorHandlerService } from '../../../reusable/data-access/error-handler/error-handler.service';
 import { User } from '@angular/fire/auth';
-import { UserProfileChangesI } from '../../utils/models/user-profile.interface';
+import { UserProfileChangesWithImageI } from '../../utils/models/user-profile.interface';
 import { environment } from 'src/environments/environment.dev';
 import { RegisterCustomOptions } from 'src/app/auth/utils/Models/OnlineAuthModels.interface';
 import { StorageService } from 'src/app/reusable/data-access/firebase-storage/storage.service';
@@ -84,7 +84,7 @@ export class AuthUserConnectorService {
     })
   );
 
-  updateUser(changes: UserProfileChangesI): Promise<boolean> {
+  updateUser(changes: UserProfileChangesWithImageI): Promise<boolean> {
     const userType = this.activeUserTypeSig();
 
     if (!userType) {
@@ -92,11 +92,13 @@ export class AuthUserConnectorService {
     }
 
     const handleMethods = {
-      online: () => this._handleOnlineUserUpdate(changes),
-      local: () => this._handleLocalUserUpdate(changes),
+      online: (change: UserProfileChangesWithImageI) =>
+        this._handleOnlineUserUpdate(change),
+      local: (change: UserProfileChangesWithImageI) =>
+        this._handleLocalUserUpdate(change),
     };
 
-    return handleMethods[userType]();
+    return handleMethods[userType](changes);
   }
 
   logOutUser() {
@@ -122,7 +124,7 @@ export class AuthUserConnectorService {
   }
 
   private async _handleLocalUserUpdate(
-    changes: UserProfileChangesI
+    changes: UserProfileChangesWithImageI
   ): Promise<boolean> {
     const { name, authOption, passphrase, photoBlob, profileColor } = changes;
     let didUpdateProfilePicture = false;
@@ -149,7 +151,7 @@ export class AuthUserConnectorService {
   }
 
   private async _handleOnlineUserUpdate(
-    changes: UserProfileChangesI
+    changes: UserProfileChangesWithImageI
   ): Promise<boolean> {
     const {
       photoUrl,
@@ -193,14 +195,24 @@ export class AuthUserConnectorService {
         return profileDataResult;
       }
 
-      await this._handleOptionalPasswordUpdate(oldPassphrase, passphrase);
-      await this._handleOptionalEmailUpdate({
+      let result = await this._handleOptionalPasswordUpdate(
+        oldPassphrase,
+        passphrase
+      );
+
+      if (result?.errors) {
+        return false;
+      }
+      result = await this._handleOptionalEmailUpdate({
         oldEmail,
         email,
         existingPassphrase: oldPassphrase,
         newPassphrase: passphrase,
       });
 
+      if (result?.errors) {
+        return false;
+      }
       return true;
     } catch (err) {
       console.error(
@@ -246,12 +258,12 @@ export class AuthUserConnectorService {
     if (!existingPassphrase) {
       return null;
     }
-    const wasPasswordUpdated =
-      !!newPassphrase && newPassphrase !== existingPassphrase;
-
     if (!oldEmail || !email) {
       return null;
     }
+    const wasPasswordUpdated =
+      !!newPassphrase && newPassphrase !== existingPassphrase;
+
     const result = await this.#authAccountService.updateEmail(
       wasPasswordUpdated ? newPassphrase : existingPassphrase,
       oldEmail,
