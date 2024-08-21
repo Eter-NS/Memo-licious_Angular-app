@@ -22,7 +22,7 @@ import { Component, Provider } from '@angular/core';
   selector: 'app-test',
   template: `<p>The component works!</p>`,
 })
-export class TestComponent {}
+class TestComponent {}
 
 const LEFT_MOUSE_CLICK = 0;
 
