@@ -6,51 +6,63 @@
   </ng-template>
 
   <ng-template #sidenavLinks>
-    <div class="sidenav">
-      <div
+    <nav class="sidenav">
+      <ul
         class="sidenav__links"
         (click)="closeNavbar()"
         (keyup.enter)="closeNavbar()"
         tabindex="-1"
       >
-        <a
-          appCustomMatRipple
-          routerLink="/app/notes"
-          class="sidenav__link"
-          routerLinkActive="sidenav__link--active"
-          tabindex="0"
-        >
-          <mat-icon>home</mat-icon> Home
-        </a>
-        <a
-          appCustomMatRipple
-          routerLink="/app/recycle-bin"
-          class="sidenav__link"
-          routerLinkActive="sidenav__link--active"
-          tabindex="0"
-        >
-          <mat-icon>delete</mat-icon> Recycle bin
-        </a>
-        <a
-          appCustomMatRipple
-          routerLink="/app/settings"
-          class="sidenav__link"
-          routerLinkActive="sidenav__link--active"
-          tabindex="0"
-        >
-          <mat-icon>settings</mat-icon> Settings
-        </a>
-        <a
-          appCustomMatRipple
-          class="sidenav__link"
-          (click)="logOut()"
-          (keyup.enter)="logOut()"
-          tabindex="0"
-        >
-          <mat-icon>logout</mat-icon> Log out
-        </a>
-      </div>
-    </div>
+        <li>
+          <a
+            data-test="link-to-app-home"
+            appCustomMatRipple
+            routerLink="/app/notes"
+            class="sidenav__link"
+            routerLinkActive="sidenav__link--active"
+            tabindex="0"
+          >
+            <mat-icon>home</mat-icon> Home
+          </a>
+        </li>
+        <li>
+          <a
+            data-test="link-to-app-recycle-bin"
+            appCustomMatRipple
+            routerLink="/app/recycle-bin"
+            class="sidenav__link"
+            routerLinkActive="sidenav__link--active"
+            tabindex="0"
+          >
+            <mat-icon>delete</mat-icon> Recycle bin
+          </a>
+        </li>
+        <li>
+          <a
+            data-test="link-to-app-settings"
+            appCustomMatRipple
+            routerLink="/app/settings"
+            class="sidenav__link"
+            routerLinkActive="sidenav__link--active"
+            tabindex="0"
+          >
+            <mat-icon>settings</mat-icon> Settings
+          </a>
+        </li>
+        <li>
+          <a
+            data-test="link-to-logout"
+            appCustomMatRipple
+            class="sidenav__link"
+            (click)="logOut()"
+            (keyup.enter)="logOut()"
+            tabindex="0"
+          >
+            <mat-icon>logout</mat-icon> Log out
+          </a>
+        </li>
+      </ul>
+    </nav>
   </ng-template>
 
   <ng-template #content>

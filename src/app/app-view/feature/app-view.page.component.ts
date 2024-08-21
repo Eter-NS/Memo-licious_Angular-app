@@ -11,7 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-color-checker.directive';
 import { NavbarComponent } from 'src/app/reusable/ui/navbar/navbar.component';
-import { ErrorHandlerService } from '../data-access/error-handler/error-handler.service';
+import { ErrorHandlerService } from '../../reusable/data-access/error-handler/error-handler.service';
 import { take, timer } from 'rxjs';
 import { AuthUserConnectorService } from '../data-access/auth-user-connector/auth-user-connector.service';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
@@ -43,21 +43,8 @@ export class AppViewComponent implements OnInit {
   @ViewChild('navbar') navbarComponent!: NavbarComponent;
 
   ngOnInit(): void {
-    this.#errorHandlerService.error$
-      .pipe(takeUntilDestroyed(this.#destroyRef))
-      .subscribe((error) => {
-        this.#snackbar.dismiss();
-        this.#snackbar.open(error, 'close', { duration: 5_000 });
-      });
-
-    const MINIMUM_EXECUTION_TIME = 0;
-    const INTERVAL_PERIOD = 1000 * 60;
-
-    timer(MINIMUM_EXECUTION_TIME, INTERVAL_PERIOD)
-      .pipe(takeUntilDestroyed(this.#destroyRef))
-      .subscribe(() => {
-        this.#notesService.clearNoteGroups();
-      });
+    this._setErrorHandler();
+    this._setNotesCleanup();
   }
 
   closeNavbar() {
@@ -72,5 +59,25 @@ export class AppViewComponent implements OnInit {
 
   logOut() {
     this.#authUserConnectorService.logOutUser();
+  }
+
+  private _setErrorHandler() {
+    this.#errorHandlerService.error$
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe((error) => {
+        this.#snackbar.dismiss();
+        this.#snackbar.open(error, 'close', { duration: 5_000 });
+      });
+  }
+
+  private _setNotesCleanup() {
+    const MINIMUM_EXECUTION_TIME = 0;
+    const INTERVAL_PERIOD = 1000 * 60;
+
+    timer(MINIMUM_EXECUTION_TIME, INTERVAL_PERIOD)
+      .pipe(takeUntilDestroyed(this.#destroyRef))
+      .subscribe(() => {
+        this.#notesService.clearNoteGroups();
+      });
   }
 }

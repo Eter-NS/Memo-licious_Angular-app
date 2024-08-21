@@ -12,6 +12,10 @@
   padding: free-space('sm');
   min-height: 85vh;
 
+  & ul {
+    list-style: none;
+  }
+
   &__links {
     display: grid;
     gap: free-space('sm');
