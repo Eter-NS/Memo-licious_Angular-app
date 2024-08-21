@@ -18,15 +18,15 @@ import {
   runWithDelay,
 } from 'src/app/reusable/utils/animations/animation-triggers';
 import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
-import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-color-checker.directive';
 import { environment } from 'src/environments/environment.dev';
+import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/adaptive-button.directive';
 
 @Component({
   standalone: true,
   imports: [
     ShoppingThreeComponent,
     SvgElementsDirective,
-    CustomMatRippleDirective,
+    AdaptiveButtonDirective,
   ],
   selector: 'app-choose-path',
   templateUrl: './choose-path.component.html',

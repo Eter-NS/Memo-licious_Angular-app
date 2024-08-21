@@ -22,6 +22,8 @@ main {
   align-items: end;
   justify-content: center;
   grid-template-rows: 1fr auto;
+  overflow: hidden;
+  overflow: clip;
 }
 
 .background-image {
@@ -48,10 +50,10 @@ main {
   z-index: 1;
   align-self: flex-end;
 
-  --padding: #{free-space('xs')};
+  --padding: #{free-space('md')};
   margin: 0 var(--padding) var(--padding);
   padding: var(--padding);
-  min-height: 45vh;
+  min-height: 25vh;
   @include border-radius('md');
 
   display: grid;
@@ -65,10 +67,6 @@ main {
 
   &__par {
     max-width: calc(view.$view-md / 2);
-    margin: {
-      right: 0.5ch;
-      left: 0.5ch;
-    }
   }
 
   &__CTA {
@@ -82,22 +80,13 @@ main {
   }
 }
 
-%CTA {
-  @extend %common-button;
+.CTA {
   display: grid;
   place-content: center;
   line-break: auto;
 
   &:hover {
     cursor: pointer;
-  }
-}
-
-.CTA {
-  @extend %CTA, %primary-button-1;
-
-  &--alternative {
-    @extend %CTA, %primary-button-2;
   }
 }
 

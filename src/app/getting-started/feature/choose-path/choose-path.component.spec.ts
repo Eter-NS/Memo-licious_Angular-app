@@ -7,78 +7,54 @@ import {
 
 import { ChoosePathComponent } from './choose-path.component';
 import { By } from '@angular/platform-browser';
-import {
-  NavigationBehaviorOptions,
-  Router,
-  RouterModule,
-  UrlTree,
-} from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router, provideRouter } from '@angular/router';
 import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
-import { LocalStorageService } from 'src/app/reusable/data-access/localStorage/local-storage.service';
+import { provideLocationMocks } from '@angular/common/testing';
+import { Component } from '@angular/core';
 
-const ComponentMock = jasmine.createSpyObj('OnlineComponent', ['anything']);
+@Component({
+  selector: 'app-test',
+  standalone: true,
+  template: `<p>Test component works!</p>`,
+})
+class TestComponent {}
 
 describe('ChoosePathComponent', () => {
   let component: ChoosePathComponent;
   let fixture: ComponentFixture<ChoosePathComponent>;
   let viewTransitionServiceMock: ViewTransitionService;
-  let routerMock: Router;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        RouterModule.forRoot([
+      imports: [ChoosePathComponent],
+      providers: [
+        provideRouter([
           { path: '', component: ChoosePathComponent },
           {
             path: 'online',
-            component: ComponentMock,
+            component: TestComponent,
           },
           {
             path: 'guest',
-            component: ComponentMock,
+            component: TestComponent,
           },
         ]),
-        ChoosePathComponent,
-      ],
-      providers: [
-        {
-          provide: Router,
-          useValue: {
-            navigateByUrl: async (
-              url: string | UrlTree,
-              extras?: NavigationBehaviorOptions
-            ): Promise<boolean> => {
-              url;
-              extras;
-              return true;
-            },
-          },
-        },
+        provideLocationMocks(),
         {
           provide: ViewTransitionService,
           useValue: {
             goBackClicked: true,
           } satisfies Partial<ViewTransitionService>,
         },
-        {
-          provide: LocalStorageService,
-          useValue: jasmine.createSpyObj('LocalStorageService', [
-            'saveToStorage',
-          ]),
-        },
       ],
     });
     TestBed.inject(ViewTransitionService);
-    TestBed.inject(LocalStorageService);
     fixture = TestBed.createComponent(ChoosePathComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
     viewTransitionServiceMock = fixture.debugElement.injector.get(
       ViewTransitionService
     );
-    routerMock = fixture.debugElement.injector.get(Router);
   });
 
   describe('component', () => {
@@ -196,8 +172,8 @@ describe('ChoosePathComponent', () => {
     });
 
     it('should call runWithDelay with values and run then block', fakeAsync(() => {
-      spyOn(component, 'runWithDelay').and.returnValue(Promise.resolve());
-      const navigateByUrlSpy = spyOn(routerMock, 'navigateByUrl');
+      spyOn(component, 'runWithDelay').and.resolveTo();
+      const navigateByUrlSpy = spyOn(TestBed.inject(Router), 'navigateByUrl');
 
       component.runTransition(suffix1);
 
@@ -208,10 +184,8 @@ describe('ChoosePathComponent', () => {
 
     it('should call runWithDelay with values and run catch block', fakeAsync(() => {
       const errorMessage = 'Error';
-      spyOn(component, 'runWithDelay').and.returnValue(
-        Promise.reject(errorMessage)
-      );
-      const spy = spyOn(console, 'error').and.callThrough();
+      spyOn(component, 'runWithDelay').and.rejectWith(errorMessage);
+      const spy = spyOn(console, 'error').and.stub();
 
       component.runTransition(suffix1);
 

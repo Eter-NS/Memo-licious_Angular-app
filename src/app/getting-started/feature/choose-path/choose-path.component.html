@@ -1,8 +1,5 @@
 <main class="color-transition">
-  <section
-    #container
-    class="container"
-  >
+  <section #container class="container">
     <img
       class="background-image"
       width="543"
@@ -27,7 +24,8 @@
       <div class="content__CTA">
         <a
           class="CTA--alternative"
-          appCustomMatRipple
+          appAdaptiveButton
+          color="primary-less"
           (click)="runTransition('guest')"
           (keyup.enter)="runTransition('guest')"
           tabindex="0"
@@ -36,7 +34,8 @@
         </a>
         <a
           class="CTA"
-          appCustomMatRipple
+          appAdaptiveButton
+          color="primary"
           (click)="runTransition('online')"
           (keyup.enter)="runTransition('online')"
           tabindex="0"
