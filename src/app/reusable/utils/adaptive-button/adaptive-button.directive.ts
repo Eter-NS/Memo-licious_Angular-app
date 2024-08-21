@@ -1,25 +1,16 @@
-import {
-  Directive,
-  HostBinding,
-  Input,
-  OnChanges,
-  SimpleChanges,
-} from '@angular/core';
+import { Directive, HostBinding, Input, booleanAttribute } from '@angular/core';
 import { CustomMatRippleDirective } from '../ripples/ripple-color-checker.directive';
 
-interface IButtonStyleOptions {
-  look: 'common' | 'fab' | 'extended-fab';
-  shape: 'circle' | 'pill';
-  color: 'primary' | 'primary-less' | 'accent' | 'accent-less';
+export interface ButtonConfiguration {
+  look?: 'common' | 'fab' | 'extended-fab';
+  shape?: 'circle' | 'pill';
+  color?: 'primary' | 'primary-less' | 'accent' | 'accent-less';
 }
 
-interface IButtonOptions extends IButtonStyleOptions {
-  notAnimated?: 'not-animated';
+interface ButtonStyleOptions extends Required<ButtonConfiguration> {
+  default: 'app-button';
+  notAnimated: 'not-animated' | undefined;
 }
-
-export type ButtonConfiguration = Partial<
-  Omit<IButtonStyleOptions, 'notAnimated'>
->;
 
 @Directive({
   selector: 'button[appAdaptiveButton], a[appAdaptiveButton]',
@@ -28,35 +19,56 @@ export type ButtonConfiguration = Partial<
     { directive: CustomMatRippleDirective, inputs: ['matRippleDisabled'] },
   ],
 })
-export class AdaptiveButtonDirective implements OnChanges {
-  #defaultStyles: IButtonStyleOptions = {
+export class AdaptiveButtonDirective {
+  /*
+  Declares button default styles before user interaction.
+  */
+  #styles: ButtonStyleOptions = {
+    default: 'app-button',
     look: 'common',
     shape: 'pill',
     color: 'accent',
+    notAnimated: undefined,
   };
 
-  @HostBinding('class') _class = this._updateClasses(this.#defaultStyles);
+  @HostBinding('class')
+  protected _class = this._generateClassString(this.#styles);
 
-  @Input() animate = true;
-  @Input() styleConfiguration: ButtonConfiguration = {
-    look: 'common',
-    shape: 'pill',
-    color: 'accent',
-  };
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  @Input({ alias: 'disable-animations', transform: booleanAttribute })
+  set disableAnimations(newValue: boolean) {
+    this._updateClasses('notAnimated', newValue ? 'not-animated' : '');
+  }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['class']) {
+  @Input()
+  set look(newValue: ButtonConfiguration['look']) {
+    this._updateClasses('look', newValue);
+  }
+
+  @Input()
+  set shape(newValue: ButtonConfiguration['shape']) {
+    this._updateClasses('shape', newValue);
+  }
+
+  @Input()
+  set color(newValue: ButtonConfiguration['color']) {
+    this._updateClasses('color', newValue);
+  }
+
+  private _updateClasses(
+    key: keyof ButtonStyleOptions,
+    value: string | undefined
+  ): void {
+    // If the new value is 'undefined', don't update any styles.
+    if (value === undefined) {
       return;
     }
 
-    this._class = this._updateClasses({
-      ...this.#defaultStyles,
-      ...this.styleConfiguration,
-      notAnimated: this.animate ? undefined : 'not-animated',
-    });
+    this.#styles = { ...this.#styles, [key]: value };
+    this._class = this._generateClassString(this.#styles);
   }
 
-  private _updateClasses(changes: IButtonOptions): string {
-    return Object.values(changes).filter(Boolean).join(' ');
+  private _generateClassString(obj: ButtonStyleOptions): string {
+    return Object.values(obj).filter(Boolean).join(' ');
   }
 }

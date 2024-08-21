@@ -10,6 +10,12 @@ button {
   place-content: center;
 }
 
+.app-button {
+  @media (forced-colors: active) {
+    border: 2px solid currentColor;
+  }
+}
+
 .common {
   @extend %common-button;
 }
@@ -35,6 +41,7 @@ button {
 
 .circle {
   padding: 0.75em;
+  aspect-ratio: 1 / 1;
 }
 .not-animated {
   transition-property: none;
