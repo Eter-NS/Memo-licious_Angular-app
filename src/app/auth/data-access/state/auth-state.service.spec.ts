@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync } from '@angular/core/testing';
 import { AuthStateService } from './auth-state.service';
 import {
   Auth,
@@ -6,10 +6,18 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
 } from '@angular/fire/auth';
-import { of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { FirebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service';
+import { firebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service.mock';
 
 describe('AuthStateService', () => {
   const authMock = jasmine.createSpyObj<Auth>(['setPersistence']);
+  const firebaseAuthControllerServiceMock = firebaseAuthControllerService;
+  const userValueSubject = new BehaviorSubject<User | null>(null);
+  firebaseAuthControllerServiceMock.user.and.callFake(() =>
+    userValueSubject.asObservable()
+  );
+
   let service: AuthStateService;
 
   beforeEach(() => {
@@ -18,6 +26,10 @@ describe('AuthStateService', () => {
         {
           provide: Auth,
           useValue: authMock,
+        },
+        {
+          provide: FirebaseAuthControllerService,
+          useValue: firebaseAuthControllerServiceMock,
         },
       ],
     });
@@ -29,7 +41,7 @@ describe('AuthStateService', () => {
   });
 
   it(`should allow the component or any consumer to subscribe to user$`, (done: DoneFn) => {
-    spyOn(service, 'user').and.returnValue(of({} as User));
+    userValueSubject.next({} as User);
 
     let data: User | null;
 
@@ -41,9 +53,21 @@ describe('AuthStateService', () => {
     done();
   });
 
+  it(`should call updateSession() each time user$ emits a new value.`, fakeAsync(() => {
+    // Arrange
+    const spy = spyOn(service, 'updateSession');
+
+    // Act
+    userValueSubject.next({} as User);
+
+    // Assert
+    expect(spy).toHaveBeenCalled();
+  }));
+
   describe('rememberMe()', () => {
     it('should call setPersistence with browserLocalPersistence', () => {
       service.rememberMe(true);
+
       expect(authMock.setPersistence).toHaveBeenCalledWith(
         browserLocalPersistence
       );
@@ -51,6 +75,7 @@ describe('AuthStateService', () => {
 
     it('should call setPersistence with browserSessionPersistence', () => {
       service.rememberMe(false);
+
       expect(authMock.setPersistence).toHaveBeenCalledWith(
         browserSessionPersistence
       );
@@ -60,7 +85,7 @@ describe('AuthStateService', () => {
   describe('checkUserSession()', () => {
     it('should return the user email if it exists', () => {
       const user = { email: 'test@example.com' } as User;
-      service.#session.set(user);
+      service['_session'].set(user);
       expect(service.checkUserSession()).toBe('test@example.com');
     });
 
