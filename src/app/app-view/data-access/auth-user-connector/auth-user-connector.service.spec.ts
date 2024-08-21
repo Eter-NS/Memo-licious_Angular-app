@@ -336,6 +336,30 @@ describe(`AuthUserConnectorService`, () => {
         authLocalUserServiceMock._allUsers = [];
       });
 
+      it(`should run fileTobase64Pipe.transform and return false if transformation fails`, async () => {
+        // Arrange
+        const spy1 = spyOn(
+          TestBed.inject(FILE_TO_BASE64_TOKEN),
+          `transform`
+        ).and.returnValue(Promise.resolve(null));
+
+        const spy2 = authLocalUserServiceMock.modifyCurrentUser;
+        const payload: UserProfileChangesWithImageI = {
+          photoBlob: {
+            extension: `jpg`,
+            blob: new File([], `example.jpg`),
+          },
+        } as UserProfileChangesWithImageI;
+
+        // Act
+        const result = await service[`_handleLocalUserUpdate`](payload);
+
+        // Assert
+        expect(spy1).toHaveBeenCalled();
+        expect(spy2).not.toHaveBeenCalled();
+        expect(result).toBeFalse();
+      });
+
       it(`should run fileToBase64Pipe.transform and authLocalUserService.modifyCurrentUser if a new user picture was received`, async () => {
         const spy1 = spyOn(
           TestBed.inject(FILE_TO_BASE64_TOKEN),

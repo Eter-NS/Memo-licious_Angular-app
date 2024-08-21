@@ -134,6 +134,10 @@ export class AuthUserConnectorService {
         photoBlob.blob
       );
 
+      if (!profilePictureUrl) {
+        return false;
+      }
+
       didUpdateProfilePicture = this.#authLocalUserService.modifyCurrentUser({
         profilePictureUrl,
       });
@@ -195,24 +199,15 @@ export class AuthUserConnectorService {
         return profileDataResult;
       }
 
-      let result = await this._handleOptionalPasswordUpdate(
-        oldPassphrase,
-        passphrase
-      );
+      await this._handleOptionalPasswordUpdate(oldPassphrase, passphrase);
 
-      if (result?.errors) {
-        return false;
-      }
-      result = await this._handleOptionalEmailUpdate({
+      await this._handleOptionalEmailUpdate({
         oldEmail,
         email,
         existingPassphrase: oldPassphrase,
         newPassphrase: passphrase,
       });
 
-      if (result?.errors) {
-        return false;
-      }
       return true;
     } catch (err) {
       console.error(
