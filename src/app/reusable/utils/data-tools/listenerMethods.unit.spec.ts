@@ -1,40 +1,33 @@
-import throttle from './listenerMethods';
+import { Observable } from 'rxjs';
+import { darkModeListener } from './listenerMethods';
+import { fakeAsync, tick } from '@angular/core/testing';
 
 describe('listenerMethods', () => {
-  describe('throttle()', () => {
-    let func: jasmine.Spy;
-    let throttledFunc: (...args: unknown[]) => void;
+  describe(`darkModeListener()`, () => {
+    it(`should return an observable`, () => {
+      // Arrange
 
-    beforeEach(() => {
-      jasmine.clock().install();
-      func = jasmine.createSpy('func');
-      throttledFunc = throttle(func, 1000);
+      // Act
+      const result = darkModeListener();
+
+      // Assert
+      expect(result).toBeInstanceOf(Observable);
     });
 
-    afterEach(() => {
-      jasmine.clock().uninstall();
-    });
+    it(`should emit a value at the subscription.`, fakeAsync(() => {
+      // Arrange
+      let result: MediaQueryList | undefined;
 
-    it('should execute the function immediately when called for the first time', () => {
-      throttledFunc();
-      expect(func).toHaveBeenCalled();
-    });
+      // Act
+      const subscription = darkModeListener().subscribe((value) => {
+        result = value;
+      });
 
-    it('should not execute the function while in throttle limit', () => {
-      throttledFunc();
-      func.calls.reset();
+      tick();
+      subscription.unsubscribe();
 
-      throttledFunc();
-      expect(func).not.toHaveBeenCalled();
-    });
-
-    it('should execute the function after the throttle limit', () => {
-      throttledFunc();
-      func.calls.reset();
-
-      jasmine.clock().tick(1000);
-      throttledFunc();
-      expect(func).toHaveBeenCalled();
-    });
+      // Assert
+      expect(result).toBeInstanceOf(MediaQueryList);
+    }));
   });
 });
