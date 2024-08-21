@@ -1,6 +1,6 @@
 import { FirebaseDatabaseControllerService } from './firebase-database-controller.service';
 
-export const firebaseDatabaseControllerServiceMock =
+export const firebaseDatabaseControllerService =
   jasmine.createSpyObj<FirebaseDatabaseControllerService>([
     'get',
     'set',
