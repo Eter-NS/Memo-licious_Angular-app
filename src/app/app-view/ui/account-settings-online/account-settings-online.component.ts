@@ -34,7 +34,6 @@ import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-
 import { BehaviorSubject } from 'rxjs';
 import { UserProfileUpdateResultI } from '../../data-access/user-profile/user-profile.service';
 import { SubmitValidState } from '../../utils/models/unsuccessfulSubmit.type';
-import { hasDifferentExistingPasswords } from '../../utils/validators/hasDifferentExistingPasswords';
 import { OnlineProfileFormI } from '../../utils/models/OnlineProfileForm.interface';
 
 @Component({
@@ -126,7 +125,15 @@ export class AccountSettingsOnlineComponent implements OnInit, AfterViewInit {
         }
       ),
     },
-    { validators: [hasDifferentExistingPasswords] }
+    {
+      validators: [
+        areInputsDifferent(
+          ['changeEmail', 'currentPassword'],
+          ['changePassword', 'currentPassword'],
+          'mismatchedExistingPasswords'
+        ),
+      ],
+    }
   );
 
   private readonly _unsuccessfulSubmitSubject =

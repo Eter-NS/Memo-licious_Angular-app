@@ -156,6 +156,15 @@ export const areInputsDifferent = (
       return null;
     }
 
+    if (
+      typeof firstInput.value === 'string' &&
+      typeof secondInput.value === 'string'
+    ) {
+      return firstInput.value.trim() === secondInput.value.trim()
+        ? { [errorName]: true }
+        : null;
+    }
+
     return firstInput.value === secondInput.value
       ? { [errorName]: true }
       : null;
@@ -163,7 +172,7 @@ export const areInputsDifferent = (
     function showError(inputName: string | string[]) {
       console.error(
         `No input has been found with name ${
-          Array.isArray(inputName) ? inputName.join(', ') : inputName
+          Array.isArray(inputName) ? `[${inputName.join(', ')}]` : inputName
         }`
       );
     }

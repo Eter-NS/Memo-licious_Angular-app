@@ -417,7 +417,7 @@ describe(`custom validations`, () => {
       expect(result).toBeNull();
     });
 
-    it(`should return an object with specified error key with true as a value when two inputs values are equal.`, () => {
+    it(`should return an object with specified error key with true as a value when two inputs values are equal (string values).`, () => {
       // Arrange
       const input1 = 'input1';
       const input2 = 'input2';
@@ -437,13 +437,53 @@ describe(`custom validations`, () => {
       expect(result).toEqual({ [errorName]: true });
     });
 
-    it(`should return null when two inputs values are different.`, () => {
+    it(`should return an object with specified error key with true as a value when two inputs values are equal (other type values).`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1]: new FormControl(258),
+        [input2]: new FormControl(258),
+      });
+      const errorName = 'example-error';
+
+      // Act
+      formGroup.controls[input1].markAsDirty();
+      formGroup.controls[input2].markAsDirty();
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
+
+      // Assert
+      expect(result).toEqual({ [errorName]: true });
+    });
+
+    it(`should return null when two inputs values are different (string values).`, () => {
       // Arrange
       const input1 = 'input1';
       const input2 = 'input2';
       const formGroup = new FormGroup({
         [input1]: new FormControl('example-value'),
         [input2]: new FormControl('example-value2'),
+      });
+      const errorName = 'example-error';
+
+      // Act
+      formGroup.controls[input1].markAsDirty();
+      formGroup.controls[input2].markAsDirty();
+      const validator = areInputsDifferent(input1, input2, errorName);
+      const result = validator(formGroup);
+
+      // Assert
+      expect(result).toBe(null);
+    });
+
+    it(`should return null when two inputs values are different (other type values).`, () => {
+      // Arrange
+      const input1 = 'input1';
+      const input2 = 'input2';
+      const formGroup = new FormGroup({
+        [input1]: new FormControl(258),
+        [input2]: new FormControl(65),
       });
       const errorName = 'example-error';
 
