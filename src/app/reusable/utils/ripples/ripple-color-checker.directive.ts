@@ -25,7 +25,7 @@ export class CustomMatRippleDirective
   }
 
   setColorBrightness(): void {
-    const brightnessMiddlePoint = 150;
+    const BRIGHTNESS_MIDDLE_POINT = 150;
     const colorString = window
       .getComputedStyle(this.#el.nativeElement)
       .getPropertyValue('background-color');
@@ -34,11 +34,15 @@ export class CustomMatRippleDirective
       .match(/\d+/g)
       ?.map((colorString) => Number(colorString));
 
-    if (!colorChannels) return;
+    if (!colorChannels) {
+      return;
+    }
 
     const colorAverage = colorChannels.reduce((a, b) => a + b) / 3;
 
     this.color =
-      colorAverage < brightnessMiddlePoint ? this.lightShadow : this.darkShadow;
+      colorAverage < BRIGHTNESS_MIDDLE_POINT
+        ? this.lightShadow
+        : this.darkShadow;
   }
 }
