@@ -20,30 +20,31 @@ import {
 import { PreviousPageButtonComponent } from '../../../reusable/ui/previous-page-button/previous-page-button.component';
 import { LocalUserAccount } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ErrorHandlerService } from '../../data-access/error-handler/error-handler.service';
+import { ErrorHandlerService } from '../../../reusable/data-access/error-handler/error-handler.service';
 import { AccountSettingsLocalComponent } from '../../ui/account-settings-local/account-settings-local.component';
 import { AccountSettingsOnlineComponent } from '../../ui/account-settings-online/account-settings-online.component';
 import {
   PhotoBlob,
   UserProfileChangesI,
+  UserProfileChangesWithImageI,
 } from '../../utils/models/user-profile.interface';
 import { AuthLocalUserService } from 'src/app/auth/data-access/local-user/auth-local-user.service';
 import { User } from '@angular/fire/auth';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   UserProfileUpdateResultI,
   UserProfileService,
 } from '../../data-access/user-profile/user-profile.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { base64ToFileObj } from 'src/app/reusable/utils/data-tools/objectTools';
 import { FetchErrorComponent } from '../../../reusable/ui/fetch-error/fetch-error.component';
 import { FileToUrlPipe } from '../../../reusable/utils/file-to-url/file-to-url.pipe';
+import { environment } from 'src/environments/environment.dev';
+import { OBJECT_TOOLS } from 'src/app/reusable/utils/data-tools/objectTools.token';
 
 const errorDictionary = {
   passwordMismatch: `The current password doesn't match the existing one, please try again.`,
   pinMismatch: `The current pin doesn't match the existing one, please try again.`,
   unregistered: 'Something went wrong, please check your profile entries',
-};
+} as const;
 
 @Component({
   selector: 'app-account-settings',
@@ -71,6 +72,15 @@ export class AccountSettingsComponent {
   #authLocalUserService = inject(AuthLocalUserService);
   #snackbar = inject(MatSnackBar);
   #errorHandlerService = inject(ErrorHandlerService);
+  #objectTools = inject(OBJECT_TOOLS);
+
+  protected acceptedExtensions = [
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+    'heif',
+  ] as const;
 
   userProfile$ = this.#userProfileService.userProfile$;
   readonly activeUserType = this.#authUserConnectorService.activeUserTypeSig;
@@ -81,15 +91,18 @@ export class AccountSettingsComponent {
     switchMap((picture) => {
       return picture ? from(this._preparePicture(picture)) : of(null);
     }),
-    tap(
-      (isFileSelected) =>
-        isFileSelected &&
+    tap((isFileSelected) => {
+      isFileSelected &&
         this.#snackbar.open(
           'Picture selected. Confirm the form to update the profile',
           'Close',
           { duration: 5000 }
-        )
-    )
+        );
+    }),
+    catchError((err) => {
+      console.error('Error during image cropping: ', err);
+      return of(null);
+    })
   );
 
   private _userProfileStateSubject =
@@ -99,15 +112,11 @@ export class AccountSettingsComponent {
   readonly userProfileUpdateNotifier$ = merge(
     this._userProfileStateSubject.asObservable(),
     this.#userProfileService.userProfileUpdateResult$
+  ).pipe(
+    tap((result) => {
+      this._notifyAboutResult(result);
+    })
   );
-
-  constructor() {
-    this.userProfileUpdateNotifier$.pipe(takeUntilDestroyed()).subscribe({
-      next: (result) => {
-        this._notifyAboutResult(result);
-      },
-    });
-  }
 
   onSubmit(profileChanges: UserProfileChangesI) {
     combineLatest([
@@ -135,28 +144,29 @@ export class AccountSettingsComponent {
           })
         )
       )
-      .subscribe((actionState) =>
-        this._userProfileStateSubject.next(actionState)
-      );
+      .subscribe((actionState) => {
+        this._userProfileStateSubject.next(actionState);
+      });
   }
 
   onUserImageSelected(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
-    file && this._pushUserImage(file);
-  }
 
-  protected readUnsavedPicture(file: File) {
-    return URL.createObjectURL(file);
-  }
+    if (!file) {
+      return;
+    }
+    const fileExtension = file.type.split('/')[1];
 
-  private _pushUserImage(file: File | null) {
+    if (!this.acceptedExtensions.some((ext) => ext === fileExtension)) {
+      return;
+    }
     this._pictureChangeSubject.next(file);
   }
 
   private _prepareUpdate(
-    profileChanges: UserProfileChangesI,
+    profileChanges: UserProfileChangesWithImageI,
     activeUser: LocalUserAccount | User | null
-  ): UserProfileChangesI {
+  ): UserProfileChangesWithImageI {
     const userType = this.activeUserType();
 
     if (!userType || !activeUser) {
@@ -174,9 +184,9 @@ export class AccountSettingsComponent {
   }
 
   private _compareLocalChanges(
-    changes: UserProfileChangesI,
+    changes: UserProfileChangesWithImageI,
     user: LocalUserAccount
-  ): UserProfileChangesI {
+  ): UserProfileChangesWithImageI {
     if (changes.oldPassphrase && changes.passphrase) {
       const result = this.#authLocalUserService.validateUser(
         user.auth.name,
@@ -205,19 +215,20 @@ export class AccountSettingsComponent {
   }
 
   private _notifyAboutResult(result: UserProfileUpdateResultI): void {
-    result.state === 'failure'
-      ? this._checkResultErrors(result)
-      : this._checkResultState(result.state);
+    if (result.state === 'failure') {
+      this._notifyAboutFailure(result);
+    } else if (result.state === 'success') {
+      this._notifyAboutSuccess();
+    }
   }
 
-  private _checkResultState(state: UserProfileUpdateResultI['state']): void {
-    state === 'success' &&
-      this.#snackbar.open('Profile changes saved!', 'close', {
-        duration: 5000,
-      });
+  private _notifyAboutSuccess(): void {
+    this.#snackbar.open('Profile changes saved!', 'close', {
+      duration: 5000,
+    });
   }
 
-  private _checkResultErrors(result: UserProfileUpdateResultI) {
+  private _notifyAboutFailure(result: UserProfileUpdateResultI) {
     if (!result.cause) {
       return;
     }
@@ -227,21 +238,29 @@ export class AccountSettingsComponent {
     );
   }
 
+  /**
+   * Crops an image to 1:1 ratio by using the Canvas API. Cuts the image borders to leave the center of the image
+   */
   private _preparePicture(picture: File): Promise<PhotoBlob> {
-    return new Promise((resolve) => {
-      // Create a TypeScript function to crop an image to 1:1 ratio by using the Canvas API. Cut the image borders to leave the center of the image
+    return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        return;
-      }
+      const ctx = canvas.getContext('2d')!;
       const img = new Image();
-      img.src = URL.createObjectURL(picture);
+
+      img.onerror = (e) => {
+        if (!environment.production) {
+          console.error(e);
+        }
+
+        reject('Error while loading the image');
+        return;
+      };
 
       img.onload = () => {
         const width = img.width;
         const height = img.height;
         const newSize = Math.min(width, height);
+        const quality = 0.75;
 
         canvas.width = newSize;
         canvas.height = newSize;
@@ -257,13 +276,22 @@ export class AccountSettingsComponent {
           newSize
         );
 
-        const croppedImage = canvas.toDataURL(picture.type, 0.75);
+        const croppedImage = canvas.toDataURL(picture.type, quality);
         const extension = picture.type.split('/')[1];
 
-        base64ToFileObj(croppedImage, `picture.${extension}`).then((blob) =>
-          resolve({ blob, extension })
-        );
+        this.#objectTools
+          .base64ToFile(croppedImage, `picture.${extension}`)
+          .then((blob) => {
+            if (blob.error || !blob.data) {
+              reject('Error while creating a blob from base64 string');
+              return;
+            }
+
+            resolve({ blob: blob.data, extension });
+          });
       };
+
+      img.src = URL.createObjectURL(picture);
     });
   }
 }

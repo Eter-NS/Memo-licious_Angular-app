@@ -8,7 +8,7 @@
       />
     </div>
 
-    <div class="content" #content>
+    <div #content data-test="content-element" class="content">
       <h1>Edit profile</h1>
 
       <div class="fadeInOnLoad | user-image">
@@ -17,9 +17,8 @@
           class="app-profile-picture"
           [photoUrl]="changedProfilePicture.blob | fileToUrl"
         />
-        }@else {
+        } @else {
         <app-profile-picture
-          #profilePictureComponent
           class="app-profile-picture"
           [photoUrl]="user.photoUrl || ''"
           [userTextAvatar]="
@@ -37,7 +36,7 @@
           type="button"
           (click)="fileInput.click()"
           (keyup.enter)="fileInput.click()"
-          tabindex="0"
+          aria-label="Here you can change your profile picture"
         >
           Edit
         </button>
@@ -45,15 +44,18 @@
         <input
           #fileInput
           type="file"
-          accept=".jpg,.jpeg,.png,.webp,.heif"
+          [accept]="'.' + acceptedExtensions.join(',.')"
           class="invisible-input"
+          tabindex="-1"
           placeholder="Import new profile picture"
+          data-test="profile-picture-input"
+          aria-hidden="true"
           (change)="onUserImageSelected($event)"
         />
       </div>
 
       <ng-template #fetchError>
-        <app-fetch-error (clicked)="viewTransitionService.hardPageReload()">
+        <app-fetch-error (clicked)="viewTransitionService.pageReload()">
           It looks like profile notification is broken.
         </app-fetch-error>
       </ng-template>
@@ -70,7 +72,11 @@
 
       }@loading (minimum 250ms){
 
-      <mat-spinner class="loading-spinner"></mat-spinner>
+      <mat-spinner
+        class="loading-spinner"
+        title="form loading"
+        data-test="loading-content-online-form"
+      ></mat-spinner>
 
       }@error {
 
@@ -88,7 +94,11 @@
 
       }@loading (minimum 250ms){
 
-      <mat-spinner class="loading-spinner"></mat-spinner>
+      <mat-spinner
+        class="loading-spinner"
+        title="form loading"
+        data-test="loading-content-local-form"
+      ></mat-spinner>
 
       }@error {
 
@@ -96,17 +106,17 @@
 
       }
       <!--  -->
-      } @else {
-
-      <ng-container [ngTemplateOutlet]="fetchError"></ng-container>
-
       }
     </div>
   </section>
 
-  }@else {
+  } @else {
 
-  <mat-spinner title="content loading" class="loading-spinner"></mat-spinner>
+  <mat-spinner
+    data-test="loading-content-spinner"
+    title="content loading"
+    class="loading-spinner"
+  ></mat-spinner>
 
   }
 </main>

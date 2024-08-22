@@ -12,6 +12,10 @@ main {
 .go-back-button-wrapper {
   @extend %previous-page-button-wrapper;
   width: var(--dynamic-width);
+}
+
+section {
+  width: var(--dynamic-width);
   margin: 0 auto;
 }
 
@@ -30,7 +34,9 @@ h1 {
   align-items: center;
 
   & button {
-    border: none;
+    @media (forced-colors: none) {
+      border: none;
+    }
     background-color: transparent;
     margin-top: free-space('xs');
     cursor: pointer;
