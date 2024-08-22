@@ -38,9 +38,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthOptions } from 'src/app/auth/utils/Models/LocalAuthModels.interface';
 import { UserProfileUpdateResultI } from '../../data-access/user-profile/user-profile.service';
 import { LocalProfileFormI } from '../../utils/models/LocalProfileForm.interface';
-import { hasInvalidCurrentPassphrase } from '../../utils/validators/hasInvalidCurrentPassphrase';
-import { hasInvalidNewPassphrase } from '../../utils/validators/hasInvalidNewPassphrase';
 import { SubmitValidState } from '../../utils/models/unsuccessfulSubmit.type';
+import { hasInvalidPassphrase } from '../../utils/validators/hasInvalidPassphrase';
 
 @Component({
   selector: 'app-account-settings-local',
@@ -132,8 +131,8 @@ export class AccountSettingsLocalComponent implements OnInit, AfterViewInit {
           ['passwordGroup', 'password'],
           'samePassphrase'
         ),
-        hasInvalidCurrentPassphrase,
-        hasInvalidNewPassphrase,
+        hasInvalidPassphrase('current'),
+        hasInvalidPassphrase('new'),
       ],
     }
   );
