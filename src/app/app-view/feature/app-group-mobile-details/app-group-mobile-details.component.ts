@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -18,14 +19,15 @@ import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { MatChipInputEvent, MatChipEditedEvent } from '@angular/material/chips';
 import {
   EMPTY,
-  Observable,
   catchError,
   combineLatest,
   combineLatestWith,
   filter,
+  from,
   map,
+  shareReplay,
+  switchMap,
   take,
-  tap,
 } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,8 +37,6 @@ import { Title } from '@angular/platform-browser';
 import { environment } from 'src/environments/environment.dev';
 import { FetchErrorComponent } from '../../../reusable/ui/fetch-error/fetch-error.component';
 import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/adaptive-button.directive';
-
-const NOTES_ROUTE = '/app/notes';
 
 @Component({
   selector: 'app-group-details',
@@ -52,7 +52,7 @@ const NOTES_ROUTE = '/app/notes';
     AdaptiveButtonDirective,
   ],
 })
-export class GroupMobileDetailsComponent {
+export class GroupMobileDetailsComponent implements OnInit {
   viewTransitionService = inject(ViewTransitionService);
   #title = inject(Title);
   #notesService = inject(NotesService);
@@ -63,56 +63,68 @@ export class GroupMobileDetailsComponent {
 
   @ViewChild('viewContainer', { static: true })
   viewContainer!: ElementRef<HTMLDivElement>;
-  @ViewChild('form') formElement!: NoteListFormComponent;
 
-  groupNotes$: Observable<NoteModel[]> = this.#notesService.notesBuffer$;
-  #noteGroup$ = this.#route.data.pipe(
+  @ViewChild('form')
+  formElement!: NoteListFormComponent;
+
+  readonly #NOTES_ROUTE = '/app/notes';
+  private _isClosingEditor = false;
+
+  #resolvedNotes$ = this.#route.data.pipe(
     filter((data) => data['groupNotes']),
-    map((data) => data['groupNotes'] as NoteGroupModel[]),
+    map((data) => data['groupNotes'] as NoteGroupModel[])
+  );
+
+  #noteGroup$ = this.#resolvedNotes$.pipe(
     combineLatestWith(this.#route.paramMap),
     map(([groups, params]) => {
       const id = params.get('groupDetails');
+
       const group = groups.find(({ id: storedId }) => storedId === id);
 
       if (!group) {
         throw new Error('No group found!');
+      } else if (group.deleteAt) {
+        throw new Error(`The group is marked to delete!`);
+      } else {
+        return group;
       }
-      return group;
     }),
-    tap((group) => {
-      this.#title.setTitle(group.title);
-      this.#notesService.fillNotesBuffer(group.notes);
-    }),
-    catchError(() => {
-      this.viewTransitionService.goBack(
-        this.viewContainer.nativeElement,
-        NOTES_ROUTE
-      );
-      return EMPTY;
-    })
+    catchError(() => from(this._goBack()).pipe(switchMap(() => EMPTY))),
+    shareReplay({ refCount: false, bufferSize: 1 })
   );
-  noteGroupTitle$ = this.#noteGroup$.pipe(map((note) => note.title));
 
   data$ = combineLatest({
-    groupNotes: this.groupNotes$,
-    noteGroupTitle: this.noteGroupTitle$,
+    groupNotes: this.#noteRestService.notesBuffer$,
+    noteGroupTitle: this.#noteGroup$.pipe(map((note) => note.title)),
   });
 
   constructor() {
     this._listenForRouteChange();
   }
 
+  ngOnInit(): void {
+    this._loadNotesAndTitle();
+  }
+
+  private _loadNotesAndTitle() {
+    this.#noteGroup$.pipe(take(1)).subscribe((group) => {
+      this.#title.setTitle(group.title);
+      this.#noteRestService.fillNotesBuffer(group.notes);
+    });
+  }
+
   private _listenForRouteChange() {
     this.#router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
       // When user moves out of the page
-      if (event instanceof ResolveEnd) {
+      if (event instanceof ResolveEnd && this._isClosingEditor) {
         this._clearNoteBuffer();
       }
     });
   }
 
   private _clearNoteBuffer() {
-    this.#notesService.fillNotesBuffer([]);
+    this.#noteRestService.fillNotesBuffer([]);
   }
 
   onCreateNote(event: MatChipInputEvent) {
@@ -131,63 +143,68 @@ export class GroupMobileDetailsComponent {
   }
 
   async closeEditor(action: NoteListFormEditor['action']) {
+    this._isClosingEditor = true;
+
     if (action === 'close') {
-      await this.viewTransitionService.goBack(
-        this.viewContainer.nativeElement,
-        NOTES_ROUTE
-      );
-      this.#notesService.fillNotesBuffer([]);
+      await this._goBack();
+      this._clearNoteBuffer();
       return;
     }
 
-    this._updateGroup();
+    await this._updateGroup();
   }
 
-  private _updateGroup() {
-    const element = this.viewContainer.nativeElement;
+  private _updateGroup(): Promise<void> {
     const newNoteGroupTitle =
       this.formElement.newNoteGroupForm.controls.groupName.value;
 
-    combineLatest([
-      this.#notesService.notes$,
-      this.groupNotes$,
-      this.#noteGroup$,
-    ])
-      .pipe(
-        take(1),
-        map(
-          ([groups, noteBuffer, group]) =>
-            [groups, noteBuffer, group] as [
-              NoteGroupModel[],
-              NoteModel[],
-              NoteGroupModel
-            ]
-        )
-      )
-      .subscribe(async ([groups, noteBuffer, group]) => {
-        if (!noteBuffer.length) {
-          await this.#notesService.deleteGroup(group.id);
-          await this.viewTransitionService.goBack(element, NOTES_ROUTE);
-          return;
-        }
-
-        const updatedGroups: NoteGroupModel[] = groups.map((storedGroup) =>
-          storedGroup.id === group.id
-            ? { ...group, notes: noteBuffer, title: newNoteGroupTitle }
-            : storedGroup
-        );
-
-        try {
-          const result = await this.#notesService.modifyGroups(updatedGroups);
-
-          if (result) {
-            await this.viewTransitionService.goBack(element, NOTES_ROUTE);
+    return new Promise<void>((resolve, reject) => {
+      combineLatest([
+        this.#notesService.notes$,
+        this.#noteRestService.notesBuffer$,
+        this.#noteGroup$,
+      ])
+        .pipe(take(1))
+        .subscribe(async ([storedGroups, noteBuffer, selectedGroup]) => {
+          if (!noteBuffer.length) {
+            await this.#notesService.deleteGroup(selectedGroup.id);
+            await this._goBack();
+            resolve();
+            return;
           }
-        } catch (err) {
-          if (!environment.production) {
-            console.error(err);
+
+          const updatedGroups: NoteGroupModel[] = storedGroups.map(
+            (storedGroup) =>
+              storedGroup.id === selectedGroup.id
+                ? {
+                    ...selectedGroup,
+                    notes: noteBuffer,
+                    title: newNoteGroupTitle,
+                  }
+                : storedGroup
+          );
+
+          try {
+            const result = await this.#notesService.modifyGroups(updatedGroups);
+
+            if (result) {
+              await this._goBack();
+              resolve();
+            }
+          } catch (err) {
+            if (!environment.production) {
+              console.error(err);
+            }
+            reject();
           }
-        }
-      });
+        });
+    });
+  }
+
+  private async _goBack() {
+    await this.viewTransitionService.goBack(
+      this.viewContainer.nativeElement,
+      this.#NOTES_ROUTE
+    );
   }
 }
