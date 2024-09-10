@@ -24,7 +24,9 @@ h1 {
 }
 
 %common-block {
-  border: none;
+  @media (forced-colors: none) {
+    border: none;
+  }
   margin: free-space('sm') auto 0;
   padding: {
     top: free-space('sm');
@@ -97,12 +99,15 @@ h1 {
     @include border-radius('sm');
     padding: free-space('sm');
     margin: auto 0;
-    border: none;
     justify-content: space-between;
     flex-wrap: nowrap;
     cursor: pointer;
     background-color: transparent;
     transition: background-color 300ms ease-in-out;
+
+    @media (forced-colors: none) {
+      border: none;
+    }
 
     &:is(:hover, :focus-visible) {
       background-color: var(--color-accent-100);
