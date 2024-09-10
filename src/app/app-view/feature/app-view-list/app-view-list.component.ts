@@ -25,7 +25,6 @@ import {
   NewNoteGroupForm,
 } from '../../ui/note-list-form/note-list-form.component';
 import { NotesListGroupElementComponent } from '../../ui/notes-list-group-element/notes-list-group-element.component';
-import { EntriesPipe } from '../../utils/pipes/entries/entries.pipe';
 import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -41,7 +40,6 @@ import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
-    EntriesPipe,
     MatIconModule,
     NgTemplateOutlet,
     BottomSheetComponent,
@@ -70,7 +68,7 @@ export class AppViewListComponent {
   mobileFormVisible = false;
 
   data$ = combineLatest({
-    notesBuffer: this.#notesService.notesBuffer$,
+    notesBuffer: this.#noteRestService.notesBuffer$,
     isHandset: this.#viewportListenersService.isHandset$,
   });
 
@@ -140,14 +138,18 @@ export class AppViewListComponent {
     this.#cd.markForCheck();
   }
 
-  handleGroupCreation({ groupName }: NewNoteGroupForm) {
-    if (!this.#notesService.isNewGroupValid(groupName)) return;
+  async handleGroupCreation({ groupName }: NewNoteGroupForm) {
+    if (!(await this.#notesService.isNewGroupValid(groupName))) {
+      return;
+    }
 
     this.#notesService.createGroup(groupName);
   }
 
   handleGroupMarkForDelete(id: string, state: boolean) {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
     this.#notesService.markGroupToDelete(id, state);
   }
 }
