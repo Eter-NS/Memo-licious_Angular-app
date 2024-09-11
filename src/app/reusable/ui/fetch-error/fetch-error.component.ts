@@ -31,7 +31,6 @@ export class FetchErrorComponent implements OnInit {
 
   ngOnInit(): void {
     const messageElement = this.messageRef.nativeElement;
-    console.log(typeof messageElement);
 
     if (!messageElement.textContent?.trim().length) {
       this.renderer.appendChild(
