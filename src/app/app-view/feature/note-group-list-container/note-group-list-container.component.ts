@@ -23,6 +23,7 @@ import {
   NoteListFormDialogEditorComponent,
 } from '../note-list-form-dialog-editor/note-list-form-dialog-editor.component';
 import { environment } from 'src/environments/environment.dev';
+import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 
 @Component({
   selector: 'app-note-group-list-container',
@@ -41,6 +42,7 @@ export class NoteGroupListContainerComponent {
   #viewportListenersService = inject(ViewportListenersService);
   #viewTransitionService = inject(ViewTransitionService);
   #notesService = inject(NotesService);
+  #noteRestService = inject(NoteRestService);
   #dialog = inject(MatDialog);
 
   @Input() markForDelete: boolean = false;
@@ -58,7 +60,9 @@ export class NoteGroupListContainerComponent {
   );
 
   handleGroupMarkForDelete(id: string, state: boolean) {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
     this.#notesService.markGroupToDelete(id, state);
   }
 
@@ -114,7 +118,7 @@ export class NoteGroupListContainerComponent {
         }
 
         if (dialogState.action === 'close') {
-          this.#notesService.fillNotesBuffer([]);
+          this.#noteRestService.fillNotesBuffer([]);
           return;
         }
 
