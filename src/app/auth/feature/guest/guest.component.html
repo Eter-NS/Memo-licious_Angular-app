@@ -14,33 +14,73 @@
     </div>
     <div #viewContainer class="content">
       <div class="login-register-content" aria-label="Guest account form">
-        @if (data.register ) {
+        @if (data.register) {
         <!--  -->
         @defer (on immediate; prefetch on immediate) {
-        <app-guest-register (data)="handleRegister($event)" />
+
+        <app-guest-register
+          data-test="register-form"
+          (data)="handleRegister($event)"
+        />
+
         } @loading ( minimum 250ms) {
+
         <mat-spinner
+          data-test="loading-register-component"
           class="loading-defer-spinner loading-state-register"
         ></mat-spinner>
-        }@placeholder (minimum 500ms) {
-        <span class="loading-state-register"> Loading... </span>
+
+        } @placeholder (minimum 500ms) {
+
+        <span data-test="loading-state-register" class="loading-state-register">
+          Loading...
+        </span>
+
+        } @error {
+
+        <app-fetch-error
+          data-test="register-component-error"
+          (clicked)="viewTransitionService.pageReload()"
+        >
+          Failed to load register form
+        </app-fetch-error>
+
         }
         <!--  -->
         } @else {
         <!--  -->
         @defer (on immediate; prefetch on immediate) {
+
         <app-guest-login
+          data-test="login-form"
           [wrongCredentials]="data.wrongCredentials"
           [users]="authLocalUserService.allUsers"
           (data)="handleLogin($event)"
           (rememberMe)="updateRememberMe($event)"
         />
+
         } @loading ( minimum 250ms) {
+
         <mat-spinner
+          data-test="loading-login-component"
           class="loading-defer-spinner loading-state-login"
         ></mat-spinner>
-        }@placeholder (minimum 500ms) {
-        <span class="loading-state-login"> Loading... </span>
+
+        } @placeholder (minimum 500ms) {
+
+        <span data-test="loading-state-login" class="loading-state-login">
+          Loading...
+        </span>
+
+        } @error {
+
+        <app-fetch-error
+          data-test="login-component-error"
+          (clicked)="viewTransitionService.pageReload()"
+        >
+          Failed to load login form
+        </app-fetch-error>
+
         }
         <!--  -->
         }
@@ -48,21 +88,29 @@
       <div class="component-content">
         <div class="login-register-switch">
           @if (data.register) {
-          <a
-            (click)="toggleRegister()"
-            (keyup.enter)="toggleRegister()"
+
+          <button
+            type="button"
             tabindex="0"
+            (click)="toggleForm()"
+            (keyup.enter)="toggleForm()"
             data-test="to-login-button"
-            >Wanna Log in?</a
           >
+            Wanna Log in?
+          </button>
+
           } @else {
-          <a
-            (click)="toggleRegister()"
-            (keyup.enter)="toggleRegister()"
+
+          <button
+            type="button"
             tabindex="0"
+            (click)="toggleForm()"
+            (keyup.enter)="toggleForm()"
             data-test="to-register-button"
-            >Wanna Register?</a
           >
+            Wanna Register?
+          </button>
+
           }
         </div>
       </div>

@@ -64,12 +64,15 @@ main {
 }
 
 .login-register {
-  &-switch > a {
-    text-align: center;
-    text-decoration: none;
+  &-switch > button {
     font-size: var(--p);
     font-weight: 500;
     cursor: pointer;
     color: inherit;
+    background-color: transparent;
+
+    @media (forced-colors: none) {
+      border: none;
+    }
   }
 }

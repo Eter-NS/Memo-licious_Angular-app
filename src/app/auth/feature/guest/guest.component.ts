@@ -21,6 +21,7 @@ import { ActivatedRoute } from '@angular/router';
 import { LocalUserFormData } from '../../utils/Models/LocalAuthModels.interface';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { FetchErrorComponent } from 'src/app/reusable/ui/fetch-error/fetch-error.component';
 
 @Component({
   standalone: true,
@@ -35,60 +36,66 @@ import { AsyncPipe } from '@angular/common';
     MatProgressSpinnerModule,
     GuestLoginComponent,
     AsyncPipe,
+    FetchErrorComponent,
   ],
 })
 export class GuestComponent implements OnInit {
   viewTransitionService = inject(ViewTransitionService);
   authLocalUserService = inject(AuthLocalUserService);
-  authCommonFeaturesService = inject(AuthCommonFeaturesService);
+  #authCommonFeaturesService = inject(AuthCommonFeaturesService);
   #route = inject(ActivatedRoute);
   #snackBar = inject(MatSnackBar);
+  _runAnimationOnce = runAnimationOnce;
 
   @ViewChild('mainTagRef', { static: true })
-  mainTagRef!: ElementRef<HTMLDivElement>;
+  private _mainTagRef!: ElementRef<HTMLDivElement>;
+
+  private _rememberMe = false;
+  private _redirect: string | undefined = undefined;
 
   private _registerSubject = new BehaviorSubject<boolean>(true);
-  private _redirectSubject = new BehaviorSubject<string | undefined>(undefined);
-  private _rememberMeSubject = new BehaviorSubject<boolean>(false);
-
   private _wrongCredentialsSubject = new BehaviorSubject<boolean>(false);
 
   protected data$ = combineLatest({
     register: this._registerSubject.asObservable(),
-    redirect: this._redirectSubject.asObservable(),
-    rememberMe: this._rememberMeSubject.asObservable(),
     wrongCredentials: this._wrongCredentialsSubject.asObservable(),
   });
 
   ngOnInit(): void {
     this._checkParams();
-    this.checkTransitionDirection();
+    this._checkTransitionDirection();
   }
 
-  private checkTransitionDirection() {
-    if (!this.viewTransitionService.goBackClicked)
-      runAnimationOnce(this.mainTagRef.nativeElement, 'color-transition');
+  private _checkTransitionDirection() {
+    if (!this.viewTransitionService.goBackClicked) {
+      this._runAnimationOnce(
+        this._mainTagRef.nativeElement,
+        'color-transition'
+      );
+    }
   }
 
   private _checkParams() {
-    const { register, redirect } = this.authCommonFeaturesService.checkParamMap(
-      this.#route,
-      'siteAction'
-    );
+    const { register, redirect } =
+      this.#authCommonFeaturesService.checkParamMap(this.#route, 'siteAction');
     this._registerSubject.next(register);
-    this._redirectSubject.next(redirect);
+    this._redirect = redirect;
   }
 
-  toggleRegister() {
+  toggleForm() {
     this._registerSubject.next(!this._registerSubject.value);
   }
 
   protected updateRememberMe(value: boolean) {
-    this._rememberMeSubject.next(value);
+    this._rememberMe = value;
   }
 
-  handleRegister({ name, passwordGroup, pinGroup }: LocalAuthUserData): void {
-    const isPasswordSelected = passwordGroup;
+  protected async handleRegister({
+    name,
+    passwordGroup,
+    pinGroup,
+  }: LocalAuthUserData): Promise<void> {
+    const isPasswordSelected = Boolean(passwordGroup);
 
     const payload: LocalUserFormData = {
       auth: {
@@ -103,14 +110,17 @@ export class GuestComponent implements OnInit {
     const result = this.authLocalUserService.createUser(payload);
 
     if (result?.message) {
-      this.#snackBar.open(result.message, 'close', { duration: 5000 });
+      this._openSnackBar(result.message);
       return;
     }
 
-    this.viewTransitionService.goForward(this.mainTagRef.nativeElement, '/app');
+    await this._redirectToApp();
   }
 
-  handleLogin({ name, passphrase }: LocalAuthUserData): void {
+  protected async handleLogin({
+    name,
+    passphrase,
+  }: LocalAuthUserData): Promise<void> {
     if (!passphrase) {
       this._wrongCredentialsSubject.next(true);
       return;
@@ -119,11 +129,11 @@ export class GuestComponent implements OnInit {
     const result = this.authLocalUserService.logIn(
       name,
       passphrase,
-      this._rememberMeSubject.value ? 'local' : 'session'
+      this._rememberMe ? 'local' : 'session'
     );
 
     if (result?.message) {
-      this.#snackBar.open(result.message, 'close', { duration: 5000 });
+      this._openSnackBar(result.message);
 
       if (result.code === 'invalid-passkey') {
         this._wrongCredentialsSubject.next(true);
@@ -132,6 +142,17 @@ export class GuestComponent implements OnInit {
       return;
     }
 
-    this.viewTransitionService.goForward(this.mainTagRef.nativeElement, '/app');
+    await this._redirectToApp();
+  }
+
+  private async _redirectToApp() {
+    return this.viewTransitionService.goForward(
+      this._mainTagRef.nativeElement,
+      this._redirect || '/app'
+    );
+  }
+
+  private _openSnackBar(message: string): void {
+    this.#snackBar.open(message, 'close', { duration: 5000 });
   }
 }
