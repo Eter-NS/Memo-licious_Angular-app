@@ -88,6 +88,13 @@ export const runWithDelay = (
       );
     }
 
+    const run = runInSequence();
+    const intervalId = setInterval(() => {
+      if (run.next().done) {
+        clearInterval(intervalId);
+      }
+    }, delay);
+
     function* runInSequence() {
       for (
         let i = options?.reverse ? elementsArray.length - 1 : 0;
@@ -106,12 +113,6 @@ export const runWithDelay = (
         yield startAnimation(el);
       }
     }
-    const run = runInSequence();
-    const intervalId = setInterval(() => {
-      if (run.next().done) {
-        clearInterval(intervalId);
-      }
-    }, delay);
 
     function afterAnimation(e: Event) {
       e.stopPropagation();
