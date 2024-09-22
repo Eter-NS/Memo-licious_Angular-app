@@ -1,11 +1,7 @@
 @if (environment==='note-creator') {
 <h2>Create new notes</h2>
 }
-<form
-  [formGroup]="newNoteGroupForm"
-  class="form"
-  (ngSubmit)="submitForm()"
->
+<form [formGroup]="newNoteGroupForm" class="form" (ngSubmit)="submitForm()">
   <label class="note-list-header-wrapper">
     <input
       class="note-list-header"
@@ -21,15 +17,9 @@
     }
   </label>
 
-  <mat-form-field
-    class="note-list-elements"
-    appearance="outline"
-  >
+  <mat-form-field class="note-list-elements" appearance="outline">
     <mat-label>Your items</mat-label>
-    <mat-chip-grid
-      #chipGrid
-      aria-label="Enter what's on your mind"
-    >
+    <mat-chip-grid #chipGrid aria-label="Enter what's on your mind">
       @if(notes){
       <!--  -->
       @for (note of notes; track note.id) {
@@ -38,8 +28,8 @@
         class="note-list-element"
         aria-description="Press enter to edit {{ note.value }}"
         [editable]="true"
-        (touchstart)="handleTouchStart()"
-        (touchend)="handleTouchEnd()"
+        (pointerdown)="handleTouchStart()"
+        (pointerup)="handleTouchEnd()"
         (edited)="handleNoteEvent({note, event: $event})"
         (removed)="removeNote.emit(note)"
       >
@@ -74,10 +64,7 @@
   }
   <!--  -->
   @if(environment==='note-creator' && notes?.length){
-  <button
-    type="submit"
-    class="submit-button"
-  >
+  <button type="submit" class="submit-button">
     <mat-icon>done</mat-icon>
   </button>
   }

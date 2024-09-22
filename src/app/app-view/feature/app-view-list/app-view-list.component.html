@@ -51,7 +51,7 @@
     @defer {
     <app-bottom-sheet
       [open]="mobileFormVisible"
-      (openChange)="toggleNoteListForm('close')"
+      (closed)="toggleNoteListForm('close')"
     >
       <ng-template #content>
         <app-note-list-form

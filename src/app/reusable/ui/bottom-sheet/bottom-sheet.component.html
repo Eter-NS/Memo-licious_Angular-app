@@ -20,11 +20,7 @@
     drag: data.isDragging
   }"
 >
-  <div
-    class="drag-icon"
-    (mousedown)="startDragging($event)"
-    (touchstart)="startDragging($event)"
-  >
+  <div class="drag-icon" (pointerdown)="startDragging($event)">
     <span></span>
   </div>
 

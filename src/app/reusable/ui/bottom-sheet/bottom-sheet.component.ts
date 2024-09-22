@@ -48,7 +48,7 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
     this._noAnimationSubject.next(value);
   }
 
-  @Output() openChange = new EventEmitter<boolean>();
+  @Output() closed = new EventEmitter<boolean>();
 
   @ContentChild('content') content!: TemplateRef<unknown>;
   @ViewChild('sheet') element!: ElementRef<HTMLDivElement>;
@@ -61,63 +61,59 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
     this.initialHeight = this.element.nativeElement.offsetHeight;
 
     this.#zone.runOutsideAngular(() => {
-      document.addEventListener('mousemove', this.dragTo.bind(this));
-      document.addEventListener('touchmove', this.dragTo.bind(this));
-      document.addEventListener('mouseup', this.stopDragging.bind(this));
-      document.addEventListener('touchend', this.stopDragging.bind(this));
+      const element = this.element.nativeElement;
+
+      element.addEventListener('pointermove', this.dragTo.bind(this));
+      element.addEventListener('pointerup', this.stopDragging.bind(this));
     });
   }
 
   ngOnDestroy(): void {
-    document.removeEventListener('mousemove', this.dragTo);
-    document.removeEventListener('touchmove', this.dragTo);
-    document.removeEventListener('mouseup', this.stopDragging);
-    document.removeEventListener('touchend', this.stopDragging);
+    const element = this.element.nativeElement;
+
+    element.removeEventListener('pointermove', this.dragTo.bind(this));
+    element.removeEventListener('pointerup', this.stopDragging.bind(this));
   }
 
   close() {
     this._isOpenedSubject.next(false);
+
+    const effect = () => {
+      this.closed.emit(false);
+      this.setNewHeight(this.initialHeight);
+    };
     const element = this.element.nativeElement;
 
-    const effectWrapper = (eventName: 'transitionend' | 'animationend') => {
-      const effect = () => {
-        this.openChange.emit(false);
-        this.setNewHeight(this.initialHeight);
-        element.removeEventListener(eventName, effect);
-      };
-
-      return effect;
-    };
-
-    element.addEventListener('transitionend', effectWrapper('transitionend'));
-    element.addEventListener('animationend', effectWrapper('animationend'));
+    element.addEventListener('transitionend', effect, { once: true });
+    element.addEventListener('animationend', effect, { once: true });
   }
 
-  startDragging(e: MouseEvent | TouchEvent) {
+  startDragging(e: PointerEvent) {
     e.preventDefault();
     e.stopPropagation();
-    this._isDraggingSubject.next(true);
 
-    if (e instanceof MouseEvent) {
-      this.startY = e.pageY;
-    } else {
-      this.startY = e.touches[0].pageY;
+    if (!e.isPrimary) {
+      return;
     }
 
+    this._isDraggingSubject.next(true);
+    this.startY = e.pageY;
     this.startHeight = this.element.nativeElement.offsetHeight;
   }
 
-  dragTo(e: MouseEvent | TouchEvent) {
-    if (!this._isDraggingSubject.value) return;
+  dragTo(e: PointerEvent) {
+    if (!this._isDraggingSubject.value || !e.isPrimary) {
+      return;
+    }
+    const element = this.element.nativeElement;
+
+    if (!element.hasPointerCapture(e.pointerId)) {
+      this.element.nativeElement.setPointerCapture(e.pointerId);
+    }
 
     const effect = () => {
-      let delta = 0;
-      if (e instanceof MouseEvent) {
-        delta = this.startY - e.pageY;
-      } else {
-        delta = this.startY - e.touches[0].pageY;
-      }
       e.preventDefault();
+      const delta = this.startY - e.pageY;
 
       const newHeight = this.startHeight + delta;
       this.setNewHeight(newHeight);
@@ -126,12 +122,16 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
     requestAnimationFrame(effect);
   }
 
-  @HostListener('document:mouseup')
-  @HostListener('document:touchend')
-  stopDragging() {
+  @HostListener('document:pointerup', ['$event'])
+  stopDragging(e: PointerEvent) {
+    const element = this.element.nativeElement;
+
+    if (element.hasPointerCapture(e.pointerId)) {
+      element.releasePointerCapture(e.pointerId);
+    }
     this._isDraggingSubject.next(false);
 
-    const height = this.element.nativeElement.offsetHeight;
+    const height = element.offsetHeight;
     const minHeight = 50;
     if (height < minHeight) {
       this.close();
