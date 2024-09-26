@@ -34,7 +34,7 @@ export const appRoutes: Routes = [
       {
         /*
         force=login to force login form before register
-        forward=path to redirect user to specific path after confirmed login
+        forward=path (e.g. path = _app_notes) to redirect user to specific path after confirmed login
         */
         path: ':siteAction',
         loadComponent: () =>
@@ -59,7 +59,7 @@ export const appRoutes: Routes = [
       {
         /*
         force=login to force login form before register
-        forward=path to redirect user to specific path after confirmed login
+        forward=path (e.g. path = _app_notes) to redirect user to specific path after confirmed login
         */
         path: ':siteAction',
         loadComponent: () =>

@@ -24,10 +24,12 @@ export class AuthCommonFeaturesService {
     const [action, parameter] = pathElement.split('=');
     switch (action) {
       case 'force':
-        returnObj.register = !(parameter === 'login');
+        returnObj.register = parameter !== 'login';
         break;
       case 'forward':
-        returnObj.redirect = parameter ? parameter : undefined;
+        returnObj.redirect = parameter
+          ? parameter.replace(/_/g, '/')
+          : undefined;
         break;
     }
 
