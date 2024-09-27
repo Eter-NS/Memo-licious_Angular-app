@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {
   GoogleAuthProvider,
-  UserCredential,
   User,
   EmailAuthProvider,
   AuthCredential,
@@ -106,10 +105,9 @@ export class AuthAccountService {
    * Auth provider for redirect and popup depending on where user runs the app.
    * Beside this method you must apply getDataFromRedirect() in your component to get data from redirect.
    */
-  async continueWithGoogle(): Promise<AuthReturnCredits> {
+  async continueWithGoogle(): Promise<AuthReturnCredits | void> {
     const provider = this._createGoogleProvider();
 
-    let result: UserCredential;
     try {
       if (this._isMobileDevice()) {
         await this.#fireAuthController.signInWithRedirect(
@@ -117,14 +115,15 @@ export class AuthAccountService {
           provider
         );
       } else {
-        result = await this.#fireAuthController.signInWithPopup(
+        const result = await this.#fireAuthController.signInWithPopup(
           this.#authState.auth,
           provider
         );
-        this.#authState.updateSession(result.user);
-      }
 
-      return await this.#authDatabase.databaseRegisterHandler(result!);
+        this.#authState.updateSession(result.user);
+
+        return await this.#authDatabase.databaseRegisterHandler(result);
+      }
     } catch (err) {
       this._devErrorLog(err);
 

@@ -311,9 +311,10 @@ describe('AuthAccountService', () => {
 
       const result = await service.continueWithGoogle();
 
-      expect(result.passed).toBeTrue();
-      expect(result.registered).toBeTrue();
-      expect(result.errors).toBeUndefined();
+      expect(result).not.toBeUndefined();
+      expect(result!.passed).toBeTrue();
+      expect(result!.registered).toBeTrue();
+      expect(result!.errors).toBeUndefined();
     });
 
     it(`should return {passed: true, registered: false} if user was signed up previously and signed with a provider`, async () => {
@@ -324,9 +325,10 @@ describe('AuthAccountService', () => {
 
       const result = await service.continueWithGoogle();
 
-      expect(result.passed).toBeTrue();
-      expect(result.registered).toBeFalse();
-      expect(result.errors).toBeUndefined();
+      expect(result).not.toBeUndefined();
+      expect(result!.passed).toBeTrue();
+      expect(result!.registered).toBeFalse();
+      expect(result!.errors).toBeUndefined();
     });
 
     it(`should return {errors: { unknownError }} if an error occurred`, async () => {
@@ -337,9 +339,10 @@ describe('AuthAccountService', () => {
 
       const result = await service.continueWithGoogle();
 
-      expect(result.passed).toBeUndefined();
-      expect(result.registered).toBeUndefined();
-      expect(result.errors?.unknownError).toBeTruthy();
+      expect(result).not.toBeUndefined();
+      expect(result!.passed).toBeUndefined();
+      expect(result!.registered).toBeUndefined();
+      expect(result!.errors?.unknownError).toBeTruthy();
     });
   });
 
