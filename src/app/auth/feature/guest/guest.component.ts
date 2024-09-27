@@ -45,7 +45,7 @@ export class GuestComponent implements OnInit {
   #authCommonFeaturesService = inject(AuthCommonFeaturesService);
   #route = inject(ActivatedRoute);
   #snackBar = inject(MatSnackBar);
-  _runAnimationOnce = runAnimationOnce;
+  private _runAnimationOnce = runAnimationOnce;
 
   @ViewChild('mainTagRef', { static: true })
   private _mainTagRef!: ElementRef<HTMLDivElement>;
