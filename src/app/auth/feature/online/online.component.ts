@@ -5,7 +5,6 @@ import {
   inject,
   OnInit,
   ViewChild,
-  ChangeDetectorRef,
 } from '@angular/core';
 import { OnlineLoginComponent } from '../../ui/online-login/online-login.component';
 import { OnlineRegisterComponent } from '../../ui/online-register/online-register.component';
@@ -23,11 +22,17 @@ import { AuthAccountService } from '../../data-access/account/auth-account.servi
 import { AuthUserData } from '../../../reusable/data-access/form-common-features/form-common-features.service';
 import { AuthStateService } from '../../data-access/state/auth-state.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { environment } from 'src/environments/environment.dev';
 import { AuthCommonFeaturesService } from '../../data-access/auth-common-features/auth-common-features.service';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { FetchErrorComponent } from '../../../reusable/ui/fetch-error/fetch-error.component';
+
+type FormsErrors = {
+  alreadyInUseError: boolean;
+  wrongEmailOrPassword: boolean;
+  emailDoesNotExist: boolean;
+};
 
 @Component({
   standalone: true,
@@ -42,6 +47,7 @@ import { AsyncPipe } from '@angular/common';
     PreviousPageButtonComponent,
     MatProgressSpinnerModule,
     AsyncPipe,
+    FetchErrorComponent,
   ],
 })
 export class OnlineComponent implements OnInit {
@@ -50,145 +56,160 @@ export class OnlineComponent implements OnInit {
   #authCommonFeaturesService = inject(AuthCommonFeaturesService);
   #route = inject(ActivatedRoute);
   #snackBar = inject(MatSnackBar);
-  #cd = inject(ChangeDetectorRef);
   viewTransitionService = inject(ViewTransitionService);
+  private _runAnimationOnce = runAnimationOnce;
 
   @ViewChild('mainTagRef', { static: true })
-  mainTagRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('viewContainer', { static: true })
-  viewContainer!: ElementRef<HTMLDivElement>;
+  private _mainTagRef!: ElementRef<HTMLDivElement>;
 
-  redirect?: string;
+  private _redirect: string | undefined = undefined;
 
   private _registerSubject = new BehaviorSubject<boolean>(true);
   protected register$ = this._registerSubject.asObservable();
 
-  alreadyInUseError = false;
-  wrongEmailOrPassword = false;
-  emailDoesNotExist = false;
+  private _formErrorsSubject = new BehaviorSubject<FormsErrors>({
+    alreadyInUseError: false,
+    wrongEmailOrPassword: false,
+    emailDoesNotExist: false,
+  });
+
+  protected data$ = combineLatest({
+    formErrors: this._formErrorsSubject.asObservable(),
+  });
 
   ngOnInit(): void {
     this._checkParams();
-    this.checkTransitionDirection();
+    this._checkTransitionDirection();
     this.googleAuth('getDataFromRedirect');
   }
 
-  private checkTransitionDirection() {
-    if (!this.viewTransitionService.goBackClicked) {
-      runAnimationOnce(this.mainTagRef.nativeElement, 'color-transition');
-    }
+  toggleForm(): void {
+    this._registerSubject.next(!this._registerSubject.value);
   }
 
-  public async googleAuth(
+  protected async googleAuth(
     method: 'continueWithGoogle' | 'getDataFromRedirect'
   ) {
     const response = await this.#authAccountService[method]();
-    if (!response) return;
+
+    if (!response) {
+      return;
+    }
     this._authErrorGuard(response);
   }
 
-  public async handleSubmit({
+  protected async handleSubmit({
     name: displayName,
     email,
     password,
   }: AuthUserData): Promise<void> {
-    if (!email || !password) return;
-
     const response = displayName
       ? await this.#authAccountService.signupWithEmail(email, password, {
           displayName,
         })
       : await this.#authAccountService.signInWithEmail(email, password);
 
-    this._authErrorGuard(response);
+    await this._authErrorGuard(response);
   }
 
-  toggleRegister(): void {
-    this._registerSubject.next(!this._registerSubject.value);
-  }
-
-  updateRememberMe(action: boolean) {
+  protected updateRememberMe(action: boolean) {
     this.#authStateService.rememberMe(action);
   }
 
-  private _authErrorGuard(response: AuthReturnCredits): void {
+  private async _authErrorGuard(response: AuthReturnCredits): Promise<void> {
     if (response.errors) {
       this._handleAuthErrors(response.errors);
       return;
     }
-
-    this.viewTransitionService.goForward(
-      this.viewContainer.nativeElement,
+    await this.viewTransitionService.goForward(
+      this._mainTagRef.nativeElement,
       this._redirectUser(response)
     );
   }
 
   private _handleAuthErrors(errors: Errors) {
-    // Flags reset
-    this.alreadyInUseError = false;
-    this.wrongEmailOrPassword = false;
-    this.emailDoesNotExist = false;
-    this.#cd.detectChanges();
+    this._formErrorsSubject.next({
+      alreadyInUseError: false,
+      wrongEmailOrPassword: false,
+      emailDoesNotExist: false,
+    });
 
-    const duration = 5000;
+    const errorMap = this._getErrorMap(errors);
+
     for (const key of objectKeys(errors)) {
-      switch (key) {
-        case 'alreadyInUseError':
-          this.alreadyInUseError = true;
-          this.#cd.markForCheck();
-          break;
+      try {
+        errorMap[key]();
+      } catch (err) {
+        console.error('Unhandled error property: ', key);
+      }
+    }
+  }
 
-        case 'wrongEmailOrPassword':
-          this.wrongEmailOrPassword = true;
-          this.#cd.markForCheck();
-          break;
+  private _getErrorMap(errors: Errors): Record<keyof Errors, () => void> {
+    const duration = 5000;
+    const actionText = 'close';
 
-        case 'emailDoesNotExist':
-          this.emailDoesNotExist = true;
-          this.#cd.markForCheck();
-          break;
-
-        case 'sendingPostToDB':
-          this.#snackBar.open(
-            'Something went wrong when creating your account, try again',
-            'close',
-            { duration }
-          );
-          break;
-
-        case 'unverifiedEmail':
-          this.viewTransitionService.goForward(
-            this.viewContainer.nativeElement,
-            '/verify-email'
-          );
-          break;
-
-        case 'noEmailProvided':
-          this.#snackBar.open(
-            'It looks like someone has forgotten to write an email 😉',
-            'close',
-            { duration }
-          );
-          break;
-
-        case 'unknownError': {
-          if (errors.unknownError?.code === 'auth/popup-closed-by-user') {
-            return;
-          }
-
-          this.#snackBar.open(
-            `${errors.unknownError?.code}, ${errors.unknownError?.message}`,
-            'close',
-            { duration }
-          );
-          break;
+    return {
+      alreadyInUseError: () => {
+        this._formErrorsSubject.next({
+          ...this._formErrorsSubject.value,
+          alreadyInUseError: true,
+        });
+      },
+      wrongEmailOrPassword: () => {
+        this._formErrorsSubject.next({
+          ...this._formErrorsSubject.value,
+          wrongEmailOrPassword: true,
+        });
+      },
+      emailDoesNotExist: () => {
+        this._formErrorsSubject.next({
+          ...this._formErrorsSubject.value,
+          emailDoesNotExist: true,
+        });
+      },
+      sendingPostToDB: () => {
+        this.#snackBar.open(
+          'Something went wrong when creating your account, try again',
+          'close',
+          { duration }
+        );
+      },
+      noEmailProvided: () => {
+        this.#snackBar.open(
+          'It looks like someone has forgotten to write an email 😉',
+          actionText,
+          { duration }
+        );
+      },
+      unverifiedEmail: () => {
+        this.viewTransitionService.goForward(
+          this._mainTagRef.nativeElement,
+          '/verify-email'
+        );
+      },
+      unknownError: () => {
+        if (errors.unknownError?.code === 'auth/popup-closed-by-user') {
+          return;
         }
 
-        default:
-          if (!environment.production) {
-            throw new Error('Unhandled error property');
+        this.#snackBar.open(
+          errors.unknownError?.message as string,
+          actionText,
+          {
+            duration,
           }
-      }
+        );
+      },
+    };
+  }
+
+  private _checkTransitionDirection() {
+    if (!this.viewTransitionService.goBackClicked) {
+      this._runAnimationOnce(
+        this._mainTagRef.nativeElement,
+        'color-transition'
+      );
     }
   }
 
@@ -203,13 +224,13 @@ export class OnlineComponent implements OnInit {
       return '/verify-email';
     }
 
-    return `/${this.redirect || 'app'}`;
+    return `/${this._redirect || 'app'}`;
   }
 
   private _checkParams() {
     const { register, redirect } =
       this.#authCommonFeaturesService.checkParamMap(this.#route, 'siteAction');
     this._registerSubject.next(register);
-    this.redirect = redirect;
+    this._redirect = redirect;
   }
 }

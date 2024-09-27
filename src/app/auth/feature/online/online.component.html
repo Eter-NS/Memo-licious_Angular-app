@@ -1,5 +1,7 @@
 <main #mainTagRef>
   <section class="container">
+    @if (data$ | async; as data) {
+
     <div class="go-back-button-wrapper">
       <app-previous-page-button
         (clicked)="
@@ -15,33 +17,71 @@
         @if (register$ | async) {
         <!--  -->
         @defer (on immediate; prefetch on immediate) {
+
         <app-online-register
-          [emailAlreadyInUse]="alreadyInUseError"
+          data-test="register-form"
+          [emailAlreadyInUse]="data.formErrors.alreadyInUseError"
           (data)="handleSubmit($event)"
         />
+
         } @loading ( minimum 250ms) {
+
         <mat-spinner
+          data-test="loading-register-component"
           class="loading-defer-spinner loading-state-register"
         ></mat-spinner>
+
         }@placeholder (minimum 500ms) {
-        <span class="loading-state-register"> Loading... </span>
+
+        <span data-test="loading-state-register" class="loading-state-register">
+          Loading...
+        </span>
+
+        } @error {
+
+        <app-fetch-error
+          data-test="register-component-error"
+          (clicked)="viewTransitionService.pageReload()"
+        >
+          Failed to load register form
+        </app-fetch-error>
+
         }
         <!--  -->
         } @else {
         <!--  -->
         @defer(on immediate; prefetch on immediate) {
+
         <app-online-login
-          [wrongEmailOrPassword]="wrongEmailOrPassword"
-          [emailDoesNotExist]="emailDoesNotExist"
+          data-test="login-form"
+          [wrongEmailOrPassword]="data.formErrors.wrongEmailOrPassword"
+          [emailDoesNotExist]="data.formErrors.emailDoesNotExist"
           (data)="handleSubmit($event)"
           (rememberMe)="updateRememberMe($event)"
         />
+
         } @loading ( minimum 250ms){
+
         <mat-spinner
+          data-test="loading-login-component"
           class="loading-defer-spinner loading-state-login"
         ></mat-spinner>
+
         } @placeholder (minimum 500ms) {
-        <span class="loading-state-login"> Loading... </span>
+
+        <span data-test="loading-state-login" class="loading-state-login">
+          Loading...
+        </span>
+
+        } @error {
+
+        <app-fetch-error
+          data-test="login-component-error"
+          (clicked)="viewTransitionService.pageReload()"
+        >
+          Failed to load login form
+        </app-fetch-error>
+
         }
         <!--  -->
         }
@@ -49,19 +89,26 @@
 
       <div class="component-content">
         <app-google-logo
+          data-test="google-auth-button"
           (click)="googleAuth('continueWithGoogle')"
           (keyup.enter)="googleAuth('continueWithGoogle')"
         />
         <div class="login-register-switch">
           @if (register$ | async) {
+
           <a
-            (click)="toggleRegister()"
-            (keyup.enter)="toggleRegister()"
+            data-test="to-login-button"
+            (click)="toggleForm()"
+            (keyup.enter)="toggleForm()"
             tabindex="0"
-            >Wanna Log in?</a
           >
+            Wanna Log in?
+          </a>
+
           } @else {
+
           <a
+            data-test="forgot-password-button"
             (click)="
               viewTransitionService.goForward(viewContainer, '/forgot-password')
             "
@@ -69,17 +116,21 @@
               viewTransitionService.goForward(viewContainer, '/forgot-password')
             "
             tabindex="0"
-            >Forgot your password?</a
           >
+            Forgot your password?
+          </a>
           <a
-            (click)="toggleRegister()"
-            (keyup.enter)="toggleRegister()"
+            data-test="to-register-button"
+            (click)="toggleForm()"
+            (keyup.enter)="toggleForm()"
             tabindex="0"
-            >Wanna Register?</a
           >
+            Wanna Register?
+          </a>
           }
         </div>
       </div>
     </div>
+    }
   </section>
 </main>

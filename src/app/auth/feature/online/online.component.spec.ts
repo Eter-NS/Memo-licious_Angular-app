@@ -1,482 +1,762 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  ComponentFixture,
+  DeferBlockBehavior,
   DeferBlockFixture,
   DeferBlockState,
   TestBed,
+  fakeAsync,
+  flush,
 } from '@angular/core/testing';
-
 import { OnlineComponent } from './online.component';
-import { ChangeDetectorRef, DebugElement, signal } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Component, DebugElement, Provider } from '@angular/core';
+import { Router, provideRouter } from '@angular/router';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { redirectLoggedInToApp } from 'src/app/app.routes';
+import { provideLocationMocks } from '@angular/common/testing';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
-import { AuthAccountService } from '../../data-access/account/auth-account.service';
-import { AuthStateService } from '../../data-access/state/auth-state.service';
-import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
-import { By } from '@angular/platform-browser';
 import {
-  AuthReturnCredits,
-  Errors,
-} from '../../utils/Models/OnlineAuthModels.interface';
-import { AuthUserData } from '../../../reusable/data-access/form-common-features/form-common-features.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { UserCredential } from '@angular/fire/auth';
+  Auth,
+  UserCredential,
+  browserLocalPersistence,
+} from '@angular/fire/auth';
+import {
+  DataSnapshot,
+  Database,
+  DatabaseReference,
+} from '@angular/fire/database';
+import { Storage } from '@angular/fire/storage';
+import { firebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service.mock';
+import { firebaseStorageControllerService } from 'src/app/reusable/data-access/firebase-storage/firebase-storage-controller.service.mock';
+import { firebaseDatabaseControllerService } from 'src/app/reusable/data-access/firebase-database/firebase-database-controller.service.mock';
+import { FirebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service';
+import { FirebaseDatabaseControllerService } from 'src/app/reusable/data-access/firebase-database/firebase-database-controller.service';
+import { FirebaseStorageControllerService } from 'src/app/reusable/data-access/firebase-storage/firebase-storage-controller.service';
+import { By } from '@angular/platform-browser';
+import { OnlineLoginComponent } from '../../ui/online-login/online-login.component';
+import { OnlineRegisterComponent } from '../../ui/online-register/online-register.component';
+import { PreviousPageButtonComponent } from 'src/app/reusable/ui/previous-page-button/previous-page-button.component';
+import { AuthUserData } from 'src/app/reusable/data-access/form-common-features/form-common-features.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthAccountService } from '../../data-access/account/auth-account.service';
 
-describe('OnlineComponent', () => {
-  const authAccountServiceMock = {
-    continueWithGoogle: jasmine.createSpy('continueWithGoogle'),
-    getDataFromRedirect: jasmine.createSpy('getDataFromRedirect'),
-    signupWithEmail: jasmine.createSpy('signupWithEmail'),
-    signInWithEmail: jasmine.createSpy('signInWithEmail'),
+@Component({
+  standalone: true,
+  selector: 'app-test',
+  template: `Test component works!`,
+})
+class TestComponent {}
+
+const correctRegisterPayload: AuthUserData = {
+  name: 'Nick',
+  email: 'exampleEmail@example.com',
+  password: 'sadasd&37343#43fE1qefef',
+};
+
+const correctLoginPayload: AuthUserData = {
+  email: 'exampleEmail@example.com',
+  password: 'sadasd&37343#43fE1qefef',
+};
+
+describe('OnlineComponent - integration', () => {
+  // Mocks
+  const authMock = jasmine.createSpyObj<Auth>(['setPersistence']);
+  const firebaseAuthControllerServiceMock = firebaseAuthControllerService;
+  const firebaseDatabaseControllerServiceMock = {
+    ...firebaseDatabaseControllerService,
+    db: {} as Database,
   };
-  const authStateServiceMock = {
-    rememberMe: jasmine.createSpy('rememberMe'),
-    session: signal<UserCredential | null | undefined>(undefined),
-  };
-  const activatedRouteMock = {
-    snapshot: {
-      paramMap: {
-        get: jasmine.createSpy('get').and.returnValue('mockValue'),
-      },
-    },
-  };
-  const viewTransitionServiceMock = {
-    goBackClicked: false,
-    page$: of<'start' | 'end' | 'idle'>('idle'),
-    goBack: jasmine.createSpy('goBack'),
-    goForward: jasmine.createSpy('goForward'),
-  };
-  const changeDetectorRefMock = {
-    markForCheck: jasmine.createSpy('markForCheck'),
+  const firebaseStorageControllerServiceMock = {
+    ...firebaseStorageControllerService,
+    storage: {} as Storage,
   };
 
+  function onlineDatabaseUserCheck(exists = false) {
+    firebaseDatabaseControllerServiceMock.ref.and.returnValue(
+      {} as DatabaseReference
+    );
+    firebaseDatabaseControllerServiceMock.get.and.resolveTo({
+      exists: () => exists,
+    } as DataSnapshot);
+    firebaseDatabaseControllerServiceMock.set.and.resolveTo();
+  }
+
+  // Component
+  let harness: RouterTestingHarness;
   let component: OnlineComponent;
-  let fixture: ComponentFixture<OnlineComponent>;
-  let matSnackBarMock: MatSnackBar;
+
+  let authAccountService: AuthAccountService;
+  let viewTransitionService: ViewTransitionService;
+  let router: Router;
 
   beforeEach(() => {
+    firebaseAuthControllerServiceMock.user.and.returnValue(of(null));
+  });
+
+  beforeEach(async () => {
     TestBed.configureTestingModule({
-      imports: [BrowserAnimationsModule, OnlineComponent],
+      deferBlockBehavior: DeferBlockBehavior.Manual,
+      imports: [NoopAnimationsModule, OnlineComponent],
       providers: [
-        { provide: AuthAccountService, useValue: authAccountServiceMock },
-        { provide: AuthStateService, useValue: authStateServiceMock },
-        { provide: ActivatedRoute, useValue: activatedRouteMock },
-        MatSnackBar,
-        { provide: ViewTransitionService, useValue: viewTransitionServiceMock },
-        { provide: ChangeDetectorRef, useValue: changeDetectorRefMock },
-      ],
+        provideRouter([
+          {
+            path: 'app',
+            component: TestComponent,
+          },
+          {
+            path: 'verify-email',
+            component: TestComponent,
+          },
+          {
+            path: 'getting-started/choose-path',
+            component: TestComponent,
+          },
+          {
+            path: 'online',
+            canActivate: [redirectLoggedInToApp],
+            children: [
+              {
+                path: ':siteAction',
+                loadComponent: () =>
+                  import('./online.component').then((m) => m.OnlineComponent),
+              },
+              {
+                path: '',
+                loadComponent: () =>
+                  import('./online.component').then((m) => m.OnlineComponent),
+              },
+            ],
+          },
+        ]),
+        provideLocationMocks(),
+        {
+          provide: Auth,
+          useValue: authMock,
+        },
+        {
+          provide: FirebaseAuthControllerService,
+          useValue: firebaseAuthControllerServiceMock,
+        },
+        {
+          provide: FirebaseDatabaseControllerService,
+          useValue: firebaseDatabaseControllerServiceMock,
+        },
+        {
+          provide: FirebaseStorageControllerService,
+          useValue: firebaseStorageControllerServiceMock,
+        },
+        ViewTransitionService,
+      ] as Provider[],
     });
-    fixture = TestBed.createComponent(OnlineComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    matSnackBarMock = fixture.debugElement.injector.get(MatSnackBar);
+    harness = await RouterTestingHarness.create();
+    component = await harness.navigateByUrl('/online', OnlineComponent);
+    authAccountService = TestBed.inject(AuthAccountService);
+    viewTransitionService = TestBed.inject(ViewTransitionService);
+    router = TestBed.inject(Router);
+    harness.detectChanges();
+  });
+
+  beforeEach(() => {
+    spyOn(viewTransitionService as any, '_runTransition').and.resolveTo();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('template', () => {
-    describe('app-online-register', () => {
-      let registerDeferBlockFixture: DeferBlockFixture;
-      let registerComponent: DebugElement;
+  describe('render', () => {
+    let buttonComponent: DebugElement;
 
-      beforeEach(async () => {
-        registerDeferBlockFixture = (await fixture.getDeferBlocks())[0];
+    beforeEach(() => {
+      buttonComponent = harness.routeDebugElement!.query(
+        By.directive(PreviousPageButtonComponent)
+      );
+    });
 
-        await registerDeferBlockFixture.render(DeferBlockState.Complete);
+    it('should render PreviousPageButton component.', () => {
+      expect(buttonComponent.nativeElement).toBeTruthy();
+    });
 
-        registerComponent = fixture.debugElement.query(
-          By.css('app-online-register')
+    it('should call viewTransitionService.goBack and move user to /getting-started/choose-path.', async () => {
+      // Arrange
+      const spy = spyOn(viewTransitionService, 'goBack').and.callThrough();
+      const viewContainer = harness.routeDebugElement!.query(
+        By.css('.content')
+      );
+      const expectedPath = '/getting-started/choose-path';
+
+      // Act
+      buttonComponent.triggerEventHandler('clicked');
+      await harness.fixture.whenStable();
+
+      // Assert
+      expect(spy).toHaveBeenCalledWith(
+        viewContainer.nativeElement,
+        expectedPath
+      );
+      expect(router.url).toEqual(expectedPath);
+    });
+
+    describe(`defer blocks`, () => {
+      describe(`register`, () => {
+        let deferBlock: DeferBlockFixture;
+
+        beforeEach(async () => {
+          deferBlock = (await harness.fixture.getDeferBlocks())[0];
+        });
+
+        it(`should display span element if loading wasn't started yet.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Placeholder);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="loading-state-register"]')
+          ).nativeElement;
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeTrue();
+          expect(element).toBeTruthy();
+        });
+
+        it(`should display material spinner if loading was started.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Loading);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="loading-register-component"]')
+          ).nativeElement;
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeTrue();
+          expect(element).toBeTruthy();
+        });
+
+        it(`should display FetchError Component if error occurred.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Error);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="register-component-error"]')
+          ).nativeElement;
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeTrue();
+          expect(element).toBeTruthy();
+        });
+
+        it(`should display GuestRegister Component if loading completed successfully.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Complete);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="register-form"]')
+          );
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeTrue();
+          expect(
+            element.componentInstance instanceof OnlineRegisterComponent
+          ).toBeTruthy();
+        });
+      });
+
+      describe(`login`, () => {
+        let deferBlock: DeferBlockFixture;
+
+        beforeEach(async () => {
+          harness.routeDebugElement
+            ?.query(By.css(`[data-test="to-login-button"]`))
+            .triggerEventHandler('click', null);
+          harness.detectChanges();
+
+          deferBlock = (await harness.fixture.getDeferBlocks())[0];
+        });
+
+        it(`should display span element if loading wasn't started yet.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Placeholder);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="loading-state-login"]')
+          ).nativeElement;
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeFalse();
+          expect(element).toBeTruthy();
+        });
+
+        it(`should display material spinner if loading was started.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Loading);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="loading-login-component"]')
+          ).nativeElement;
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeFalse();
+          expect(element).toBeTruthy();
+        });
+
+        it(`should display FetchError Component if error occurred.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Error);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="login-component-error"]')
+          ).nativeElement;
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeFalse();
+          expect(element).toBeTruthy();
+        });
+
+        it(`should display GuestLogin Component if loading completed successfully.`, async () => {
+          // Arrange
+          // Act
+          await deferBlock.render(DeferBlockState.Complete);
+          const element = harness.routeDebugElement!.query(
+            By.css('[data-test="login-form"]')
+          );
+
+          // Assert
+          expect(component['_registerSubject'].value).toBeFalse();
+          expect(
+            element.componentInstance instanceof OnlineLoginComponent
+          ).toBeTruthy();
+        });
+      });
+    });
+
+    describe(`component's content`, () => {
+      it('should call the toggleForm() if "to-login-button" has had an interaction with user.', () => {
+        // Arrange
+        const spy = spyOn(component, 'toggleForm');
+        const button = harness.routeDebugElement!.query(
+          By.css('[data-test="to-login-button"]')
         );
+
+        // Act
+        button.triggerEventHandler('click', null);
+        button.triggerEventHandler('keyup.enter', null);
+
+        // Assert
+        expect(spy).toHaveBeenCalledTimes(2);
       });
 
-      it('should be rendered when register flag is "true"', async () => {
-        expect(component.register).toBeTrue();
-        expect(registerComponent).toBeTruthy();
-      });
-
-      it('should call handleSubmit() when data event was emitted', () => {
-        spyOn(component, 'handleSubmit').and.returnValue(Promise.resolve());
-
-        registerComponent.triggerEventHandler('data', null);
-
-        expect(component.handleSubmit).toHaveBeenCalled();
-      });
-    });
-
-    describe('app-online-login', () => {
-      let loginDeferBlockFixture: DeferBlockFixture;
-      let loginComponent: DebugElement;
-
-      beforeEach(async () => {
-        component.register = false;
-        fixture.detectChanges();
-
-        loginDeferBlockFixture = (await fixture.getDeferBlocks())[1];
-        await loginDeferBlockFixture.render(DeferBlockState.Complete);
-
-        loginComponent = fixture.debugElement.query(By.css('app-online-login'));
-      });
-
-      it('should be rendered when register is "false"', () => {
-        expect(component.register).toBeFalse();
-        expect(loginComponent).toBeTruthy();
-      });
-
-      it('should call handleSubmit() when data event was emitted', () => {
-        spyOn(component, 'handleSubmit').and.returnValue(Promise.resolve());
-
-        loginComponent.triggerEventHandler('data', null);
-
-        expect(component.handleSubmit).toHaveBeenCalled();
-      });
-
-      it('should call authStateService.rememberMe() when rememberMe event was emitted', () => {
-        loginComponent.triggerEventHandler('rememberMe', true);
-
-        expect(authStateServiceMock.rememberMe).toHaveBeenCalledWith(true);
-      });
-    });
-
-    describe('Continue with Google button', () => {
-      let button: DebugElement;
-
-      beforeEach(() => {
-        button = fixture.debugElement.query(By.css('.sign-in-with-google'));
-      });
-
-      it('should be rendered', () => {
-        expect(button).toBeTruthy();
-        expect(button.nativeElement.textContent).toContain(
-          'Continue with Google'
+      it('should call the toggleForm() if "to-register-button" has had an interaction with user.', () => {
+        component['_registerSubject'].next(false);
+        harness.detectChanges();
+        const spy = spyOn(component, 'toggleForm');
+        const button = harness.routeDebugElement!.query(
+          By.css('[data-test="to-register-button"]')
         );
+
+        button.triggerEventHandler('click', null);
+        button.triggerEventHandler('keyup.enter', null);
+
+        expect(spy).toHaveBeenCalledTimes(2);
       });
 
-      it('should call googleAuth() when event click or keyup.enter was emitted', () => {
-        spyOn(component, 'googleAuth').and.returnValue(Promise.resolve());
+      it(`should show a button allowing user to switch to logging in by default.`, async () => {
+        // Arrange
 
-        button.triggerEventHandler('click');
-        button.triggerEventHandler('keyup.enter');
+        // Act
+        const loginButton = harness.routeDebugElement!.query(
+          By.css('[data-test="to-login-button"]')
+        ).nativeElement;
 
-        expect(component.googleAuth).toHaveBeenCalledTimes(2);
+        // Assert
+        expect(loginButton).toBeTruthy();
+      });
+
+      it(`should show a button allowing user to switch to registering after clicking the log in button.`, async () => {
+        // Arrange
+        const loginButton = harness.routeDebugElement!.query(
+          By.css('[data-test="to-login-button"]')
+        ).nativeElement;
+
+        // Act
+        loginButton.click();
+        harness.detectChanges();
+
+        const registerButton = harness.routeDebugElement!.query(
+          By.css('[data-test="to-register-button"]')
+        ).nativeElement;
+
+        // Assert
+        expect(registerButton).toBeTruthy();
+      });
+
+      it(`should show a button allowing user to reset password after clicking the log in button.`, async () => {
+        // Arrange
+        const loginButton = harness.routeDebugElement!.query(
+          By.css('[data-test="to-login-button"]')
+        ).nativeElement;
+
+        // Act
+        loginButton.click();
+        harness.detectChanges();
+
+        const forgotPasswordButton = harness.routeDebugElement!.query(
+          By.css('[data-test="forgot-password-button"]')
+        ).nativeElement;
+
+        // Assert
+        expect(forgotPasswordButton).toBeTruthy();
       });
     });
   });
 
-  describe('googleAuth()', () => {
-    it('should call authAccountService.continueWithGoogle() and return a falsy value', async () => {
-      authAccountServiceMock.continueWithGoogle.and.returnValue(
-        Promise.resolve(null)
+  describe(`registering`, () => {
+    let registerFormComponent: DebugElement;
+
+    beforeEach(async () => {
+      await (
+        await harness.fixture.getDeferBlocks()
+      )[0].render(DeferBlockState.Complete);
+
+      registerFormComponent = harness.routeDebugElement!.query(
+        By.directive(OnlineRegisterComponent)
       );
-
-      await component.googleAuth('continueWithGoogle');
-
-      expect(authAccountServiceMock.continueWithGoogle).toHaveBeenCalled();
     });
 
-    it('should call authAccountService.continueWithGoogle(), return AuthReturnCredits, and call _authErrorGuard()', async () => {
-      const spy = spyOn(component as any, '_authErrorGuard');
-      authAccountServiceMock.continueWithGoogle.and.returnValue(
-        Promise.resolve({
-          passed: true,
-          registered: false,
-        } satisfies AuthReturnCredits)
+    it(`should open a snackbar message if fireAuthController.createUserWithEmailAndPassword promise rejects.`, fakeAsync(() => {
+      // Arrange
+      const setSpy =
+        firebaseAuthControllerServiceMock.createUserWithEmailAndPassword.and.rejectWith(
+          {
+            code: 'auth/email-already-in-use',
+            message: 'The account already exists with the given email address.',
+          }
+        );
+      const formErrorsSubjectNextSpy = spyOn(
+        component['_formErrorsSubject'],
+        'next'
+      ).and.callThrough();
+
+      // Act
+      registerFormComponent.triggerEventHandler('data', correctRegisterPayload);
+      flush();
+
+      // Assert
+      expect(setSpy).toHaveBeenCalled();
+      expect(formErrorsSubjectNextSpy).toHaveBeenCalledWith({
+        ...component['_formErrorsSubject'].value,
+        alreadyInUseError: true,
+      });
+    }));
+
+    it(`should go to /verify-email route if the user was created successfully.`, fakeAsync(() => {
+      // Arrange
+      firebaseAuthControllerServiceMock.createUserWithEmailAndPassword.and.resolveTo(
+        {
+          user: {
+            email: correctRegisterPayload.email,
+            emailVerified: false,
+          },
+        } as UserCredential
       );
+      onlineDatabaseUserCheck();
 
-      await component.googleAuth('continueWithGoogle');
+      const goForwardSpy = spyOn(
+        viewTransitionService,
+        'goForward'
+      ).and.callThrough();
 
-      expect(spy).toHaveBeenCalled();
-    });
+      // Act
+      registerFormComponent.triggerEventHandler('data', correctRegisterPayload);
 
-    it('should call authAccountService.getDataFromRedirect() and return a falsy value', async () => {
-      authAccountServiceMock.getDataFromRedirect.and.returnValue(
-        Promise.resolve(null)
+      flush();
+
+      // Assert
+      expect(goForwardSpy).toHaveBeenCalled();
+      expect(router.url).toEqual('/verify-email');
+    }));
+  });
+
+  describe(`logging in`, () => {
+    let loginFormComponent: DebugElement;
+
+    beforeEach(async () => {
+      harness
+        .routeDebugElement!.query(By.css('[data-test="to-login-button"]'))
+        .triggerEventHandler('click', null);
+      harness.detectChanges();
+
+      await (
+        await harness.fixture.getDeferBlocks()
+      )[0].render(DeferBlockState.Complete);
+
+      loginFormComponent = harness.routeDebugElement!.query(
+        By.directive(OnlineLoginComponent)
       );
-
-      await component.googleAuth('getDataFromRedirect');
-
-      expect(authAccountServiceMock.getDataFromRedirect).toHaveBeenCalled();
     });
 
-    it('should call authAccountService.getDataFromRedirect(), return AuthReturnCredits, and call _authErrorGuard()', async () => {
-      const spy = spyOn(component as any, '_authErrorGuard');
-      authAccountServiceMock.getDataFromRedirect.and.returnValue(
-        Promise.resolve({
-          errors: { unknownError: { code: '123', message: 'Example error' } },
-        } satisfies AuthReturnCredits)
+    it(`should change user persistance to local if OnlineLogin component emits rememberMe event with value true.`, fakeAsync(() => {
+      // Arrange
+      const setPersistenceSpy = authMock.setPersistence;
+
+      // Act
+      loginFormComponent.triggerEventHandler('rememberMe', true);
+
+      // Assert
+      expect(setPersistenceSpy).toHaveBeenCalledWith(browserLocalPersistence);
+    }));
+
+    it(`should set wrongCredentials to true if user gave wrong login credentials.`, fakeAsync(() => {
+      // Arrange
+      const signInWithEmailAndPasswordSpy =
+        firebaseAuthControllerServiceMock.signInWithEmailAndPassword.and.rejectWith(
+          {
+            code: 'auth/user-not-found',
+            message: 'example error message',
+          }
+        );
+      const formErrorsSubjectNextSpy = spyOn(
+        component['_formErrorsSubject'],
+        'next'
+      ).and.callThrough();
+
+      // Act
+      loginFormComponent.triggerEventHandler('data', correctLoginPayload);
+
+      flush();
+
+      // Assert
+      expect(signInWithEmailAndPasswordSpy).toHaveBeenCalled();
+      expect(formErrorsSubjectNextSpy).toHaveBeenCalledWith({
+        ...component['_formErrorsSubject'].value,
+        emailDoesNotExist: true,
+      });
+    }));
+
+    it(`should open an error message in snackbar if something went wrong.`, fakeAsync(() => {
+      // Arrange
+      const signInWithEmailAndPasswordSpy =
+        firebaseAuthControllerServiceMock.signInWithEmailAndPassword.and.rejectWith(
+          { code: 'xyz', message: 'An example unknown error' }
+        );
+      const openSpy = spyOn(MatSnackBar.prototype, 'open');
+
+      // Act
+      loginFormComponent.triggerEventHandler('data', correctLoginPayload);
+
+      flush();
+
+      // Assert
+      expect(signInWithEmailAndPasswordSpy).toHaveBeenCalled();
+      expect(openSpy).toHaveBeenCalledWith(
+        'An example unknown error',
+        'close',
+        { duration: 5000 }
       );
+    }));
 
-      await component.googleAuth('getDataFromRedirect');
-
-      expect(spy).toHaveBeenCalled();
-    });
-  });
-
-  describe('handleSubmit()', () => {
-    it('should stop executing the method in case there is no email or password provided', async () => {
-      spyOn(component, 'handleSubmit');
-      const payload = { email: '', password: 'xyz' };
-
-      await component.handleSubmit(payload);
-
-      expect(authAccountServiceMock.signupWithEmail).not.toHaveBeenCalled();
-      expect(authAccountServiceMock.signInWithEmail).not.toHaveBeenCalled();
-
-      const payload2 = { email: 'xyz', password: '' };
-
-      await component.handleSubmit(payload2);
-
-      expect(authAccountServiceMock.signupWithEmail).not.toHaveBeenCalled();
-      expect(authAccountServiceMock.signInWithEmail).not.toHaveBeenCalled();
-    });
-
-    it('should call authAccountService.signupWithEmail() when the name property is provided', async () => {
-      const payload: AuthUserData = {
-        email: 'example@example.com',
-        password: 'zaq1@WSX',
-        name: 'Peter',
-      };
-      authAccountServiceMock.signupWithEmail.and.returnValue(
-        Promise.resolve({
-          errors: { alreadyInUseError: true },
-        } satisfies AuthReturnCredits)
+    it(`should go to /verify-email route if the user was logged in successfully but emailVerified is false.`, fakeAsync(() => {
+      // Arrange
+      firebaseAuthControllerServiceMock.signInWithEmailAndPassword.and.resolveTo(
+        {
+          user: {
+            emailVerified: false,
+            displayName: correctLoginPayload.name,
+          },
+        } as UserCredential
       );
+      const goForwardSpy = spyOn(
+        viewTransitionService,
+        'goForward'
+      ).and.callThrough();
 
-      await component.handleSubmit(payload);
+      // Act
+      loginFormComponent.triggerEventHandler('data', correctLoginPayload);
 
-      expect(authAccountServiceMock.signupWithEmail).toHaveBeenCalled();
-    });
+      flush();
 
-    it('should call authAccountService.signInWithEmail() when the name property is provided', async () => {
-      const payload: AuthUserData = {
-        email: 'example@example.com',
-        password: 'zaq1@WSX',
-      };
-      authAccountServiceMock.signInWithEmail.and.returnValue(
-        Promise.resolve({
-          errors: { emailDoesNotExist: true },
-        } satisfies AuthReturnCredits)
+      // Assert
+      expect(goForwardSpy).toHaveBeenCalled();
+      expect(router.url).toEqual('/verify-email');
+    }));
+
+    it(`should go to /app route if the user was logged in successfully.`, fakeAsync(() => {
+      // Arrange
+      firebaseAuthControllerServiceMock.signInWithEmailAndPassword.and.resolveTo(
+        {
+          user: {
+            emailVerified: true,
+            displayName: correctLoginPayload.name,
+          },
+        } as UserCredential
       );
+      const goForwardSpy = spyOn(
+        viewTransitionService,
+        'goForward'
+      ).and.callThrough();
 
-      await component.handleSubmit(payload);
+      // Act
+      loginFormComponent.triggerEventHandler('data', correctLoginPayload);
 
-      expect(authAccountServiceMock.signInWithEmail).toHaveBeenCalled();
-    });
+      flush();
 
-    it('should call _authErrorGuard() after collecting data from authAccountService method', async () => {
-      const payload: AuthUserData = {
-        email: 'example@example.com',
-        password: 'zaq1@WSX',
-      };
-
-      const spy = spyOn(component as any, '_authErrorGuard');
-
-      await component.handleSubmit(payload);
-
-      expect(spy).toHaveBeenCalled();
-    });
+      // Assert
+      expect(goForwardSpy).toHaveBeenCalled();
+      expect(router.url).toEqual('/app');
+    }));
   });
 
-  describe('_authErrorGuard()', () => {
-    it('should call _handleAuthErrors() when the property errors exist in the response argument', () => {
-      const spy = spyOn(component as any, '_handleAuthErrors');
-      const payload: AuthReturnCredits = {
-        errors: { unknownError: { code: '123', message: 'Example error' } },
-      };
+  describe(`google auth`, () => {
+    let googleAuthButton: DebugElement;
 
-      (component as any)._authErrorGuard(payload);
-
-      expect(spy).toHaveBeenCalled();
+    beforeEach(() => {
+      googleAuthButton = harness.routeDebugElement!.query(
+        By.css('[data-test="google-auth-button"]')
+      );
     });
 
-    it('should call viewTransitionService.goForward() when there is not errors property in the response object', () => {
-      const payload: AuthReturnCredits = {
-        registered: true,
-        passed: true,
-      };
+    describe(`redirect`, () => {
+      it(`should load the Online component if authAccountService.getDataFromRedirect returns null.`, fakeAsync(() => {
+        // Arrange
+        const authErrorGuardSpy = spyOn(component as any, '_authErrorGuard');
+        firebaseAuthControllerServiceMock.getRedirectResult.and.resolveTo(null);
 
-      (component as any)._authErrorGuard(payload);
+        // Act
+        component['googleAuth']('getDataFromRedirect');
 
-      expect(viewTransitionServiceMock.goForward).toHaveBeenCalled();
-    });
-  });
+        flush();
 
-  describe('_handleAuthErrors()', () => {
-    describe('formFlags', () => {
-      let markForCheckSpy: jasmine.Spy<any>;
+        // Assert
+        expect(authErrorGuardSpy).not.toHaveBeenCalled();
+      }));
 
-      beforeEach(() => {
-        markForCheckSpy = spyOn((component as any).cd, 'markForCheck');
-      });
+      it(`should call fireAuthController.signInWithRedirect if user's device is mobile/tablet (Step 1).`, fakeAsync(() => {
+        // Arrange
+        spyOn(authAccountService, '_isMobileDevice').and.returnValue(true);
+        const signInWithRedirectSpy =
+          firebaseAuthControllerServiceMock.signInWithRedirect.and.resolveTo(
+            undefined
+          );
 
-      it('should set "alreadyInUseError" property to true if such key exists in errors object', () => {
-        const payload: Errors = { alreadyInUseError: true };
+        // Act
+        googleAuthButton.triggerEventHandler('click');
 
-        (component as any)._handleAuthErrors(payload);
+        flush();
 
-        expect(component.alreadyInUseError).toBeTrue();
-        expect(markForCheckSpy).toHaveBeenCalled();
-      });
+        // Assert
+        expect(signInWithRedirectSpy).toHaveBeenCalled();
+      }));
 
-      it('should set "wrongEmailOrPassword" property to true if such key exists in errors object', () => {
-        const payload: Errors = { wrongEmailOrPassword: true };
+      it(`should redirect user to /verify-email if email is not verified.`, fakeAsync(() => {
+        // Arrange
+        firebaseAuthControllerServiceMock.getRedirectResult.and.resolveTo({
+          user: {
+            email: 'example@example.com',
+            emailVerified: false,
+          },
+        } as UserCredential);
+        onlineDatabaseUserCheck();
 
-        (component as any)._handleAuthErrors(payload);
+        // Act
+        component['googleAuth']('getDataFromRedirect');
 
-        expect(component.wrongEmailOrPassword).toBeTrue();
-        expect(markForCheckSpy).toHaveBeenCalled();
-      });
+        flush();
 
-      it('should set "emailDoesNotExist" property to true if such key exists in errors object', () => {
-        const payload: Errors = { emailDoesNotExist: true };
+        // Assert
+        expect(router.url).toEqual('/verify-email');
+      }));
 
-        (component as any)._handleAuthErrors(payload);
+      it(`should redirect user to /app if email is verified.`, fakeAsync(() => {
+        // Arrange
+        firebaseAuthControllerServiceMock.getRedirectResult.and.resolveTo({
+          user: {
+            email: 'example@example.com',
+            emailVerified: true,
+          },
+        } as UserCredential);
+        onlineDatabaseUserCheck(true);
 
-        expect(component.emailDoesNotExist).toBeTrue();
-        expect(markForCheckSpy).toHaveBeenCalled();
-      });
-    });
+        // Act
+        component['googleAuth']('getDataFromRedirect');
 
-    describe('MatSnack calls', () => {
-      let spy: jasmine.Spy<any>;
+        flush();
 
-      beforeEach(() => {
-        spy = spyOn(matSnackBarMock, 'open');
-      });
-
-      it('should open a snackBar for 5 seconds if sendingPostToDB property exists in errors object', () => {
-        const payload: Errors = {
-          sendingPostToDB: true,
-        };
-
-        (component as any)._handleAuthErrors(payload);
-
-        expect(spy).toHaveBeenCalled();
-      });
-
-      it('should open a snackBar for 5 seconds if unverifiedEmail property exists in errors object', () => {
-        const payload: Errors = { unverifiedEmail: true };
-        const spy = viewTransitionServiceMock.goForward;
-
-        (component as any)._handleAuthErrors(payload);
-
-        expect(spy).toHaveBeenCalled();
-      });
-
-      it('should open a snackBar for 5 seconds if noEmailProvided property exists in errors object', () => {
-        const payload: Errors = { noEmailProvided: true };
-
-        (component as any)._handleAuthErrors(payload);
-
-        expect(spy).toHaveBeenCalled();
-      });
-
-      it('should open a snackBar for 5 seconds if unknownError property exists in errors object', () => {
-        const payload: Errors = {
-          unknownError: { code: '000', message: 'Example error' },
-        };
-
-        (component as any)._handleAuthErrors(payload);
-
-        expect(spy).toHaveBeenCalled();
-      });
-
-      it('should throw an error when there was passed unknown key to the switch check', () => {
-        const payload = { xyz: 'Hello there' };
-
-        expect(() => {
-          (component as any)._handleAuthErrors(payload);
-        }).toThrow();
-      });
-    });
-  });
-
-  describe('_redirectUser()', () => {
-    it('should return "/verify-email" if registered is true', () => {
-      const payload: AuthReturnCredits = {
-        registered: true,
-        passed: true,
-      };
-
-      const result = (component as any)._redirectUser(payload);
-
-      expect(result).toBe('/verify-email');
+        // Assert
+        expect(router.url).toEqual('/app');
+      }));
     });
 
-    it(`should return "/verify-email" if user's email is NOT verified`, () => {
-      const payload: AuthReturnCredits = {
-        registered: false,
-        passed: true,
-      };
-      authStateServiceMock.session.set({
-        user: { emailVerified: false },
-      } as UserCredential);
+    describe(`popup`, () => {
+      it(`should do nothing when fireAuthController.signInWithPopup rejects with the 'auth/popup-closed-by-user' error.`, fakeAsync(() => {
+        // Arrange
+        const openSpy = spyOn(MatSnackBar.prototype, 'open');
+        const formErrorsSubjectNextSpy = spyOn(
+          component['_formErrorsSubject'],
+          'next'
+        ).and.callThrough();
+        firebaseAuthControllerServiceMock.signInWithPopup.and.rejectWith({
+          code: 'auth/popup-closed-by-user',
+          message: 'Example error message',
+        });
 
-      const result = (component as any)._redirectUser(payload);
+        // Act
+        googleAuthButton.triggerEventHandler('click');
 
-      expect(result).toBe('/verify-email');
-    });
+        flush();
 
-    it('should return "/app" parameter whether component.redirect is falsy', () => {
-      const payload: AuthReturnCredits = {
-        registered: false,
-        passed: true,
-      };
+        // Assert
+        expect(openSpy).not.toHaveBeenCalled();
+        expect(formErrorsSubjectNextSpy).toHaveBeenCalledOnceWith({
+          alreadyInUseError: false,
+          wrongEmailOrPassword: false,
+          emailDoesNotExist: false,
+        });
+      }));
 
-      const result = (component as any)._redirectUser(payload);
+      it(`should call fireAuthController.signInWithPopup if user's device is a laptop/PC etc. and redirect to /verify-email if email is not verified.`, fakeAsync(() => {
+        // Arrange
+        spyOn(authAccountService, '_isMobileDevice').and.returnValue(false);
+        const signInWithPopupSpy =
+          firebaseAuthControllerServiceMock.signInWithPopup.and.resolveTo({
+            user: {
+              email: 'example@email.com',
+              emailVerified: false,
+              displayName: 'Example name',
+            },
+          } as UserCredential);
+        onlineDatabaseUserCheck();
 
-      expect(result).toBe('/app');
-    });
+        // Act
+        googleAuthButton.triggerEventHandler('click');
 
-    afterEach(() => {
-      authStateServiceMock.session.set(undefined);
-    });
-  });
+        flush();
 
-  describe('checkParams()', () => {
-    it('should set component.register to false if pathElement is "force=login"', () => {
-      activatedRouteMock.snapshot.paramMap.get.and.returnValue('force=login');
+        // Assert
+        expect(signInWithPopupSpy).toHaveBeenCalled();
+        expect(router.url).toEqual('/verify-email');
+      }));
 
-      (component as any).checkParams();
+      it(`should call fireAuthController.signInWithPopup if user's device is a laptop/PC etc. and redirect to /app if email is verified.`, fakeAsync(() => {
+        // Arrange
+        spyOn(authAccountService, '_isMobileDevice').and.returnValue(false);
+        const signInWithPopupSpy =
+          firebaseAuthControllerServiceMock.signInWithPopup.and.resolveTo({
+            user: {
+              email: 'example@email.com',
+              emailVerified: true,
+              displayName: 'Example name',
+            },
+          } as UserCredential);
+        onlineDatabaseUserCheck(true);
 
-      expect(component.register).toBe(false);
-    });
+        // Act
+        googleAuthButton.triggerEventHandler('click');
 
-    it('should set default values if pathElement is falsy', () => {
-      activatedRouteMock.snapshot.paramMap.get.and.returnValue('');
+        flush();
 
-      (component as any).checkParams();
-
-      expect(component.register).toBe(true);
-      expect(component.redirect).toBe(undefined);
-    });
-
-    it('should set component.redirect to "/app" if pathElement is "forward=/app"', () => {
-      activatedRouteMock.snapshot.paramMap.get.and.returnValue('forward=/app');
-
-      (component as any).checkParams();
-
-      expect(component.redirect).toBe('/app');
-    });
-
-    it('should leave component.redirect to undefined if pathElement is "forward="', () => {
-      activatedRouteMock.snapshot.paramMap.get.and.returnValue('forward=');
-
-      (component as any).checkParams();
-
-      expect(component.redirect).toBe(undefined);
-    });
-  });
-
-  describe('toggleRegister()', () => {
-    it('should toggle the component.register property to false if its current state is true', () => {
-      component.register = true;
-
-      component.toggleRegister();
-
-      expect(component.register).toBe(false);
+        // Assert
+        expect(signInWithPopupSpy).toHaveBeenCalled();
+        expect(router.url).toEqual('/app');
+      }));
     });
   });
 });
