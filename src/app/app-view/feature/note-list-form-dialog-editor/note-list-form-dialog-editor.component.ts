@@ -78,11 +78,11 @@ export class NoteListFormDialogEditorComponent implements OnInit {
     })
   );
 
-  groupNotes$ = this.#notesService.notesBuffer$;
+  groupNotes$ = this.#noteRestService.notesBuffer$;
 
   ngOnInit(): void {
     this.noteGroup$.pipe(take(1)).subscribe((noteGroup) => {
-      this.#notesService.fillNotesBuffer(noteGroup.notes);
+      this.#noteRestService.fillNotesBuffer(noteGroup.notes);
     });
   }
 
@@ -109,7 +109,7 @@ export class NoteListFormDialogEditorComponent implements OnInit {
       return;
     }
 
-    this.#notesService.notesBuffer$
+    this.#noteRestService.notesBuffer$
       .pipe(take(1))
       .subscribe((notesGroupBuffer) => {
         this.#dialogRef.close({

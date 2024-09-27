@@ -18,7 +18,8 @@
     class="note-edit__action-button"
     (click)="closeDialog('close')"
     appAdaptiveButton
-    [styleConfiguration]="{ look: 'extended-fab', color: 'primary-less' }"
+    look="extended-fab"
+    color="primary-less"
   >
     <mat-icon>cancel</mat-icon> Close
   </button>
@@ -28,7 +29,8 @@
     class="note-edit__action-button"
     (click)="closeDialog('save')"
     appAdaptiveButton
-    [styleConfiguration]="{ look: 'extended-fab', color: 'primary' }"
+    look="extended-fab"
+    color="primary"
   >
     <mat-icon>save</mat-icon> Save
   </button>
