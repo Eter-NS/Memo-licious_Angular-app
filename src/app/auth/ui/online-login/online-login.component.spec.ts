@@ -2,13 +2,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OnlineLoginComponent } from './online-login.component';
 import { By } from '@angular/platform-browser';
 import { FormCommonFeaturesService } from '../../../reusable/data-access/form-common-features/form-common-features.service';
-import { SimpleChange } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 describe('OnlineLoginComponent', () => {
   let component: OnlineLoginComponent;
   let fixture: ComponentFixture<OnlineLoginComponent>;
-  let formCommonFeaturesServiceMock: FormCommonFeaturesService;
+
+  const formCommonFeaturesServiceMock =
+    jasmine.createSpyObj<FormCommonFeaturesService>([
+      'onInitAnimations',
+      'getError',
+      'submitForm',
+    ]);
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -16,18 +21,13 @@ describe('OnlineLoginComponent', () => {
       providers: [
         {
           provide: FormCommonFeaturesService,
-          useValue: jasmine.createSpyObj('FormCommonFeaturesService', [
-            'onInitAnimations',
-            'getError',
-            'onSubmit',
-          ]),
+          useValue: formCommonFeaturesServiceMock,
         },
       ],
     });
     fixture = TestBed.createComponent(OnlineLoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    formCommonFeaturesServiceMock = TestBed.inject(FormCommonFeaturesService);
   });
 
   it('should create', () => {
@@ -46,7 +46,7 @@ describe('OnlineLoginComponent', () => {
 
     it('should assign "sending" property to true if the form is valid', () => {
       expect(component.loginForm.valid).toBe(true);
-      expect(component.sending).toBe(true);
+      expect(component['_sendingSubject'].value).toBe(true);
     });
 
     it('should render the mat-spinner component if "sending" is true', () => {
@@ -58,13 +58,6 @@ describe('OnlineLoginComponent', () => {
 
     it('should hide mat-spinner if there is an error from the @Input', () => {
       component.emailDoesNotExist = true;
-      component.ngOnChanges({
-        emailDoesNotExist: new SimpleChange(
-          false,
-          component.emailDoesNotExist,
-          true
-        ),
-      });
       fixture.detectChanges();
 
       const matSpinner = fixture.debugElement.query(By.css('mat-spinner'));
@@ -73,13 +66,6 @@ describe('OnlineLoginComponent', () => {
 
     it('should show error message if emailDoesNotExist is true', () => {
       component.emailDoesNotExist = true;
-      component.ngOnChanges({
-        emailDoesNotExist: new SimpleChange(
-          false,
-          component.emailDoesNotExist,
-          true
-        ),
-      });
       fixture.detectChanges();
 
       const errorNode = fixture.debugElement.query(
@@ -90,13 +76,6 @@ describe('OnlineLoginComponent', () => {
 
     it('should show error message if wrongEmailOrPassword is true', () => {
       component.wrongEmailOrPassword = true;
-      component.ngOnChanges({
-        wrongEmailOrPassword: new SimpleChange(
-          false,
-          component.wrongEmailOrPassword,
-          true
-        ),
-      });
       fixture.detectChanges();
 
       const errorNode = fixture.debugElement.query(

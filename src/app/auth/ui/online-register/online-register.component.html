@@ -1,3 +1,4 @@
+@if(data$ | async; as data){
 <div class="form-wrapper" aria-label="The register form for a new user">
   <h1>Start the journey by creating account</h1>
 
@@ -13,15 +14,10 @@
         />
       </label>
       <p class="input-error">
-        {{
-          getError("name", "minlength")
-            ? "Too short name"
-            : getError("name", "maxlength")
-            ? "Too long name"
-            : getError("name", "includesSpecialChars")
-            ? "Special characters are not allowed here"
-            : " "
-        }}
+        @if (getError('name', 'minlength')) { Too short name } @else if
+        (getError('name', 'maxlength')) { Too long name } @else if
+        (getError('name', 'includesSpecialChars')) { Special characters are not
+        allowed here }
       </p>
     </fieldset>
 
@@ -36,7 +32,7 @@
         />
       </label>
       <p class="input-error">
-        {{ getError("email", "emailError") ? "This is not an email" : " " }}
+        @if (getError('email', 'emailError')) { This is not an email }
       </p>
     </fieldset>
 
@@ -51,11 +47,8 @@
         />
       </label>
       <p class="input-error">
-        {{
-          getError("password", "passwordError")
-            ? "The password must have 8 characters, numbers, and special characters"
-            : " "
-        }}
+        @if (getError('password', 'passwordError')) { The password must have 8
+        characters, numbers, and special characters }
       </p>
     </fieldset>
 
@@ -70,13 +63,13 @@
         />
       </label>
       <p class="input-error">
-        {{
-          getError("confirmPassword", "passwordMatch") &&
-          (registerForm.get("confirmPassword")?.touched ||
-            registerForm.get("confirmPassword")?.dirty)
-            ? "The passwords are not the same"
-            : " "
-        }}
+        @if(registerForm.get('confirmPassword'); as confirmPassword){
+        <!--  -->
+        @if (getError('confirmPassword', 'passwordMatch') &&
+        (confirmPassword.touched || confirmPassword.dirty)) { The passwords are
+        not the same }
+        <!--  -->
+        }
       </p>
     </fieldset>
 
@@ -86,18 +79,15 @@
       appCustomMatRipple
       [appMatSpinnerToggler]="registerForm.valid"
     >
-      @if (sending ) {
-      <mat-spinner class="sending-spinner"></mat-spinner>
+      @if (data.sending) {
+      <mat-spinner title="Sending data" class="sending-spinner"></mat-spinner>
       } @else { Register }
     </button>
     <p class="input-error" data-test="checkInputs||emailAlreadyInUse">
-      {{
-        registerForm.hasError("checkInputs")
-          ? "Check the inputs above"
-          : emailAlreadyInUse
-          ? "The email is already in use"
-          : " "
-      }}
+      @if (registerForm.hasError('checkInputs')) { Check the inputs above }
+      @else if (data.errors.emailAlreadyInUse) { The email is already in use }
     </p>
   </form>
 </div>
+
+}

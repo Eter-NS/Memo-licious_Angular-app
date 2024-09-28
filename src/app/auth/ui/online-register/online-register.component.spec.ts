@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { OnlineRegisterComponent } from './online-register.component';
 import { FormCommonFeaturesService } from '../../../reusable/data-access/form-common-features/form-common-features.service';
 import { By } from '@angular/platform-browser';
-import { DebugElement, SimpleChange } from '@angular/core';
+import { DebugElement } from '@angular/core';
 
 describe('OnlineRegisterComponent', () => {
   let component: OnlineRegisterComponent;
@@ -46,7 +46,7 @@ describe('OnlineRegisterComponent', () => {
 
       form.triggerEventHandler('ngSubmit');
 
-      expect(component.sending).toBeTrue();
+      expect(component['_sendingSubject'].value).toBeTrue();
     });
 
     it('should render mat-spinner if the "sending" property is true', () => {
@@ -63,15 +63,8 @@ describe('OnlineRegisterComponent', () => {
       expect(matSpinner).toBeTruthy();
     });
 
-    it('should hide the mat-spinner if  is true', () => {
+    it('should hide the mat-spinner if data.sending is true', () => {
       component.emailAlreadyInUse = true;
-      component.ngOnChanges({
-        emailAlreadyInUse: new SimpleChange(
-          false,
-          component.emailAlreadyInUse,
-          true
-        ),
-      });
       fixture.detectChanges();
 
       const matSpinner = fixture.debugElement.query(By.css('mat-spinner'));
@@ -104,17 +97,9 @@ describe('OnlineRegisterComponent', () => {
   describe('ngOnChanges()', () => {
     it('should set "sending" property to false if emailAlreadyInUse is true', () => {
       component.emailAlreadyInUse = true;
-
-      component.ngOnChanges({
-        emailAlreadyInUse: new SimpleChange(
-          false,
-          component.emailAlreadyInUse,
-          true
-        ),
-      });
       fixture.detectChanges();
 
-      expect(component.sending).toBeFalse();
+      expect(component['_sendingSubject'].value).toBeFalse();
     });
   });
 });

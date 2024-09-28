@@ -6,16 +6,12 @@ import {
   Input,
   ChangeDetectionStrategy,
   inject,
-  OnChanges,
-  SimpleChanges,
 } from '@angular/core';
 import {
   NonNullableFormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-
 import { checkEmail } from 'src/app/reusable/utils/custom-validations/custom-validations';
 import { CustomMatRippleDirective } from 'src/app/reusable/utils/ripples/ripple-color-checker.directive';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -28,12 +24,19 @@ import {
   MatCheckboxChange,
   MatCheckboxModule,
 } from '@angular/material/checkbox';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
+
+type OnlineLoginFormErrors = {
+  wrongEmailOrPassword: boolean;
+  emailDoesNotExist: boolean;
+};
 
 @Component({
   standalone: true,
   imports: [
+    AsyncPipe,
     ReactiveFormsModule,
-    RouterLink,
     CustomMatRippleDirective,
     MatProgressSpinnerModule,
     MatSpinnerTogglerDirective,
@@ -41,42 +44,61 @@ import {
   ],
   selector: 'app-online-login',
   templateUrl: './online-login.component.html',
-  styleUrls: ['/src/app/reusable/utils/forms/form.scss'],
+  styleUrls: ['../../../reusable/utils/forms/form.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OnlineLoginComponent implements AfterViewInit, OnChanges {
-  fb = inject(NonNullableFormBuilder);
-  formCommonFeaturesService = inject(FormCommonFeaturesService);
-  loginForm = this.fb.group({
-    email: this.fb.control('', {
+export class OnlineLoginComponent implements AfterViewInit {
+  #fb = inject(NonNullableFormBuilder);
+  #formCommonFeaturesService = inject(FormCommonFeaturesService);
+
+  @Input({ required: true }) set wrongEmailOrPassword(value: boolean) {
+    this._stopSending(value);
+
+    this._formErrorsSubject.next({
+      ...this._formErrorsSubject.value,
+      wrongEmailOrPassword: value,
+    });
+  }
+
+  @Input({ required: true }) set emailDoesNotExist(value: boolean) {
+    this._stopSending(value);
+
+    this._formErrorsSubject.next({
+      ...this._formErrorsSubject.value,
+      emailDoesNotExist: value,
+    });
+  }
+
+  @Output() data = new EventEmitter<AuthUserData>();
+  @Output() rememberMe = new EventEmitter<boolean>();
+
+  private readonly _formErrorsSubject =
+    new BehaviorSubject<OnlineLoginFormErrors>({
+      emailDoesNotExist: false,
+      wrongEmailOrPassword: false,
+    });
+  private readonly _sendingSubject = new BehaviorSubject<boolean>(false);
+
+  readonly data$ = combineLatest({
+    sending: this._sendingSubject.asObservable(),
+    errors: this._formErrorsSubject.asObservable(),
+  });
+
+  loginForm = this.#fb.group({
+    email: this.#fb.control('', {
       validators: [Validators.required, checkEmail],
     }),
-    password: this.fb.control('', {
+    password: this.#fb.control('', {
       validators: [Validators.required],
     }),
   });
 
-  @Input({ required: true }) wrongEmailOrPassword = false;
-  @Input({ required: true }) emailDoesNotExist = false;
-  @Output() data = new EventEmitter<AuthUserData>();
-  sending = false;
-  @Output() rememberMe = new EventEmitter<boolean>();
-
   ngAfterViewInit(): void {
-    this.formCommonFeaturesService.onInitAnimations();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (
-      changes['wrongEmailOrPassword']?.currentValue === true ||
-      changes['emailDoesNotExist']?.currentValue === true
-    ) {
-      this.sending = false;
-    }
+    this.#formCommonFeaturesService.onInitAnimations();
   }
 
   getError = (element: string | string[], validation: string) =>
-    this.formCommonFeaturesService.getError(
+    this.#formCommonFeaturesService.getError(
       this.loginForm,
       element,
       validation
@@ -87,9 +109,14 @@ export class OnlineLoginComponent implements AfterViewInit, OnChanges {
   }
 
   onSubmit = () => {
-    this.sending = this.formCommonFeaturesService.submitForm(
-      this.loginForm,
-      this.data
+    this._sendingSubject.next(
+      this.#formCommonFeaturesService.submitForm(this.loginForm, this.data)
     );
   };
+
+  private _stopSending(value: boolean) {
+    if (value) {
+      this._sendingSubject.next(false);
+    }
+  }
 }
