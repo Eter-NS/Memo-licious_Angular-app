@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   Auth,
   User,
@@ -22,7 +23,7 @@ export class AuthStateService {
   readonly user$ = this.#firebaseAuthControllerService.user(this.auth);
 
   constructor() {
-    this.user$.subscribe((state) => {
+    this.user$.pipe(takeUntilDestroyed()).subscribe((state) => {
       this.updateSession(state);
     });
   }

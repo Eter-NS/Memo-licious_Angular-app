@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync } from '@angular/core/testing';
+import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { AuthStateService } from './auth-state.service';
 import {
   Auth,
@@ -11,14 +11,19 @@ import { FirebaseAuthControllerService } from 'src/app/reusable/data-access/fire
 import { firebaseAuthControllerService } from 'src/app/reusable/data-access/firebase-auth/firebase-auth-controller.service.mock';
 
 describe('AuthStateService', () => {
+  // Mocks
   const authMock = jasmine.createSpyObj<Auth>(['setPersistence']);
   const firebaseAuthControllerServiceMock = firebaseAuthControllerService;
   const userValueSubject = new BehaviorSubject<User | null>(null);
-  firebaseAuthControllerServiceMock.user.and.callFake(() =>
-    userValueSubject.asObservable()
-  );
 
+  // Service
   let service: AuthStateService;
+
+  beforeEach(() => {
+    firebaseAuthControllerServiceMock.user.and.returnValue(
+      userValueSubject.asObservable()
+    );
+  });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -40,57 +45,64 @@ describe('AuthStateService', () => {
     expect(service).toBeTruthy();
   });
 
-  it(`should allow the component or any consumer to subscribe to user$`, (done: DoneFn) => {
-    userValueSubject.next({} as User);
+  describe(`user$`, () => {
+    it(`should allow a component or any consumer to subscribe to the observable.`, fakeAsync(() => {
+      userValueSubject.next({} as User);
 
-    let data: User | null;
+      let data: User | null;
 
-    service.user$.subscribe((user) => {
-      data = user;
-    });
+      service.user$.subscribe((user) => {
+        data = user;
+      });
 
-    expect(data!).not.toBeNull();
-    done();
+      flush();
+
+      expect(data!).not.toBeNull();
+    }));
+
+    it(`should call updateSession() each time user$ emits a new value.`, fakeAsync(() => {
+      // Arrange
+      const spy = spyOn(service, 'updateSession');
+
+      // Act
+      userValueSubject.next({} as User);
+
+      flush();
+
+      // Assert
+      expect(spy).toHaveBeenCalled();
+    }));
   });
 
-  it(`should call updateSession() each time user$ emits a new value.`, fakeAsync(() => {
-    // Arrange
-    const spy = spyOn(service, 'updateSession');
+  describe(`methods`, () => {
+    describe('rememberMe()', () => {
+      it('should call setPersistence with browserLocalPersistence.', () => {
+        service.rememberMe(true);
 
-    // Act
-    userValueSubject.next({} as User);
+        expect(authMock.setPersistence).toHaveBeenCalledWith(
+          browserLocalPersistence
+        );
+      });
 
-    // Assert
-    expect(spy).toHaveBeenCalled();
-  }));
+      it('should call setPersistence with browserSessionPersistence.', () => {
+        service.rememberMe(false);
 
-  describe('rememberMe()', () => {
-    it('should call setPersistence with browserLocalPersistence', () => {
-      service.rememberMe(true);
-
-      expect(authMock.setPersistence).toHaveBeenCalledWith(
-        browserLocalPersistence
-      );
+        expect(authMock.setPersistence).toHaveBeenCalledWith(
+          browserSessionPersistence
+        );
+      });
     });
 
-    it('should call setPersistence with browserSessionPersistence', () => {
-      service.rememberMe(false);
+    describe('checkUserSession()', () => {
+      it('should return the user email if it exists.', () => {
+        const user = { email: 'test@example.com' } as User;
+        service['_session'].set(user);
+        expect(service.checkUserSession()).toBe('test@example.com');
+      });
 
-      expect(authMock.setPersistence).toHaveBeenCalledWith(
-        browserSessionPersistence
-      );
-    });
-  });
-
-  describe('checkUserSession()', () => {
-    it('should return the user email if it exists', () => {
-      const user = { email: 'test@example.com' } as User;
-      service['_session'].set(user);
-      expect(service.checkUserSession()).toBe('test@example.com');
-    });
-
-    it('should return null if the user email does NOT exist', () => {
-      expect(service.checkUserSession()).toBeNull();
+      it('should return null if the user email does NOT exist.', () => {
+        expect(service.checkUserSession()).toBeNull();
+      });
     });
   });
 });
