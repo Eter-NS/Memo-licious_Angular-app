@@ -100,7 +100,7 @@
             ],
             "styles": ["src/scss/styles.scss"],
             "scripts": [],
-            "karmaConfig": "karma.conf.js"
+            "karmaConfig": "karma.conf.ts"
           }
         },
         "deploy": {
