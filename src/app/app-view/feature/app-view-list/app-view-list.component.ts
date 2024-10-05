@@ -16,7 +16,6 @@ import {
   removeAnimations,
 } from 'src/app/reusable/utils/animations/animation-tools';
 import { runAnimationOnce } from 'src/app/reusable/utils/animations/animation-triggers';
-import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
 import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
 import { NotesService } from '../../data-access/notes/notes.service';
 import { BottomSheetComponent } from '../../../reusable/ui/bottom-sheet/bottom-sheet.component';
@@ -30,7 +29,7 @@ import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoteGroupListContainerComponent } from '../note-group-list-container/note-group-list-container.component';
 import { GrinningFaceWithSweatEmojiComponent } from '../../../reusable/ui/SVGs/grinning-face-with-sweat-emoji/grinning-face-with-sweat-emoji.component';
-import { combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/adaptive-button.directive';
 
 @Component({
@@ -52,7 +51,6 @@ import { AdaptiveButtonDirective } from 'src/app/reusable/utils/adaptive-button/
   ],
 })
 export class AppViewListComponent {
-  viewTransitionService = inject(ViewTransitionService);
   #notesService = inject(NotesService);
   #viewportListenersService = inject(ViewportListenersService);
   #noteRestService = inject(NoteRestService);
@@ -63,54 +61,52 @@ export class AppViewListComponent {
   private _removeAnimations = removeAnimations;
   private _runAnimationOnce = runAnimationOnce;
 
-  @ViewChild('mobileAddNoteGroupButton') button!: ElementRef<HTMLDivElement>;
+  @ViewChild('mobileAddNoteGroupButton')
+  button!: ElementRef<HTMLDivElement>;
 
-  mobileFormVisible = false;
+  private readonly _mobileFormVisibleSubject = new BehaviorSubject<boolean>(
+    false
+  );
 
   data$ = combineLatest({
     notesBuffer: this.#noteRestService.notesBuffer$,
     isHandset: this.#viewportListenersService.isHandset$,
+    mobileFormVisible: this._mobileFormVisibleSubject.asObservable(),
   });
 
   constructor() {
     this.#viewportListenersService.isHandset$
       .pipe(takeUntilDestroyed())
-      .subscribe((isMobile) => !isMobile && (this.mobileFormVisible = false));
+      .subscribe((isMobile) => {
+        if (!isMobile) {
+          this._mobileFormVisibleSubject.next(false);
+        }
+      });
   }
 
   toggleNoteListForm(state: 'open' | 'close') {
     const element = this.button.nativeElement;
+    const isGoingToBeOpen = state === 'open';
 
-    switch (state) {
-      case 'open':
-        this.fadeInOutElement(element, 'out', 'top');
-        this.mobileFormVisible = true;
-        break;
+    this._fadeInOutElement(element, isGoingToBeOpen ? 'out' : 'in', 'top');
 
-      case 'close':
-        this.fadeInOutElement(element, 'in', 'top');
-        this.mobileFormVisible = false;
-        break;
-
-      default:
-        throw new Error('Unknown state value');
-    }
+    this._mobileFormVisibleSubject.next(isGoingToBeOpen);
   }
 
-  private fadeInOutElement(
+  private _fadeInOutElement(
     element: HTMLElement,
     state: 'in' | 'out',
     fromTo: 'top' | 'bottom'
   ) {
     this.#zone.runOutsideAngular(() => {
+      this._finishAnimation(element);
+
       switch (state) {
         case 'out':
-          this._finishAnimation(element);
           this._runAnimationOnce(element, `fadeOut-to-${fromTo}-animation`);
           break;
 
         case 'in':
-          this._finishAnimation(element);
           this._runAnimationOnce(element, `fadeIn-from-${fromTo}-animation`, {
             removeClassOnFinish: true,
           });
@@ -118,13 +114,13 @@ export class AppViewListComponent {
           break;
 
         default:
-          throw new Error('Unknown state value');
+          console.error('Unknown state value: ', state);
       }
     });
   }
 
-  onCreateNote(event: MatChipInputEvent) {
-    this.#noteRestService.onCreateNote(event);
+  async onCreateNote(event: MatChipInputEvent) {
+    await this.#noteRestService.onCreateNote(event);
     this.#cd.markForCheck();
   }
 
@@ -143,13 +139,6 @@ export class AppViewListComponent {
       return;
     }
 
-    this.#notesService.createGroup(groupName);
-  }
-
-  handleGroupMarkForDelete(id: string, state: boolean) {
-    if (!id) {
-      return;
-    }
-    this.#notesService.markGroupToDelete(id, state);
+    await this.#notesService.createGroup(groupName);
   }
 }

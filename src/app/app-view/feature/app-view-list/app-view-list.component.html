@@ -1,8 +1,9 @@
 @if (data$ | async; as data) {
 <main>
-  @if(!data.isHandset){
+  @if (!data.isHandset) {
   <section class="create-new-noteList">
     <app-note-list-form
+      data-test="standalone-note-list-form"
       environment="note-creator"
       [notes]="data.notesBuffer"
       (createNote)="onCreateNote($event)"
@@ -12,35 +13,43 @@
     />
   </section>
   } @else {
-  <h1>Notes</h1>
+  <h1 data-test="app-view-list-mobile-h1">Notes</h1>
   }
+
   <section>
-    @defer{
+    @defer {
     <app-note-group-list-container>
       <ng-template #noElementsInfo>
-        <div class="empty">
-          <span> Whoops... It looks like you have no lists for now </span>
+        <div data-test="no-elements-info-container" class="empty">
+          <span>Whoops... It looks like you have no lists for now</span>
           <app-grinning-face-with-sweat-emoji class="emoji" />
         </div>
       </ng-template>
     </app-note-group-list-container>
     } @loading (minimum 500ms){
     <mat-spinner
+      data-test="note-group-list-container-loading"
       title="content loading"
       class="note-group-loading"
-    ></mat-spinner>
+    />
     }
   </section>
-  @if(data.isHandset){
-  <section class="add-new-noteList">
+
+  @if (data.isHandset) {
+  <section
+    data-test="mobile-create-note-group-section"
+    class="add-new-noteList"
+  >
     <div
       #mobileAddNoteGroupButton
       class="add-new-noteList__open-button"
-      [class.add-new-noteList__open-button--toggled]="mobileFormVisible"
+      [class.add-new-noteList__open-button--toggled]="data.mobileFormVisible"
+      [ariaHidden]="data.mobileFormVisible"
     >
       <button
         type="button"
         title="Add new note list"
+        data-test="mobile-show-note-group-form-button"
         (click)="toggleNoteListForm('open')"
         appAdaptiveButton
         shape="circle"
@@ -50,11 +59,13 @@
     </div>
     @defer {
     <app-bottom-sheet
-      [open]="mobileFormVisible"
+      data-test="bottom-sheet-with-note-list-form"
+      [open]="data.mobileFormVisible"
       (closed)="toggleNoteListForm('close')"
     >
       <ng-template #content>
         <app-note-list-form
+          data-test="note-list-form-for-touch-devices"
           environment="note-creator"
           [notes]="data.notesBuffer"
           (createNote)="onCreateNote($event)"
