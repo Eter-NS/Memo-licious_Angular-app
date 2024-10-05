@@ -1,9 +1,12 @@
-<main #container>
+<main>
   <section>
     <h1>Recycle bin</h1>
 
-    @defer{
-    <app-note-group-list-container [markForDelete]="true">
+    @defer {
+    <app-note-group-list-container
+      data-test="note-group-list-container"
+      [markForDelete]="true"
+    >
       <ng-template #noElementsInfo>
         <div class="empty">
           <span>Wow. What a clean space </span>
@@ -12,7 +15,11 @@
       </ng-template>
     </app-note-group-list-container>
     }@loading (minimum 500ms){
-    <mat-spinner class="note-group-loading"></mat-spinner>
+    <mat-spinner
+      data-test="note-group-list-container-loading-spinner"
+      title="Loading content"
+      class="note-group-loading"
+    ></mat-spinner>
     }
   </section>
 </main>
