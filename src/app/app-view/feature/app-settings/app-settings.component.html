@@ -4,7 +4,7 @@
 
     @if (existingUser$ | async; as existingUser) {
 
-    <div class="user-image">
+    <div data-test="user-image-container" class="user-image">
       <app-profile-picture
         class="app-profile-picture"
         [photoUrl]="existingUser.photoUrl || ''"
@@ -16,7 +16,7 @@
       />
     </div>
 
-    <form [formGroup]="appSettingsForm">
+    <form data-test="settings-form" [formGroup]="appSettingsForm">
       <fieldset class="form-section">
         <legend>App</legend>
 
@@ -30,13 +30,14 @@
           </div>
 
           <mat-form-field class="form-section__element-input">
-            <mat-select formControlName="theme">
+            <mat-select data-test="theme-select" formControlName="theme">
               <mat-select-trigger>
                 <p class="theme-option">
                   @switch (appSettingsForm.get(['theme'])?.value) {
                   <!--  -->
                   @case ('auto') {
-                  <mat-icon>auto_awesome</mat-icon> <span>Auto</span>
+                  <mat-icon>auto_awesome</mat-icon>
+                  <span data-test="theme-option-system">Auto</span>
                   } @case ('light') {
                   <mat-icon>light_mode</mat-icon> <span>Light</span>
                   } @case ('dark') {
@@ -49,17 +50,17 @@
                 </p>
               </mat-select-trigger>
 
-              <mat-option value="auto">
+              <mat-option data-test="theme-option-auto" value="auto">
                 <span class="theme-option">
                   <mat-icon>auto_awesome</mat-icon> Auto
                 </span>
               </mat-option>
-              <mat-option value="light">
+              <mat-option data-test="theme-option-light" value="light">
                 <span class="theme-option">
                   <mat-icon>light_mode</mat-icon> Light
                 </span>
               </mat-option>
-              <mat-option value="dark">
+              <mat-option data-test="theme-option-dark" value="dark">
                 <span class="theme-option">
                   <mat-icon>dark_mode</mat-icon> Dark
                 </span>
@@ -78,7 +79,11 @@
           </div>
 
           <div class="switch-wrapper">
-            <app-switch formControlName="fastDeletingMode" color="accent" />
+            <app-switch
+              data-test="deleting-mode-option"
+              formControlName="fastDeletingMode"
+              color="accent"
+            />
           </div>
         </div>
       </fieldset>
@@ -87,6 +92,7 @@
     <ul class="settings-sections">
       <li>
         <a
+          data-test="settings-account-link"
           class="settings-sections__link"
           (click)="viewTransitionService.goForward(container, '/app/account')"
           (keyup.enter)="
@@ -104,8 +110,12 @@
         </a>
       </li>
     </ul>
-    }@else {
-    <mat-spinner title="content loading" class="note-group-loading" />
+    } @else {
+    <mat-spinner
+      data-test="user-profile-loading"
+      title="content loading"
+      class="note-group-loading"
+    />
     }
   </section>
 </main>
