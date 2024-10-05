@@ -12,7 +12,6 @@ import {
 } from 'rxjs';
 import { NoteGroupModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { AuthLocalUserService } from 'src/app/auth/data-access/local-user/auth-local-user.service';
-import { randomId } from 'src/app/reusable/utils/data-tools/objectTools';
 import { AuthUserConnectorService } from '../auth-user-connector/auth-user-connector.service';
 import { AuthDatabaseService } from 'src/app/auth/data-access/database/auth-database.service';
 import { GroupRemovingStrategy } from '../../utils/models/app-settings.interface';
@@ -101,7 +100,7 @@ export class NotesService {
           try {
             const createdAt = await this.#objectTools.createTimestamp();
             const payload: NoteGroupModel = {
-              id: randomId(this.#noteRestService.ID_LENGTH),
+              id: this.#objectTools.randomId(this.#noteRestService.ID_LENGTH),
               title,
               notes: buffer,
               createdAt,
