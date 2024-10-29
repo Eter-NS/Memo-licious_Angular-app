@@ -81,7 +81,7 @@ export class NoteListFormComponent {
       validators: [Validators.required, Validators.maxLength(32)],
     }),
   });
-  timeoutId!: unknown;
+  timeoutId: unknown | undefined = undefined;
   separatorCodes = [ENTER, COMMA] as const;
 
   private _errorMessage = new BehaviorSubject<
@@ -105,13 +105,18 @@ export class NoteListFormComponent {
     );
 
   handleTouchStart() {
+    // TODO: Create a handler for touch devices to make them edit notes.
     this.timeoutId = setTimeout(() => {
-      // this.chipRow.
+      this.chipRow.focus();
     }, 500);
   }
 
   handleTouchEnd() {
-    clearTimeout(this.timeoutId as number);
+    // TODO: Create a handler for touch devices to make them edit notes.
+
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId as number);
+    }
   }
 
   /** For creating and modifying notes only */
@@ -126,11 +131,12 @@ export class NoteListFormComponent {
     }
 
     const isModificationEvent = 'event' in e;
-    const result = isModificationEvent
-      ? this._stringLengthValidator(e.event.value, this._lengthValidationConfig)
-      : this._stringLengthValidator(e.value, this._lengthValidationConfig);
+    const isValid = this._stringLengthValidator(
+      isModificationEvent ? e.event.value : e.value,
+      this._lengthValidationConfig
+    );
 
-    if (!result) {
+    if (!isValid) {
       this._errorMessage.next({
         cause: `The note can't be longer than ${this._lengthValidationConfig.max} characters`,
       });
@@ -141,7 +147,9 @@ export class NoteListFormComponent {
   }
 
   submitForm() {
-    if (this.newNoteGroupForm.controls.groupName.errors) return;
+    if (this.newNoteGroupForm.controls.groupName.errors) {
+      return;
+    }
 
     this.data.emit(this.newNoteGroupForm.getRawValue());
 

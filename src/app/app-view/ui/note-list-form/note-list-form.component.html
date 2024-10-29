@@ -25,6 +25,7 @@
       @for (note of notes; track note.id) {
       <mat-chip-row
         #chipRow
+        [attr.data-test]="'note-chip-' + note.id"
         class="note-list-element"
         aria-description="Press enter to edit {{ note.value }}"
         [editable]="true"
@@ -50,6 +51,7 @@
       }
       <input
         matInput
+        data-test="create-note-input"
         placeholder="New item"
         [matChipInputFor]="chipGrid"
         [matChipInputSeparatorKeyCodes]="separatorCodes"

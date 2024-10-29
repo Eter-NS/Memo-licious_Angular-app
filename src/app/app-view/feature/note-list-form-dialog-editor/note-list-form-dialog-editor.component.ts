@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  HostListener,
   OnInit,
   ViewChild,
   inject,
@@ -9,7 +10,6 @@ import {
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle,
@@ -41,7 +41,6 @@ export interface INoteListFormDialogData {
     AsyncPipe,
     NoteListFormComponent,
     MatDialogActions,
-    MatDialogClose,
     MatDialogTitle,
     MatDialogContent,
     MatIconModule,
@@ -74,6 +73,7 @@ export class NoteListFormDialogEditorComponent implements OnInit {
         this.#dialogRef.close({ action: 'close' });
         return EMPTY;
       }
+
       return of(group);
     })
   );
@@ -99,6 +99,11 @@ export class NoteListFormDialogEditorComponent implements OnInit {
   onRemoveNote(event: NoteModel) {
     this.#noteRestService.onRemoveNote(event);
     this.#cd.markForCheck();
+  }
+
+  @HostListener('window:keydown.Escape')
+  private _closeDialogWithoutResult() {
+    this.#dialogRef.close({ action: 'close' });
   }
 
   closeDialog(action: NoteListFormEditor['action']) {

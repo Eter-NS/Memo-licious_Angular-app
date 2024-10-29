@@ -25,10 +25,7 @@ export class NotesListGroupElementComponent {
   @Input({ required: true }) done!: boolean;
 
   @Output() cardClick = new EventEmitter<void>();
-  @Output() cardDetailsClick = new EventEmitter<boolean>();
   @Output() toggleRemove = new EventEmitter<boolean>();
-
-  private _initialClickState = false;
 
   onCardClick(event: Event) {
     event.preventDefault();
@@ -37,16 +34,8 @@ export class NotesListGroupElementComponent {
     this.cardClick.emit();
   }
 
-  onCardOptionsClick(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this._initialClickState = !this._initialClickState;
-
-    this.cardDetailsClick.emit(this._initialClickState);
-  }
-
-  toggleRemoveGroup() {
+  toggleRemoveGroup(e: Event) {
+    e.stopPropagation();
     this.toggleRemove.emit(!this.done);
   }
 }

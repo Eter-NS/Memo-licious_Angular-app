@@ -9,11 +9,10 @@
     <h3>{{ groupName }}</h3>
 
     <button
+      data-test="menu-button-toggle"
       type="button"
       mat-icon-button
       [matMenuTriggerFor]="menu"
-      (click)="onCardOptionsClick($event)"
-      (keyup.space)="onCardOptionsClick($event)"
       aria-label="more options"
       tabindex="0"
     >
@@ -21,11 +20,12 @@
     </button>
     <mat-menu #menu="matMenu">
       <button
+        data-test="menu-option-toggle-remove"
         mat-menu-item
         type="button"
-        (click)="toggleRemoveGroup()"
-        (keyup.enter)="toggleRemoveGroup()"
-        tabindex="1"
+        (click)="toggleRemoveGroup($event)"
+        (keypress.enter)="toggleRemoveGroup($event)"
+        tabindex="0"
       >
         <mat-icon>done</mat-icon> <span>Mark as done</span>
       </button>

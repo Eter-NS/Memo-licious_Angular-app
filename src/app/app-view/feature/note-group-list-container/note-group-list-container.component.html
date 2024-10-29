@@ -1,12 +1,13 @@
-@if (filteredNotes$ | async; as filteredNotes) {
+@if (filteredNoteGroups$ | async; as filteredNoteGroups) {
 <div
   #container
   class="noteList-list"
-  [class.empty]="filteredNotes === null || !filteredNotes.length"
+  [class.empty]="filteredNoteGroups === null || !filteredNoteGroups.length"
 >
   <!--  -->
-  @if (filteredNotes.length) {
+  @if (filteredNoteGroups.length) {
   <ngx-masonry
+    data-test="note-groups-container"
     class="noteList-list__grid"
     [ordered]="true"
     [options]="{
@@ -16,36 +17,33 @@
       horizontalOrder: true
     }"
   >
-    @for(note of filteredNotes; track note.id){
+    @for (noteGroup of filteredNoteGroups; track noteGroup.id) {
     <div
+      data-test="note-group-list-item"
       class="noteList-list__element-wrapper"
       ngxMasonryItem
     >
-      @if(markForDelete){
       <app-notes-list-group-element
-        [groupName]="note.title"
-        [groupValue]="note"
-        [done]="!!note.deleteAt"
-        (toggleRemove)="handleGroupMarkForDelete(note.id, $event)"
+        [attr.data-test]="'note-group-list-item-' + noteGroup.id"
+        [groupName]="noteGroup.title"
+        [groupValue]="noteGroup"
+        [done]="!!noteGroup.deleteAt"
+        (cardClick)="handleClick(noteGroup.id)"
+        (toggleRemove)="handleGroupMarkForDelete(noteGroup.id, $event)"
       />
-      }@else {
-      <app-notes-list-group-element
-        [groupName]="note.title"
-        [groupValue]="note"
-        [done]="!!note.deleteAt"
-        (cardClick)="handleClick(note.id)"
-        (toggleRemove)="handleGroupMarkForDelete(note.id, $event)"
-      />
-      }
       <div class="noteList-list__space-between"></div>
     </div>
     }
   </ngx-masonry>
   } @else {
-  <ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
+  <div data-test="no-groups">
+    <ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
+  </div>
   }
   <!--  -->
 </div>
 } @else {
-<ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
+<div data-test="nothing-emitted">
+  <ng-container *ngTemplateOutlet="noGroupsFound"></ng-container>
+</div>
 }

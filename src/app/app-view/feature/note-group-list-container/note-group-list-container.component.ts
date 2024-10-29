@@ -3,19 +3,27 @@ import {
   ChangeDetectionStrategy,
   Component,
   ContentChild,
+  DestroyRef,
   ElementRef,
   Input,
   TemplateRef,
   ViewChild,
   inject,
 } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogConfig,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { NgxMasonryModule } from 'ngx-masonry';
-import { combineLatest, filter, map, take } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, take } from 'rxjs';
 import { NotesService } from 'src/app/app-view/data-access/notes/notes.service';
 import { NotesListGroupElementComponent } from 'src/app/app-view/ui/notes-list-group-element/notes-list-group-element.component';
 import { NoteListFormEditor } from 'src/app/app-view/utils/models/note-list-form-editor.interface';
-import { NoteGroupModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
+import {
+  NoteGroupModel,
+  NoteModel,
+} from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { ViewTransitionService } from 'src/app/reusable/data-access/view-transition/view-transition.service';
 import { ViewportListenersService } from 'src/app/reusable/data-access/viewport-listeners/viewport-listeners.service';
 import {
@@ -24,6 +32,8 @@ import {
 } from '../note-list-form-dialog-editor/note-list-form-dialog-editor.component';
 import { environment } from 'src/environments/environment.dev';
 import { NoteRestService } from '../../data-access/note-REST/note-rest.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { readMessageProperty } from 'src/app/reusable/utils/data-tools/readMessageProperty';
 
 @Component({
   selector: 'app-note-group-list-container',
@@ -44,45 +54,69 @@ export class NoteGroupListContainerComponent {
   #notesService = inject(NotesService);
   #noteRestService = inject(NoteRestService);
   #dialog = inject(MatDialog);
+  #destroyRef = inject(DestroyRef);
 
-  @Input() markForDelete: boolean = false;
+  @Input() set markForDelete(value: boolean) {
+    this._markForDeleteSubject.next(value);
+  }
+
+  private readonly _markForDeleteSubject = new BehaviorSubject<boolean>(false);
 
   @ContentChild('noElementsInfo') noGroupsFound!: TemplateRef<unknown>;
 
-  @ViewChild('container') mainElement!: ElementRef<HTMLDivElement>;
+  @ViewChild('container')
+  private readonly _mainElement?: ElementRef<HTMLDivElement>;
 
-  filteredNotes$ = this.#notesService.notes$.pipe(
-    map((groups) =>
-      groups.filter(({ deleteAt }) =>
-        this.markForDelete ? deleteAt : !deleteAt
-      )
+  filteredNoteGroups$ = combineLatest([
+    this.#notesService.notes$,
+    this._markForDeleteSubject,
+  ]).pipe(
+    map(([groups, markForDelete]) =>
+      groups.filter(({ deleteAt }) => (markForDelete ? deleteAt : !deleteAt))
     )
   );
 
-  handleGroupMarkForDelete(id: string, state: boolean) {
-    if (!id) {
-      return;
-    }
+  protected handleGroupMarkForDelete(id: string, state: boolean) {
     this.#notesService.markGroupToDelete(id, state);
   }
 
-  handleClick(id: string) {
+  protected handleClick(id: string) {
     this.#viewportListenersService.isHandset$
       .pipe(take(1))
-      .subscribe((value) => {
-        if (value) {
+      .subscribe((isHandset) => {
+        if (!this._mainElement) {
+          return;
+        }
+
+        if (isHandset) {
           this.#viewTransitionService.goForward(
-            this.mainElement.nativeElement,
+            this._mainElement.nativeElement,
             `/app/notes/${id}`
           );
-        } else {
-          this.handleDialog(id);
+
+          return;
         }
+
+        this._handleDialog(id);
       });
   }
 
-  handleDialog(id: string) {
-    const config: MatDialogConfig<INoteListFormDialogData> = {
+  private _handleDialog(id: string) {
+    const config = this._configureDialog(id);
+
+    const dialogRef = this.#dialog.open<
+      NoteListFormDialogEditorComponent,
+      INoteListFormDialogData,
+      NoteListFormEditor
+    >(NoteListFormDialogEditorComponent, config);
+
+    this._subscribeToDialogEvents(dialogRef, id);
+  }
+
+  private _configureDialog(
+    id: string
+  ): MatDialogConfig<INoteListFormDialogData> {
+    return {
       minWidth: '500px',
       maxWidth: '75vw',
       enterAnimationDuration: '200ms',
@@ -91,14 +125,16 @@ export class NoteGroupListContainerComponent {
       data: { id },
       closeOnNavigation: true,
     };
+  }
 
-    const dialogRef = this.#dialog.open<
+  private _subscribeToDialogEvents(
+    dialogRef: MatDialogRef<
       NoteListFormDialogEditorComponent,
-      INoteListFormDialogData,
       NoteListFormEditor
-    >(NoteListFormDialogEditorComponent, config);
-
-    combineLatest([dialogRef.beforeClosed(), this.filteredNotes$])
+    >,
+    id: string
+  ): void {
+    combineLatest([dialogRef.beforeClosed(), this.filteredNoteGroups$])
       .pipe(
         take(1),
         filter(
@@ -107,46 +143,79 @@ export class NoteGroupListContainerComponent {
         map(
           ([dialogState, notes]) =>
             [dialogState, notes] as [NoteListFormEditor, NoteGroupModel[]]
-        )
+        ),
+        takeUntilDestroyed(this.#destroyRef)
       )
       .subscribe(async ([dialogState, groups]) => {
-        if (!dialogState.noteGroupTitle) {
-          return;
-        }
-        if (!dialogState.notesGroupBuffer) {
+        const defaultAction = () => {
+          this.#noteRestService.fillNotesBuffer([]);
+        };
+
+        if (!dialogState.noteGroupTitle || !dialogState.notesGroupBuffer) {
+          defaultAction();
           return;
         }
 
         if (dialogState.action === 'close') {
-          this.#noteRestService.fillNotesBuffer([]);
+          defaultAction();
           return;
         }
 
-        let updatedGroups: NoteGroupModel[];
-
-        if (dialogState.notesGroupBuffer.length === 0) {
-          updatedGroups = groups.filter((group) => group.id !== id);
-        } else {
-          updatedGroups = groups.map((group) => {
-            return group.id === id
-              ? {
-                  ...group,
-                  title: dialogState.noteGroupTitle!,
-                  notes: dialogState.notesGroupBuffer!,
-                }
-              : group;
-          });
-        }
-
         try {
-          const result = await this.#notesService.modifyGroups(updatedGroups);
+          const result = await this._modifyGroups(
+            groups,
+            dialogState.noteGroupTitle,
+            dialogState.notesGroupBuffer,
+            id
+          );
 
           dialogRef.disableClose = !result;
         } catch (err) {
           if (!environment.production) {
-            console.error(err);
+            console.error(readMessageProperty(err) || err);
           }
+
+          dialogRef.disableClose = true;
         }
       });
+  }
+
+  private _modifyGroups(
+    groups: NoteGroupModel[],
+    noteGroupTitle: string,
+    notesGroupBuffer: NoteModel[],
+    id: string
+  ): Promise<boolean> {
+    const updatedGroups = this._updateGroups(
+      groups,
+      noteGroupTitle,
+      notesGroupBuffer,
+      id
+    );
+
+    return this.#notesService.modifyGroups(updatedGroups);
+  }
+
+  private _updateGroups(
+    groups: NoteGroupModel[],
+    noteGroupTitle: string,
+    notesGroupBuffer: NoteModel[],
+    id: string
+  ): NoteGroupModel[] {
+    if (notesGroupBuffer.length === 0) {
+      // Remove the group
+      return groups.filter((group) => group.id !== id);
+    } else {
+      // Modify notes in the group
+      return groups.map((group) => {
+        return group.id === id
+          ? {
+              ...group,
+              title: noteGroupTitle,
+              notes: notesGroupBuffer,
+            }
+          : group;
+      });
+    }
   }
 }
