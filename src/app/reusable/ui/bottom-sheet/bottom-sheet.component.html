@@ -1,11 +1,13 @@
 @if (data$ | async; as data) {
 <div
   #overlay
+  data-test="sheet-overlay"
   class="overlay"
   [ngClass]="{
     'do-not-animate': data.noAnimation,
     visible: data.isOpened
   }"
+  [ariaHidden]="!data.isOpened"
   (click)="close()"
   (keyup.enter)="close()"
   tabindex="0"
@@ -19,6 +21,7 @@
     open: data.isOpened,
     drag: data.isDragging
   }"
+  [ariaHidden]="!data.isOpened"
 >
   <div class="drag-icon" (pointerdown)="startDragging($event)">
     <span></span>

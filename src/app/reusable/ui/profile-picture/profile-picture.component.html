@@ -1,12 +1,10 @@
 @switch (viewOptionSig()) {
 <!--  -->
 @case ("photoUrl") {
-<img
-  [src]="photoUrl"
-  alt="profile picture"
-/>
+<img [src]="photoUrl" alt="profile picture" />
 } @case ('singleCharacter') {
 <div
+  data-test="user-letter-avatar"
   class="user-letter-avatar"
   [style.--user-avatar-color]="userTextData!.color"
 >
