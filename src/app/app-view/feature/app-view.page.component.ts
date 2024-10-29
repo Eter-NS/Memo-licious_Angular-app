@@ -72,7 +72,7 @@ export class AppViewComponent implements OnInit {
 
   private _setNotesCleanup() {
     const MINIMUM_EXECUTION_TIME = 0;
-    const INTERVAL_PERIOD = 1000 * 60;
+    const INTERVAL_PERIOD = 1000 * 60 * 10;
 
     timer(MINIMUM_EXECUTION_TIME, INTERVAL_PERIOD)
       .pipe(takeUntilDestroyed(this.#destroyRef))

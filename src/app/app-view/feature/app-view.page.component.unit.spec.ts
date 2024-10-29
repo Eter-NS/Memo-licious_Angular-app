@@ -150,7 +150,7 @@ describe(`AppViewComponent - methods`, () => {
     it(`should call notesService.clearNoteGroups() after timer interval.`, fakeAsync(() => {
       component['_setNotesCleanup']();
 
-      tick(1000 * 60);
+      tick(1000 * 60 * 10);
       fixture.destroy();
       expect(notesServiceMock.clearNoteGroups).toHaveBeenCalledTimes(2);
     }));
