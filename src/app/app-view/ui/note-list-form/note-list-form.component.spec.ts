@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NoteListFormComponent } from './note-list-form.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('NoteListFormComponent', () => {
   let component: NoteListFormComponent;
@@ -8,10 +9,9 @@ describe('NoteListFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NoteListFormComponent]
-    })
-    .compileComponents();
-    
+      imports: [NoopAnimationsModule, NoteListFormComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(NoteListFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

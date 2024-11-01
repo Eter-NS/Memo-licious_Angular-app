@@ -22,7 +22,7 @@ import {
   NoteGroupModel,
   NoteModel,
 } from 'src/app/auth/utils/Models/UserDataModels.interface';
-import { EMPTY, filter, map, of, switchMap, take } from 'rxjs';
+import { EMPTY, map, of, switchMap, take } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
@@ -53,16 +53,15 @@ export class NoteListFormDialogEditorComponent implements OnInit {
     inject<MatDialogRef<NoteListFormDialogEditorComponent, NoteListFormEditor>>(
       MatDialogRef
     );
-  #dialogData = inject<INoteListFormDialogData>(MAT_DIALOG_DATA);
   #notesService = inject(NotesService, { self: true });
   #noteRestService = inject(NoteRestService, { self: true });
   #cd = inject(ChangeDetectorRef);
 
+  private _noteGroupId = inject<INoteListFormDialogData>(MAT_DIALOG_DATA).id;
+
   @ViewChild('form') formElement!: NoteListFormComponent;
 
-  private _noteGroupId = this.#dialogData.id;
   noteGroup$ = this.#notesService.notes$.pipe(
-    filter((groups) => !!groups),
     map((groups) =>
       (groups as NoteGroupModel[]).find(
         ({ id: storedId }) => storedId === this._noteGroupId
@@ -70,7 +69,7 @@ export class NoteListFormDialogEditorComponent implements OnInit {
     ),
     switchMap((group) => {
       if (!group) {
-        this.#dialogRef.close({ action: 'close' });
+        this._closeDialogWithoutResult();
         return EMPTY;
       }
 
@@ -91,8 +90,8 @@ export class NoteListFormDialogEditorComponent implements OnInit {
     this.#cd.markForCheck();
   }
 
-  onEditNote(event: { note: NoteModel; event: MatChipEditedEvent }) {
-    this.#noteRestService.onEditNote(event);
+  onEditNote(eventObj: { note: NoteModel; event: MatChipEditedEvent }) {
+    this.#noteRestService.onEditNote(eventObj);
     this.#cd.markForCheck();
   }
 
@@ -107,10 +106,10 @@ export class NoteListFormDialogEditorComponent implements OnInit {
   }
 
   closeDialog(action: NoteListFormEditor['action']) {
-    const noteGroupFormElement =
+    const noteGroupTitleFormElement =
       this.formElement.newNoteGroupForm.controls.groupName;
 
-    if (noteGroupFormElement.errors) {
+    if (noteGroupTitleFormElement.errors && action === 'save') {
       return;
     }
 
@@ -119,7 +118,7 @@ export class NoteListFormDialogEditorComponent implements OnInit {
       .subscribe((notesGroupBuffer) => {
         this.#dialogRef.close({
           action,
-          noteGroupTitle: noteGroupFormElement.getRawValue(),
+          noteGroupTitle: noteGroupTitleFormElement.getRawValue(),
           notesGroupBuffer,
         });
       });

@@ -4,7 +4,8 @@ import {
   EventEmitter,
   Input,
   Output,
-  ViewChild,
+  QueryList,
+  ViewChildren,
   inject,
 } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -74,7 +75,7 @@ export class NoteListFormComponent {
   @Output() removeNote = new EventEmitter<NoteModel>();
   @Output() data = new EventEmitter<NewNoteGroupForm>();
 
-  @ViewChild('chipRow') chipRow!: MatChipRow;
+  @ViewChildren('chipRow') chipRows!: QueryList<MatChipRow>;
 
   newNoteGroupForm = this.#fb.group({
     groupName: this.#fb.control(this.noteListTitle, {
@@ -104,16 +105,18 @@ export class NoteListFormComponent {
       validation
     );
 
-  handleTouchStart() {
-    // TODO: Create a handler for touch devices to make them edit notes.
+  handleTouchStart(e: PointerEvent, noteId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const chipRow = this.chipRows.find(({ id }) => id === noteId);
+
     this.timeoutId = setTimeout(() => {
-      this.chipRow.focus();
+      chipRow?._handleDoubleclick(new MouseEvent('dbclick'));
     }, 500);
   }
 
   handleTouchEnd() {
-    // TODO: Create a handler for touch devices to make them edit notes.
-
     if (this.timeoutId) {
       clearTimeout(this.timeoutId as number);
     }
@@ -129,6 +132,8 @@ export class NoteListFormComponent {
       }
       return;
     }
+
+    this._errorMessage.next(null);
 
     const isModificationEvent = 'event' in e;
     const isValid = this._stringLengthValidator(

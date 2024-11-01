@@ -4,6 +4,7 @@
 <form [formGroup]="newNoteGroupForm" class="form" (ngSubmit)="submitForm()">
   <label class="note-list-header-wrapper">
     <input
+      data-test="note-list-title-input"
       class="note-list-header"
       type="text"
       placeholder="Note list title"
@@ -29,7 +30,8 @@
         class="note-list-element"
         aria-description="Press enter to edit {{ note.value }}"
         [editable]="true"
-        (pointerdown)="handleTouchStart()"
+        [id]="note.id"
+        (pointerdown)="handleTouchStart($event, note.id)"
         (pointerup)="handleTouchEnd()"
         (edited)="handleNoteEvent({note, event: $event})"
         (removed)="removeNote.emit(note)"
