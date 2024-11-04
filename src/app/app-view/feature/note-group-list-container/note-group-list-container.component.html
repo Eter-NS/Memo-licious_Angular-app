@@ -25,8 +25,7 @@
     >
       <app-notes-list-group-element
         [attr.data-test]="'note-group-list-item-' + noteGroup.id"
-        [groupName]="noteGroup.title"
-        [groupValue]="noteGroup"
+        [group]="noteGroup"
         [done]="!!noteGroup.deleteAt"
         (cardClick)="handleClick(noteGroup.id)"
         (toggleRemove)="handleGroupMarkForDelete(noteGroup.id, $event)"
