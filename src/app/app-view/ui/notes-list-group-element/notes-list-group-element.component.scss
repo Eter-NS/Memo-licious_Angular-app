@@ -38,13 +38,33 @@
   --mat-menu-container-color: var(--color-accent-300);
 }
 
+::ng-deep .light {
+  --theme-background-color: rgb(190, 190, 190);
+
+  &:has(.to-delete) .mat-mdc-menu-panel {
+    --mat-menu-container-color: var(--theme-background-color) !important;
+  }
+
+  & .note-list-card.to-delete .chip {
+    background-color: var(--theme-background-color) !important;
+  }
+}
+
+::ng-deep .dark {
+  --theme-background-color: rgb(105, 105, 105);
+
+  &:has(.to-delete) .mat-mdc-menu-panel {
+    --mat-menu-container-color: var(--theme-background-color) !important;
+  }
+
+  & .note-list-card.to-delete .chip {
+    background-color: var(--theme-background-color) !important;
+  }
+}
+
 .chip {
   flex: 1 0 42px;
   transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
-
-  .note-list-card.to-delete & {
-    background-color: rgb(190, 190, 190) !important;
-  }
 
   &.do-not-grow {
     flex-grow: 0;
@@ -56,13 +76,6 @@
     gap: free-space('xs') calc(#{free-space('xs')} / 2);
     flex-wrap: wrap;
   }
-}
-
-::ng-deep
-  .dark
-  .note-list-card.to-delete[_ngcontent-ng-c537040186]
-  .chip[_ngcontent-ng-c537040186] {
-  background-color: rgb(100, 100, 100) !important;
 }
 
 h3 {

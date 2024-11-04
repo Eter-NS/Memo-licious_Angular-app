@@ -20,22 +20,25 @@ import { NoteGroupModel } from 'src/app/auth/utils/Models/UserDataModels.interfa
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotesListGroupElementComponent {
-  @Input({ required: true }) groupName!: string;
-  @Input({ required: true }) groupValue!: NoteGroupModel;
+  @Input({ required: true }) group!: NoteGroupModel;
   @Input({ required: true }) done!: boolean;
 
   @Output() cardClick = new EventEmitter<void>();
   @Output() toggleRemove = new EventEmitter<boolean>();
 
-  onCardClick(event: Event) {
-    event.preventDefault();
-    event.stopPropagation();
+  onCardClick(e: Event) {
+    e.preventDefault();
+    this.stopPropagation(e);
 
     this.cardClick.emit();
   }
 
   toggleRemoveGroup(e: Event) {
-    e.stopPropagation();
+    this.stopPropagation(e);
     this.toggleRemove.emit(!this.done);
+  }
+
+  protected stopPropagation(e: Event) {
+    e.stopPropagation();
   }
 }
