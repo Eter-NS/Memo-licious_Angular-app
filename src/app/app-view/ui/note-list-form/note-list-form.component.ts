@@ -25,9 +25,10 @@ import { NoteModel } from 'src/app/auth/utils/Models/UserDataModels.interface';
 import { ENTER, COMMA } from '@angular/cdk/keycodes';
 import { MatInputModule } from '@angular/material/input';
 import { FormCommonFeaturesService } from 'src/app/reusable/data-access/form-common-features/form-common-features.service';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
-import { BehaviorSubject } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 import { environment } from 'src/environments/environment.dev';
+import { LongPressDirective } from '../../../reusable/utils/long-press/long-press.directive';
+import { NoteValidationService } from '../../data-access/note-validation/note-validation.service';
 
 export type NewNoteGroupForm = ReturnType<
   typeof NoteListFormComponent.prototype.newNoteGroupForm.getRawValue
@@ -36,10 +37,6 @@ export type NewNoteGroupForm = ReturnType<
 export interface EditNoteI {
   note: NoteModel;
   event: MatChipEditedEvent;
-}
-
-export interface ValidationErrorI {
-  cause: string;
 }
 
 @Component({
@@ -54,20 +51,19 @@ export interface ValidationErrorI {
     MatChipsModule,
     MatIconModule,
     ReactiveFormsModule,
-    NgTemplateOutlet,
     AsyncPipe,
+    LongPressDirective,
   ],
 })
 export class NoteListFormComponent {
+  protected noteFormValidation = inject(NoteValidationService);
   #fb = inject(NonNullableFormBuilder);
   #formCommonFeaturesService = inject(FormCommonFeaturesService);
 
-  @Input({ required: true }) notes!: Array<NoteModel> | null;
+  @Input({ required: true }) notes!: Array<NoteModel>;
   @Input({ required: true }) environment!: 'note-creator' | 'note-edit';
   @Input() set noteListTitle(value: string) {
-    if (value) {
-      this.newNoteGroupForm.controls.groupName.patchValue(value);
-    }
+    this.newNoteGroupForm.controls.groupName.patchValue(value);
   }
 
   @Output() createNote = new EventEmitter<MatChipInputEvent>();
@@ -77,116 +73,91 @@ export class NoteListFormComponent {
 
   @ViewChildren('chipRow') chipRows!: QueryList<MatChipRow>;
 
+  protected readonly separatorCodes = [ENTER, COMMA] as const;
+
   newNoteGroupForm = this.#fb.group({
-    groupName: this.#fb.control(this.noteListTitle, {
-      validators: [Validators.required, Validators.maxLength(32)],
-    }),
+    groupName: ['', [Validators.required, Validators.maxLength(32)]],
   });
-  timeoutId: unknown | undefined = undefined;
-  separatorCodes = [ENTER, COMMA] as const;
 
-  private _errorMessage = new BehaviorSubject<
-    ValidationErrorI | null | undefined
-  >(undefined);
-
-  get errorMessage$() {
-    return this._errorMessage.asObservable();
-  }
-
-  private _lengthValidationConfig = {
-    min: 0,
-    max: 35,
-  };
-
-  getError = (element: string, validation: string) =>
-    this.#formCommonFeaturesService.getError(
+  getError(element: string, validation: string) {
+    return this.#formCommonFeaturesService.getError(
       this.newNoteGroupForm,
       element,
       validation
     );
+  }
 
-  handleTouchStart(e: PointerEvent, noteId: string) {
-    e.preventDefault();
-    e.stopPropagation();
-
+  handleMobileEdit(noteId: string): void {
     const chipRow = this.chipRows.find(({ id }) => id === noteId);
-
-    this.timeoutId = setTimeout(() => {
-      chipRow?._handleDoubleclick(new MouseEvent('dbclick'));
-    }, 500);
-  }
-
-  handleTouchEnd() {
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId as number);
-    }
-  }
-
-  /** For creating and modifying notes only */
-  handleNoteEvent(e: MatChipInputEvent | EditNoteI) {
-    if (!('event' in e) && !('value' in e)) {
-      if (!environment.production) {
-        console.error(
-          'The parameter is neither MatChipInputEvent nor EditNoteI'
-        );
-      }
+    if (!chipRow) {
       return;
     }
 
-    this._errorMessage.next(null);
-
-    const isModificationEvent = 'event' in e;
-    const isValid = this._stringLengthValidator(
-      isModificationEvent ? e.event.value : e.value,
-      this._lengthValidationConfig
+    chipRow._handleDoubleclick(
+      new MouseEvent('dbclick', {
+        button: 0,
+        bubbles: false,
+        cancelable: true,
+      })
     );
-
-    if (!isValid) {
-      this._errorMessage.next({
-        cause: `The note can't be longer than ${this._lengthValidationConfig.max} characters`,
-      });
-    } else {
-      isModificationEvent ? this.editNote.emit(e) : this.createNote.emit(e);
-      this._errorMessage.next(null);
-    }
   }
 
-  submitForm() {
+  handleNoteEvent(e: MatChipInputEvent | EditNoteI): void {
+    if (!this._isValidEventType(e)) {
+      return;
+    }
+
+    this.noteFormValidation.setError(null);
+
+    const isModificationEvent = 'event' in e;
+    const noteValue = isModificationEvent ? e.event.value : e.value;
+    const { state: validationState, cause } =
+      this.noteFormValidation.validateNoteLength(noteValue);
+
+    if (this._isNoteTooLong(validationState, cause)) {
+      return;
+    }
+
+    isModificationEvent ? this.editNote.emit(e) : this.createNote.emit(e);
+  }
+
+  submitForm(): void {
     if (this.newNoteGroupForm.controls.groupName.errors) {
       return;
     }
 
-    this.data.emit(this.newNoteGroupForm.getRawValue());
+    if (this.noteFormValidation.hasActiveError) {
+      return;
+    }
 
+    this.data.emit(this.newNoteGroupForm.getRawValue());
     this.newNoteGroupForm.reset();
   }
 
-  private _stringLengthValidator(
-    value: string,
-    config: { min?: number; max?: number }
-  ) {
-    const throwNoOption = () => {
-      throw new Error('No configuration detected!');
-    };
-
-    if (!config) {
-      throwNoOption();
+  private _isValidEventType(e: MatChipInputEvent | EditNoteI): boolean {
+    const isValidEvent = 'event' in e || 'value' in e;
+    if (isValidEvent) {
+      return true;
     }
 
-    if (!Object.keys(config).length) {
-      throwNoOption();
+    if (!environment.production) {
+      console.error(
+        'Invalid event type: Expected MatChipInputEvent or EditNoteI'
+      );
     }
+    return false;
+  }
 
-    const valueLength = value.length;
-    let result = false;
-
-    if (typeof config.min === 'number' && typeof config.max === 'number') {
-      result = config.min <= valueLength && valueLength <= config.max;
-    } else if (typeof config.min === 'number') {
-      result = config.min <= valueLength;
-    } else if (typeof config.max === 'number') {
-      result = valueLength <= config.max;
+  private _isNoteTooLong(
+    validationState: string,
+    cause: string | null
+  ): boolean {
+    if (validationState === 'invalid' && cause === 'too-long') {
+      this.noteFormValidation.setError({
+        cause: `The note can't be longer than ${this.noteFormValidation.validationConfig.max} characters`,
+      });
+      return true;
     }
-    return result;
+    return false;
   }
 }

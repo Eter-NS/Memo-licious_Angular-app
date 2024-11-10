@@ -1,6 +1,7 @@
 @if (environment==='note-creator') {
 <h2>Create new notes</h2>
 }
+
 <form [formGroup]="newNoteGroupForm" class="form" (ngSubmit)="submitForm()">
   <label class="note-list-header-wrapper">
     <input
@@ -12,32 +13,36 @@
     />
     @if (getError('groupName', 'required') &&
     newNoteGroupForm.get('groupName')?.touched) {
-    <span class="input-error">*This field is required!</span>
-    } @if (getError('groupName', 'maxlength')) {
-    <span class="input-error">Hmm... Please create a shorter list title</span>
+    <span data-test="note-list-title-error-required" class="input-error"
+      >*This field is required!</span
+    >
+    }
+    <!--  -->
+    @if (getError('groupName', 'maxlength')) {
+    <span data-test="note-list-title-error-maxlength" class="input-error"
+      >Hmm... Please create a shorter list title</span
+    >
     }
   </label>
 
   <mat-form-field class="note-list-elements" appearance="outline">
     <mat-label>Your items</mat-label>
     <mat-chip-grid #chipGrid aria-label="Enter what's on your mind">
-      @if(notes){
-      <!--  -->
       @for (note of notes; track note.id) {
       <mat-chip-row
-        #chipRow
-        [attr.data-test]="'note-chip-' + note.id"
+        data-test-many="note-chip"
+        attr.data-test="note-chip-{{ note.id }}"
         class="note-list-element"
         aria-description="Press enter to edit {{ note.value }}"
-        [editable]="true"
-        [id]="note.id"
-        (pointerdown)="handleTouchStart($event, note.id)"
-        (pointerup)="handleTouchEnd()"
+        #chipRow
         (edited)="handleNoteEvent({note, event: $event})"
         (removed)="removeNote.emit(note)"
+        [editable]="true"
+        [id]="note.id"
+        appLongPress
+        (longPress)="handleMobileEdit(note.id)"
       >
         {{ note.value }}
-
         <button
           type="button"
           matChipRemove
@@ -46,10 +51,6 @@
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-chip-row>
-      }
-      <!--  -->
-      }@else {
-      <mat-label>There are no notes yet</mat-label>
       }
       <input
         matInput
@@ -63,12 +64,18 @@
     </mat-chip-grid>
   </mat-form-field>
 
-  @if(errorMessage$ | async; as errorMessage ){
-  <small class="form-error">{{ errorMessage.cause }}</small>
+  @if(noteFormValidation.errorMessage$ | async; as errorMessage ){
+  <small data-test="note-error-message" class="form-error">{{
+    errorMessage.cause
+  }}</small>
   }
   <!--  -->
-  @if(environment==='note-creator' && notes?.length){
-  <button type="submit" class="submit-button">
+  @if(environment==='note-creator' && notes.length){
+  <button
+    data-test="note-creator-submit-button"
+    type="submit"
+    class="submit-button"
+  >
     <mat-icon>done</mat-icon>
   </button>
   }
