@@ -1,15 +1,17 @@
 <h2 mat-dialog-title>Notes editor</h2>
 
 <mat-dialog-content #content>
+  @if (data$ | async; as data) {
   <app-note-list-form
     #form
     environment="note-edit"
-    [noteListTitle]="(noteGroup$ | async)?.title || ''"
-    [notes]="groupNotes$ | async"
+    [noteListTitle]="data.noteGroup.title"
+    [notes]="data.groupNotes"
     (createNote)="onCreateNote($event)"
     (editNote)="onEditNote($event)"
     (removeNote)="onRemoveNote($event)"
   />
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions class="note-edit__actions">

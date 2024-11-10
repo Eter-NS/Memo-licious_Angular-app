@@ -22,7 +22,7 @@ import {
   NoteGroupModel,
   NoteModel,
 } from 'src/app/auth/utils/Models/UserDataModels.interface';
-import { EMPTY, map, of, switchMap, take } from 'rxjs';
+import { combineLatest, EMPTY, map, of, switchMap, take } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { NoteListFormEditor } from '../../utils/models/note-list-form-editor.interface';
@@ -78,6 +78,11 @@ export class NoteListFormDialogEditorComponent implements OnInit {
   );
 
   groupNotes$ = this.#noteRestService.notesBuffer$;
+
+  protected data$ = combineLatest({
+    noteGroup: this.noteGroup$,
+    groupNotes: this.#noteRestService.notesBuffer$,
+  });
 
   ngOnInit(): void {
     this.noteGroup$.pipe(take(1)).subscribe((noteGroup) => {
