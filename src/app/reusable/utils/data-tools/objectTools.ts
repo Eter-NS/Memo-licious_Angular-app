@@ -24,13 +24,30 @@ export function objectKeys<T extends object>(obj: T): Array<keyof T> {
  * @returns In case os using unixtime property, don't forget to multiply the value by 1000!
  */
 export async function getUTCTimestamp(): Promise<UTCTimestampBody> {
-  const response = await fetch('http://worldtimeapi.org/api/timezone/Etc/UTC');
+  const API_URL = 'http://worldtimeapi.org/api/timezone/Etc/UTC';
+  const controller = new AbortController();
+  const REQUEST_TIMEOUT_MS = 1_000;
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(API_URL, { signal: controller.signal });
+  } catch (err) {
+    clearTimeout(timeout);
+
+    throw (err as Error).name === 'AbortController'
+      ? new Error('Timestamp request timeout')
+      : err;
+  }
 
   if (!response.ok) {
     throw new Error('Error fetching UTC timestamp: ' + response.statusText);
   }
 
-  return response.json() as Promise<UTCTimestampBody>;
+  return await response.json();
 }
 
 export function localUTCTimestamp() {
@@ -38,19 +55,40 @@ export function localUTCTimestamp() {
   return now.getTime() + now.getTimezoneOffset();
 }
 
+const INCREMENT_INTERVAL = 1000;
+let cachedTimestamp: number | undefined = undefined;
+let intervalId: ReturnType<typeof setInterval> | undefined = undefined;
+
+/**
+ * Clears the cached timestamp and stops the interval
+ */
+export function clearCachedTimestamp(): void {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = undefined;
+  }
+  cachedTimestamp = undefined;
+}
+
 /**
  * Creates a timestamp in UTC or a local machine version if the device is offline.
  */
 export async function createTimestamp(): Promise<number> {
-  let timestamp: number;
-
-  try {
-    timestamp = (await getUTCTimestamp()).unixtime * 1000;
-  } catch (err) {
-    timestamp = localUTCTimestamp();
+  if (cachedTimestamp) {
+    return cachedTimestamp;
   }
 
-  return timestamp;
+  try {
+    cachedTimestamp = (await getUTCTimestamp()).unixtime * 1000;
+  } catch (err) {
+    cachedTimestamp = localUTCTimestamp();
+  }
+
+  intervalId = setInterval(() => {
+    (cachedTimestamp as number) += INCREMENT_INTERVAL;
+  }, INCREMENT_INTERVAL);
+
+  return cachedTimestamp;
 }
 
 /**
