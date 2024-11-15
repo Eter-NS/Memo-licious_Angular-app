@@ -1,7 +1,6 @@
 @if (data$ | async; as data) {
 <div
-  #overlay
-  data-test="sheet-overlay"
+  data-test="bottom-sheet-overlay"
   class="overlay"
   [ngClass]="{
     'do-not-animate': data.noAnimation,
@@ -15,7 +14,10 @@
 
 <div
   #sheet
+  data-test="bottom-sheet-element"
   class="bottom-sheet"
+  role="dialog"
+  aria-modal="true"
   [ngClass]="{
     'do-not-animate': data.noAnimation,
     open: data.isOpened,
@@ -23,17 +25,22 @@
   }"
   [ariaHidden]="!data.isOpened"
 >
-  <div class="drag-icon" (pointerdown)="startDragging($event)">
+  <div
+    data-test="drag-icon"
+    class="drag-icon"
+    (pointerdown)="startDragging($event)"
+  >
     <span></span>
   </div>
 
   <div class="content">
+    @if (data.isOpened) {
     <ng-container *ngTemplateOutlet="content || defaultContent"></ng-container>
+    }
   </div>
 
   <ng-template #defaultContent>
-    <h2>There is nothing to be shown 😢</h2>
+    <h2 data-test="default-content">There is nothing to be shown 😢</h2>
   </ng-template>
 </div>
-
 }

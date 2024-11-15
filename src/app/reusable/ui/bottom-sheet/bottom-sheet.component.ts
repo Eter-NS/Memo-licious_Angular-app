@@ -6,7 +6,6 @@ import {
   ContentChild,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
   NgZone,
   OnDestroy,
@@ -31,6 +30,18 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
   #renderer = inject(Renderer2);
   #zone = inject(NgZone);
 
+  @Input({ required: true }) set open(value: boolean) {
+    this._isOpenedSubject.next(value);
+  }
+  @Input({ transform: booleanAttribute }) set noAnimation(value: boolean) {
+    this._noAnimationSubject.next(value);
+  }
+
+  @Output() closed = new EventEmitter<boolean>();
+
+  @ContentChild('content') content!: TemplateRef<unknown>;
+  @ViewChild('sheet') element!: ElementRef<HTMLDivElement>;
+
   private readonly _isOpenedSubject = new BehaviorSubject<boolean>(false);
   private readonly _noAnimationSubject = new BehaviorSubject<boolean>(false);
   private readonly _isDraggingSubject = new BehaviorSubject<boolean>(false);
@@ -41,30 +52,24 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
     isDragging: this._isDraggingSubject.asObservable(),
   });
 
-  @Input({ required: true }) set open(value: boolean) {
-    this._isOpenedSubject.next(value);
-  }
-  @Input({ transform: booleanAttribute }) set 'no-animation'(value: boolean) {
-    this._noAnimationSubject.next(value);
-  }
-
-  @Output() closed = new EventEmitter<boolean>();
-
-  @ContentChild('content') content!: TemplateRef<unknown>;
-  @ViewChild('sheet') element!: ElementRef<HTMLDivElement>;
-
-  startY!: number;
-  startHeight!: number;
-  initialHeight!: number;
+  #escapeButtonListener!: () => void;
+  #startY!: number;
+  #startHeight!: number;
+  #initialHeight!: number;
 
   ngAfterViewInit(): void {
-    this.initialHeight = this.element.nativeElement.offsetHeight;
+    const element = this.element.nativeElement;
+    this.#initialHeight = element.offsetHeight;
 
     this.#zone.runOutsideAngular(() => {
-      const element = this.element.nativeElement;
-
       element.addEventListener('pointermove', this.dragTo.bind(this));
       element.addEventListener('pointerup', this.stopDragging.bind(this));
+      document.addEventListener('pointerup', this.stopDragging.bind(this));
+      this.#escapeButtonListener = this.#renderer.listen(
+        document,
+        'keyup.Escape',
+        this.close.bind(this)
+      );
     });
   }
 
@@ -73,14 +78,21 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
 
     element.removeEventListener('pointermove', this.dragTo.bind(this));
     element.removeEventListener('pointerup', this.stopDragging.bind(this));
+    document.removeEventListener('pointerup', this.stopDragging.bind(this));
+    this.#escapeButtonListener();
   }
 
   close() {
     this._isOpenedSubject.next(false);
+    let hasEmitted = false;
 
     const effect = () => {
-      this.closed.emit(false);
-      this.setNewHeight(this.initialHeight);
+      if (!hasEmitted) {
+        this.closed.emit(false);
+        hasEmitted = true;
+      }
+
+      this.setNewHeight(this.#initialHeight);
     };
     const element = this.element.nativeElement;
 
@@ -97,8 +109,8 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
     }
 
     this._isDraggingSubject.next(true);
-    this.startY = e.pageY;
-    this.startHeight = this.element.nativeElement.offsetHeight;
+    this.#startY = e.pageY;
+    this.#startHeight = this.element.nativeElement.offsetHeight;
   }
 
   dragTo(e: PointerEvent) {
@@ -108,22 +120,25 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
     const element = this.element.nativeElement;
 
     if (!element.hasPointerCapture(e.pointerId)) {
-      this.element.nativeElement.setPointerCapture(e.pointerId);
+      element.setPointerCapture(e.pointerId);
     }
 
     const effect = () => {
       e.preventDefault();
-      const delta = this.startY - e.pageY;
+      const delta = this.#startY - e.pageY;
 
-      const newHeight = this.startHeight + delta;
+      const newHeight = this.#startHeight + delta;
       this.setNewHeight(newHeight);
     };
 
     requestAnimationFrame(effect);
   }
 
-  @HostListener('document:pointerup', ['$event'])
   stopDragging(e: PointerEvent) {
+    if (!this._isDraggingSubject.value || !e.isPrimary) {
+      return;
+    }
+
     const element = this.element.nativeElement;
 
     if (element.hasPointerCapture(e.pointerId)) {
@@ -133,11 +148,17 @@ export class BottomSheetComponent implements AfterViewInit, OnDestroy {
 
     const height = element.offsetHeight;
     const minHeight = 50;
+
     if (height < minHeight) {
       this.close();
     }
   }
 
+  /**
+   * Sets the new height of the bottom sheet.
+   *
+   * @param value - The new height in pixels.
+   */
   setNewHeight(value: number) {
     this.#renderer.setStyle(this.element.nativeElement, 'height', `${value}px`);
   }
