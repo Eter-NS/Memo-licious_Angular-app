@@ -1,5 +1,5 @@
 @use 'src/scss/utils.scss' as *;
-@use '../account-settings-common-styles/account-settings-common-styles.scss';
+@use '../common-styles/account-settings.scss';
 
 .current-passphrase {
   margin-bottom: free-space('xs');

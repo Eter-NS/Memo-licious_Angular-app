@@ -1,6 +1,7 @@
 @use 'src/scss/utils.scss' as *;
 @use 'src/scss/components.scss' as *;
 @use 'src/scss/viewport.scss' as *;
+@use '../common-styles/chip-color.scss' as *;
 
 :host {
   display: block;
@@ -68,10 +69,6 @@ h2 {
       }
     }
   }
-}
-
-::ng-deep .mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled) {
-  background-color: var(--color-accent-300) !important;
 }
 
 .input-error,

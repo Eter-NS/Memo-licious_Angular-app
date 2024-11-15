@@ -1,22 +1,40 @@
 @use 'src/scss/utils.scss' as *;
+@use '../common-styles/chip-color.scss' as *;
 
 :host {
   --container-size: max(240px, 25vw);
   --more-vert-icon-size: 48px;
 }
 
+@mixin theme-styles($bg-color) {
+  --theme-background-color: #{$bg-color};
+
+  &:has(.to-delete) .mat-mdc-menu-panel {
+    --mat-menu-container-color: var(--theme-background-color) !important;
+  }
+
+  & .note-list-card.to-delete .chip {
+    background-color: var(--theme-background-color) !important;
+  }
+}
+
+@mixin standard-transition {
+  transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+}
+
 .note-list-card {
+  --to-delete-background: rgb(232, 232, 232);
+
   display: grid;
   gap: free-space('xs');
   padding: free-space('sm');
   @include border-radius('xs');
   background-color: var(--color-accent-100);
   cursor: pointer;
-  transition: background-color 300ms 50ms ease-in-out,
-    color 300ms 50ms ease-in-out;
+  @include standard-transition;
 
   &.to-delete {
-    background-color: rgb(212, 212, 212, 0.6);
+    background-color: var(--to-delete-background);
   }
 
   &__header {
@@ -26,45 +44,29 @@
   }
 }
 
-::ng-deep .dark .note-list-card.to-delete {
-  background-color: rgb(65, 65, 65);
-}
-
-::ng-deep .mat-mdc-standard-chip .mdc-evolution-chip__cell--primary {
-  justify-content: center;
-}
-
-::ng-deep .mat-mdc-menu-panel {
-  --mat-menu-container-color: var(--color-accent-300);
-}
-
-::ng-deep .light {
-  --theme-background-color: rgb(190, 190, 190);
-
-  &:has(.to-delete) .mat-mdc-menu-panel {
-    --mat-menu-container-color: var(--theme-background-color) !important;
+::ng-deep {
+  .mat-mdc-standard-chip {
+    & .mdc-evolution-chip__cell--primary {
+      justify-content: center;
+    }
   }
 
-  & .note-list-card.to-delete .chip {
-    background-color: var(--theme-background-color) !important;
-  }
-}
-
-::ng-deep .dark {
-  --theme-background-color: rgb(105, 105, 105);
-
-  &:has(.to-delete) .mat-mdc-menu-panel {
-    --mat-menu-container-color: var(--theme-background-color) !important;
+  .light {
+    @include theme-styles(rgb(210, 210, 210));
   }
 
-  & .note-list-card.to-delete .chip {
-    background-color: var(--theme-background-color) !important;
+  .dark {
+    @include theme-styles(rgb(105, 105, 105));
+
+    & .note-list-card {
+      --to-delete-background: rgb(65, 65, 65);
+    }
   }
 }
 
 .chip {
   flex: 1 0 42px;
-  transition: background-color 300ms ease-in-out, color 300ms ease-in-out;
+  @include standard-transition;
 
   &.do-not-grow {
     flex-grow: 0;
@@ -85,8 +87,8 @@ h3 {
       (2 * #{free-space('sm')} + var(--more-vert-icon-size))
   );
   -webkit-user-select: none;
-  color: var(--contrast-color-accent-100);
   user-select: none;
+  color: var(--contrast-color-accent-100);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
